@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DernekYonetim.Controllers
 {
-    public class UyelerController : Controller
+    public class AnasayfaController : Controller
     {
         private readonly DernekYonetimContext _context;
 
-        public UyelerController(DernekYonetimContext context)
+        public AnasayfaController(DernekYonetimContext context)
         {
             _context = context;
         }

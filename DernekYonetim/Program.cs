@@ -3,6 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. Session Servisini Ekle (BURASI EKLENDÝ)
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // 30 dk boþta kalýrsa oturum düþer
+});
+
 // MVC
 builder.Services.AddControllersWithViews();
 
@@ -22,12 +28,16 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// 2. Session Middleware'ini Aktif Et (BURASI EKLENDÝ)
+// ÖNEMLÝ: UseRouting'den sonra, UseAuthorization'dan önce olmalý.
+app.UseSession();
+
 app.UseAuthorization();
 
 // MVC routing
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Uyeler}/{action=Index}/{id?}");
+    pattern: "{controller=Anasayfa}/{action=Index}/{id?}"); // Anasayfa ayarýný korudum
 
 app.Run();
-

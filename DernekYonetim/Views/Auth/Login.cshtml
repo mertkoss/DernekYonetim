@@ -330,18 +330,18 @@
                             <!-- Senin istediğin şekilde: method post + name alanları aynı -->
                             <form method="post">
                                 <div class="form-group">
-                                    <input name="kullaniciAdi" type="text" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder">Kullanıcı Adı</label>
+                                    <input name="email" type="email" class="form-control" placeholder=" " required />
+                                    <label class="form-control-placeholder">E-Posta Adresi</label>
                                 </div>
 
                                 <div class="form-group">
                                     <input id="password-field" name="sifre" type="password" class="form-control" placeholder=" " required />
                                     <label class="form-control-placeholder">Şifre</label>
-                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password" aria-label="Şifreyi göster/gizle"></span>
+                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary w-100 mt-2">
-                                    Giriş
+                                    Giriş Yap
                                 </button>
 
                                 @if (ViewBag.Hata != null)
@@ -349,18 +349,6 @@
                                     <div class="error-box">@ViewBag.Hata</div>
                                 }
 
-                                <div class="helper-row">
-                                    <label class="checkbox-wrap mb-0">
-                                        <input type="checkbox" checked />
-                                        Beni hatırla
-                                    </label>
-
-                                    <a href="#">Şifremi unuttum</a>
-                                </div>
-
-                                <div class="text-center mt-3" style="color:var(--muted); font-size:14px;">
-                                    Hesabın yok mu? <a href="/Auth/Register">Üye Ol</a>
-                                </div>
                             </form>
                         </div>
                     </div>
