@@ -1,7 +1,6 @@
 ﻿@model HomeViewModel
 @{
-    ViewData["Title"] = "Anasayfa";
-    // Bu satır sayfanın "iskeletini" _Layout dosyasından almasını sağlar:
+    ViewData["Title"] = Model.About?.Baslik;
     Layout = "_Layout";
 }
 
@@ -10,22 +9,56 @@
 <section class="page-section dernek-hakkinda-section">
     <div class="container">
 
-        <div class="page-header">
-            <h1 class="page-title">
-                @Model.About?.Baslik
-            </h1>
-
-            <div class="page-meta">
-                Son güncelleme:
-                @Model.About?.GuncellemeTarihi?.ToString("dd MMMM yyyy")
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div class="text-start">
+                <h1 class="page-title">@Model.About?.Baslik</h1>
+                <div class="page-meta">
+                    Son güncelleme: @Model.About?.GuncellemeTarihi?.ToString("dd MMMM yyyy")
+                </div>
             </div>
+            <button class="btn btn-warning rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#editAboutModal">
+                <i class="fas fa-edit me-2"></i>Sayfayı Düzenle
+            </button>
         </div>
 
-        <div class="content-card">
+        <div class="content-card mt-4">
             @Html.Raw(Model.About?.Icerik)
         </div>
 
     </div>
 </section>
+
+<div class="modal fade" id="editAboutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0">
+            <form action="/Dernek/BolumGuncelle" method="post">
+                <input type="hidden" name="Id" value="@Model.About?.Id" />
+                <input type="hidden" name="Slug" value="@Model.About?.Slug" />
+                <input type="hidden" name="Aktif" value="true" /> @* Sayfa şu an aktifse aktif kalsın *@
+
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">@Model.About?.Baslik - İçeriği Düzenle</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Sayfa Başlığı</label>
+                        <input type="text" name="Baslik" class="form-control" value="@Model.About?.Baslik" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">İçerik Editörü</label>
+                        <textarea name="Icerik" id="editor" class="form-control">@Model.About?.Icerik</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="submit" class="btn btn-primary px-5">Değişiklikleri Uygula</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 
 <script src="~/js/hakkinda.js"></script>
