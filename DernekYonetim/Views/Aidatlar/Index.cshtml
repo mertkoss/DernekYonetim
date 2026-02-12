@@ -1,0 +1,71 @@
+﻿@using DernekYonetim.Models
+@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Aidat Listesi";
+    Layout = "_Layout";
+}
+
+<link href="~/css/aidatlar.css" rel="stylesheet" />
+
+<section class="page-section bg-light" style="padding-top:120px;">
+    <div class="container">
+
+        <div class="row mb-4">
+            <div class="col text-center">
+                <h2 class="section-heading text-uppercase">Aidat Takibi</h2>
+                <p class="text-muted">Üyelerin yıllara göre aidat durumu</p>
+            </div>
+        </div>
+
+        <div class="card aidat-card shadow-sm border-0">
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="aidatTable">
+                        <thead>
+                            <tr>
+                                <th>Üye No</th>
+                                <th>Ad Soyad</th>
+                                <th>Yıl</th>
+                                <th>Tutar</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Aidatlar)
+                            {
+                                <tr>
+                                    <td>@item.UyeId</td>
+
+                                    <td>
+                                        <strong>@item.Uye.Ad @item.Uye.Soyad</strong>
+                                    </td>
+
+                                    <td>@item.Yil</td>
+
+                                    <td>@item.Tutar ₺</td>
+
+                                    <td>
+                                        @if (item.Durum == "Ödendi")
+                                        {
+                                            <span class="badge badge-paid">Ödendi</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-unpaid">Ödenmedi</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script src="~/js/aidatlar.js"></script>

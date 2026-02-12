@@ -1,0 +1,65 @@
+/* Navbar fixed-top offset */
+.dernek-hakkinda-section {
+    padding-top: 140px; /* navbar + nefes */
+    padding-bottom: 80px;
+    background-color: #f8f9fa;
+}
+
+/* Baþlýk alaný */
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.page-meta {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Ýçerik kartý */
+.content-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+    /* Ýçerik içindeki elemanlar */
+    .content-card p {
+        margin-bottom: 1.2rem;
+    }
+
+    .content-card h3,
+    .content-card h4 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .content-card ul {
+        padding-left: 20px;
+    }
+
+    .content-card li {
+        margin-bottom: 8px;
+    }
+
+/* Mobil uyum */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.8rem;
+    }
+
+    .content-card {
+        padding: 25px;
+    }
+}

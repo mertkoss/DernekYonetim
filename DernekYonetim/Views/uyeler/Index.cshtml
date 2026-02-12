@@ -1,0 +1,168 @@
+﻿@using DernekYonetim.Models
+@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Anasayfa";
+    // Bu satır sayfanın "iskeletini" _Layout dosyasından almasını sağlar:
+    Layout = "_Layout";
+}
+
+<header class="masthead">
+    <div class="container">
+        <div class="masthead-subheading">Welcome To Our Studio!</div>
+        <div class="masthead-heading text-uppercase">It's Nice To Meet You</div>
+        <a class="btn btn-primary btn-xl text-uppercase" href="#hakkinda">Daha Fazla</a>
+    </div>
+</header>
+
+<section class="page-section about-preview-section" id="hakkinda">
+    <div class="container">
+        <div class="section-head text-center">
+            <h2 class="section-title text-uppercase">
+                @(Model?.About?.Baslik ?? "Dernek Hakkında")
+            </h2>
+            <p class="section-subtitle">
+                @(Model?.About?.Icerik ?? "Kısa bir özet ve misyonumuzun temel çizgileri.")
+            </p>
+        </div>
+
+        <div class="row justify-content-center g-4">
+            <div class="col-lg-10">
+                <div class="about-card">
+                    <div class="about-card__bg"></div>
+                    <div class="about-card__content">
+                        <div class="about-card__meta">
+                            <span class="badge-soft">
+                                <i class="fas fa-leaf me-2"></i> Topluluk • Dayanışma • Etki
+                            </span>
+                        </div>
+                        <h3 class="about-card__headline">
+                            @(Model?.About?.Slug ?? "Kısa bir cümleyle derneğinizi özetleyin")
+                        </h3>
+                        <p class="about-card__text clamp-4">
+                            @(Model?.About?.Icerik ?? "Buraya veritabanından dernek hakkında içeriğinin kısa özetini getireceğiz.")
+                        </p>
+                        <div class="about-card__actions">
+                            <a class="btn btn-primary btn-modern" href="/Dernek/Hakkinda">
+                                Devamını Gör <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                            <a class="btn btn-outline-light btn-ghost" href="#iletisim">
+                                İletişime Geç
+                            </a>
+                        </div>
+                        <div class="about-card__stats">
+                            <div class="stat"><div class="stat__value">3</div><div class="stat__label">Kuruluş</div></div>
+                            <div class="stat"><div class="stat__value">5</div><div class="stat__label">Üye</div></div>
+                            <div class="stat"><div class="stat__value">7</div><div class="stat__label">Proje</div></div>
+                        </div>
+                    </div>
+                    <div class="about-card__aside">
+                        <div class="about-icon"><i class="fas fa-hands-helping"></i></div>
+                        <div class="about-aside-text">
+                            <div class="about-aside-title">Misyonumuz</div>
+                            <div class="about-aside-desc clamp-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section bg-light" id="galeri">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="section-heading text-uppercase">Galeri</h2>
+            <h3 class="section-subheading text-muted">Son etkinliklerimizden kareler.</h3>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-sm-6 mb-4">
+                <div class="portfolio-item">
+                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal1">
+                        <div class="portfolio-hover">
+                            <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                        </div>
+                        <img class="img-fluid" src="~/img/portfolio/1.jpg" alt="..." />
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="portfolio-caption-heading">Threads</div>
+                        <div class="portfolio-caption-subheading text-muted">Illustration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section" id="kayiplar">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="section-heading text-uppercase">Kaybettiklerimiz</h2>
+            <h3 class="section-subheading text-muted">Onları saygıyla anıyoruz.</h3>
+        </div>
+        <ul class="timeline">
+            <li>
+                <div class="timeline-image"><img class="rounded-circle img-fluid" src="~/img/about/1.jpg" alt="..." /></div>
+                <div class="timeline-panel">
+                    <div class="timeline-heading">
+                        <h4>2009-2011</h4>
+                        <h4 class="subheading">Our Humble Beginnings</h4>
+                    </div>
+                    <div class="timeline-body"><p class="text-muted">Lorem ipsum dolor sit amet...</p></div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="page-section bg-light" id="haber">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="section-heading text-uppercase">Haberler</h2>
+            <h3 class="section-subheading text-muted">Güncel gelişmeler.</h3>
+        </div>
+        <div class="row">
+        </div>
+    </div>
+</section>
+
+<div class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-3 col-sm-6 my-3">
+                <a href="#!"><img class="img-fluid img-brand d-block mx-auto" src="~/img/logos/google.svg" alt="..." /></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="page-section" id="iletisim">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="section-heading text-uppercase">İletişim</h2>
+            <h3 class="section-subheading text-muted">Bize ulaşın.</h3>
+        </div>
+    </div>
+</section>
+
+<div class="portfolio-modal modal fade" id="portfolioModal1" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="close-modal" data-bs-dismiss="modal" aria-label="Close">
+                <span style="font-size:28px; padding:12px; display:inline-block;">&times;</span>
+            </div>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="modal-body">
+                            <h2>Project Name</h2>
+                            <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal" type="button">
+                                <i class="fas fa-xmark me-1"></i> Close Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

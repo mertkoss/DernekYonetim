@@ -1,0 +1,237 @@
+﻿@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Galeri Yönetimi";
+    Layout = "_Layout";
+}
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="~/lib/img/logos/aod.svg" alt="logo" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
+            Menü <i class="fas fa-bars ms-1"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                <li class="nav-item"><a class="nav-link" href="/Dernek/Hakkinda">Dernek Hakkında</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/Galeri">Galeri</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Kayiplar">Kaybettiklerimiz</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Haberler">Haberler</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Iletisim">İletişim</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="page-section bg-light" style="padding-top:120px">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="section-heading text-uppercase mb-0">Galeri</h2>
+                <h3 class="section-subheading text-muted mt-2">Derneğimizden özel anlar</h3>
+            </div>
+            <button class="btn btn-primary btn-lg rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#ekleModal">
+                <i class="fas fa-plus me-2"></i>Yeni Fotoğraf Ekle
+            </button>
+        </div>
+
+        <div class="row g-4">
+            @if (Model.Galeri != null && Model.Galeri.Any())
+            {
+                foreach (var item in Model.Galeri)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm border-0 gallery-card position-relative">
+
+                            <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                                <button class="btn btn-light btn-sm shadow-sm rounded-circle me-1"
+                                        title="Düzenle"
+                                        onclick="editGallery(@item.Id, '@Html.Raw(item.Baslik)', '@Html.Raw(item.Aciklama)')">
+                                    <i class="fas fa-edit text-warning"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm shadow-sm rounded-circle" title="Sil"
+                                        onclick="deleteGallery(@item.Id)">
+                                    <i class="fas fa-trash-alt text-danger"></i>
+                                </button>
+                            </div>
+
+                            <div class="img-container">
+                                <img src="@item.FotografYolu" class="card-img-top" alt="@item.Baslik" loading="lazy" />
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">@item.Baslik</h5>
+                                <p class="card-text text-muted small">@item.Aciklama</p>
+                            </div>
+
+                            <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+                                <small class="text-muted"><i class="far fa-calendar-alt me-1"></i> @(item.YuklemeTarihi?.ToString("dd.MM.yyyy") ?? "-")</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-images fa-4x text-muted mb-3"></i>
+                    <p class="text-muted">Henüz galeriye eklenmiş bir içerik yok. Hemen bir tane ekleyin!</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+
+<div class="modal fade" id="duzenleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form asp-controller="Galeri" asp-action="Guncelle" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="Id" id="editId" /> <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Fotoğrafı Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Başlık</label>
+                        <input type="text" name="Baslik" id="editBaslik" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea name="Aciklama" id="editAciklama" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fotoğrafı Değiştir (İsteğe bağlı)</label>
+                        <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                        <small class="text-muted">Yeni fotoğraf seçmezseniz mevcut fotoğraf korunur.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="submit" class="btn btn-warning">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ekleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form action="/Galeri/Ekle" method="post" enctype="multipart/form-data">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Yeni Fotoğraf Yükle</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Başlık</label>
+                        <input type="text" name="Baslik" class="form-control" required placeholder="Fotoğraf başlığı...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea name="Aciklama" class="form-control" rows="3" placeholder="Kısa bir açıklama..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fotoğraf Seç</label>
+                        <input type="file" name="Fotograf" class="form-control" required accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="submit" class="btn btn-primary">Kaydet ve Yayınla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gallery-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    .img-container {
+        overflow: hidden;
+        height: 250px;
+    }
+
+    .gallery-card img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform .5s ease;
+    }
+
+    .gallery-card:hover img {
+        transform: scale(1.1);
+    }
+
+    /* Admin butonlarını başlangıçta gizle, hoverda göster */
+    .admin-controls {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gallery-card:hover .admin-controls {
+        opacity: 1;
+    }
+
+    .btn-primary {
+        background-color: #ffc800;
+        border-color: #ffc800;
+        color: #000;
+        font-weight: 700;
+    }
+
+        .btn-primary:hover {
+            background-color: #e6b400;
+            border-color: #e6b400;
+            color: #000;
+        }
+
+    /* Navbar Styles (Sizin kodunuzdan korundu) */
+    #mainNav {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.4));
+        backdrop-filter: blur(6px);
+    }
+
+        #mainNav .navbar-nav .nav-item .nav-link {
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+            #mainNav .navbar-nav .nav-item .nav-link.active {
+                color: #ffc800;
+            }
+</style>
+
+<script>
+    function editGallery(id, baslik, aciklama) {
+        // Modal içindeki inputları doldur
+        document.getElementById('editId').value = id;
+        document.getElementById('editBaslik').value = baslik;
+        document.getElementById('editAciklama').value = aciklama;
+
+        // Modalı aç
+        var myModal = new bootstrap.Modal(document.getElementById('duzenleModal'));
+        myModal.show();
+    }
+
+    function deleteGallery(id) {
+        if (confirm('Bu fotoğrafı silmek istediğinize emin misiniz?')) {
+            window.location.href = '/Galeri/Sil/' + id;
+        }
+    }
+</script>

@@ -1,0 +1,80 @@
+#mainNav {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.4) );
+    backdrop-filter: blur(6px);
+}
+
+    #mainNav .navbar-toggler {
+        padding: 0.75rem;
+        font-size: 0.75rem;
+        font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    #mainNav .navbar-brand {
+        color: #ffc800;
+        font-family: "Montserrat", sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.0625em;
+        text-transform: uppercase;
+    }
+
+        #mainNav .navbar-brand img {
+            height: 1.5rem;
+        }
+
+    #mainNav .navbar-nav .nav-item .nav-link {
+        font-family: "Montserrat", sans-serif;
+        font-size: 0.95rem;
+        color: #fff;
+        letter-spacing: 0.0625em;
+    }
+
+        #mainNav .navbar-nav .nav-item .nav-link:hover,
+        #mainNav .navbar-nav .nav-item .nav-link.active {
+            color: #ffc800;
+        }
+
+/* ====== DESKTOP ====== */
+@media (min-width: 992px) {
+
+    #mainNav {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+        background-color: transparent;
+        transition: all 0.3s ease-in-out;
+    }
+
+        #mainNav .navbar-brand {
+            font-size: 1.5em;
+        }
+
+            #mainNav .navbar-brand img {
+                height: 2rem;
+            }
+
+        #mainNav.navbar-shrink {
+            padding-top: 0.6rem;
+            padding-bottom: 0.6rem;
+            background: linear-gradient( to bottom, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.6) );
+            backdrop-filter: blur(8px);
+        }
+
+            #mainNav.navbar-shrink .navbar-brand {
+                font-size: 1.25em;
+            }
+
+                #mainNav.navbar-shrink .navbar-brand img {
+                    height: 1.5rem;
+                }
+
+        #mainNav .navbar-nav .nav-item {
+            margin-right: 1rem;
+        }
+
+            #mainNav .navbar-nav .nav-item:last-child {
+                margin-right: 0;
+            }
+}
