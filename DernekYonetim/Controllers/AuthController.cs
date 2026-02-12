@@ -83,12 +83,15 @@ namespace DernekYonetim.Controllers
             return RedirectToAction("Login");
         }
 
-        // --- LOGOUT BÖLÜMÜ ---
 
+        // ÇIKIŞ YAP (LOGOUT)
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // Tüm session'ı temizler
-            return RedirectToAction("Login");
+            // Oturumdaki tüm verileri (AdminID, AdSoyad vs.) siler
+            HttpContext.Session.Clear();
+
+            // Kullanıcıyı Ana Sayfaya (veya istersen Login'e) gönderir
+            return RedirectToAction("Index", "Anasayfa");
         }
     }
 }

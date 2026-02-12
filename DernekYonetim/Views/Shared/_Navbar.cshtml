@@ -82,11 +82,27 @@
                     <a class="nav-link" href="/Iletisim/Index">İletişim</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link ms-lg-3" href="/Auth/Login" title="Giriş Yap">
-                        <i class="fas fa-user-circle fa-lg"></i>
-                    </a>
-                </li>
+                @if (Context.Session.GetInt32("AdminID") != null)
+                {
+                    // --- GİRİŞ YAPILMIŞ HALİ ---
+                    <li class="nav-item d-flex align-items-center ms-lg-3 text-white">
+                        <small>Merhaba, @Context.Session.GetString("AdminAd")</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-danger text-white px-3 ms-2" href="/Auth/Logout">
+                            <i class="fas fa-sign-out-alt"></i> Çıkış
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    // --- GİRİŞ YAPILMAMIŞ HALİ ---
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light ms-lg-3 px-3" href="/Auth/Login">
+                            <i class="fas fa-user"></i> Giriş Yap
+                        </a>
+                    </li>
+                }
 
             </ul>
         </div>
