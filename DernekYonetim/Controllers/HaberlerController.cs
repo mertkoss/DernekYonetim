@@ -34,6 +34,10 @@ public class HaberlerController : Controller
     [HttpPost]
     public async Task<IActionResult> HaberKaydet(Haberler haber, IFormFile? Fotograf)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
         // 1. Dosya işlemi
         if (Fotograf != null && Fotograf.Length > 0)
         {
@@ -67,6 +71,11 @@ public class HaberlerController : Controller
     [HttpPost]
     public async Task<IActionResult> HaberGuncelle(Haberler gelenHaber, IFormFile? Fotograf)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
         // DB'deki mevcut kaydı bulalım
         var mevcutHaber = await _context.Haberlers.FindAsync(gelenHaber.Id);
         if (mevcutHaber == null) return NotFound();

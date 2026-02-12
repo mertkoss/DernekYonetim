@@ -34,6 +34,10 @@ public class DernekController : Controller
     [HttpPost]
     public async Task<IActionResult> BolumGuncelle(DernekHakkindaBolumleri model)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
         var mevcutBolum = await _context.DernekHakkindaBolumleris.FindAsync(model.Id);
 
         if (mevcutBolum == null)

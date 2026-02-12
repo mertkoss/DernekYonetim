@@ -22,6 +22,10 @@ public class IletisimController : Controller
     [HttpPost]
     public async Task<IActionResult> Guncelle(Iletisim model)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
         var mevcut = await _context.Iletisims.FirstOrDefaultAsync();
         if (mevcut != null)
         {

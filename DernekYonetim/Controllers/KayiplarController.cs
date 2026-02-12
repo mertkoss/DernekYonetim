@@ -23,6 +23,10 @@ public class KayiplarController : Controller
     [HttpPost]
     public async Task<IActionResult> KayitEkle(Kaybettiklerimiz model, IFormFile? Fotograf, DateTime VefatTarihiInput)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
         if (Fotograf != null && Fotograf.Length > 0)
         {
             string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
@@ -57,6 +61,11 @@ public class KayiplarController : Controller
     [HttpPost]
     public async Task<IActionResult> KayitGuncelle(Kaybettiklerimiz gelenVeri, IFormFile? Fotograf, DateTime VefatTarihiInput)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
         var mevcut = await _context.Kaybettiklerimizs.FindAsync(gelenVeri.Id);
         if (mevcut == null) return NotFound();
 

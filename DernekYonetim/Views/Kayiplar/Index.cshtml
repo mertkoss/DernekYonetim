@@ -9,9 +9,13 @@
         <div class="text-center mb-5">
             <h2 class="section-heading text-uppercase">Kaybettiklerimiz</h2>
             <h3 class="section-subheading text-muted">Aramızdan ayrılan değerli büyüklerimizi ve dostlarımızı saygıyla anıyoruz.</h3>
-            <button class="btn btn-dark rounded-pill mt-3" data-bs-toggle="modal" data-bs-target="#kayipEkleModal">
-                <i class="fas fa-plus me-2"></i>Yeni Kayıt Ekle
-            </button>
+
+            @if (Context.Session.GetInt32("AdminID") != null)
+            {
+                <button class="btn btn-dark rounded-pill mt-3" data-bs-toggle="modal" data-bs-target="#kayipEkleModal">
+                    <i class="fas fa-plus me-2"></i>Yeni Kayıt Ekle
+                </button>
+            }
         </div>
 
         <div class="row g-4">
@@ -30,15 +34,22 @@
                             </p>
                             <p class="card-text text-muted small">@item.Aciklama</p>
                         </div>
-                        <div class="card-footer bg-white border-0 text-center pb-3">
-                            <button class="btn btn-sm btn-outline-warning border-0"
-                                    onclick="kayipDuzenle(@item.Id, '@Html.Raw(item.AdSoyad)', '@item.VefatTarihi?.ToString("yyyy-MM-dd")', '@Html.Raw(item.Aciklama)')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <a href="/Kayiplar/Sil/@item.Id" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </div>
+
+                        @if (Context.Session.GetInt32("AdminID") != null)
+                        {
+                            <div class="card-footer bg-white border-0 text-center pb-3">
+                                <button class="btn btn-sm btn-outline-warning border-0"
+                                        onclick="kayipDuzenle(@item.Id,
+                                                                    '@Html.Raw(item.AdSoyad?.Replace("'", "\\'"))',
+                                                                    '@item.VefatTarihi?.ToString("yyyy-MM-dd")',
+                                                                    '@Html.Raw(item.Aciklama?.Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " "))')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <a href="/Kayiplar/Sil/@item.Id" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        }
                     </div>
                 </div>
             }
@@ -46,77 +57,81 @@
     </div>
 </section>
 
-<div class="modal fade" id="kayipDuzenleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-0">
-            <form action="/Kayiplar/KayitGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
-                <input type="hidden" name="Id" id="editId" />
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">Kaydı Düzenle</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Ad Soyad</label>
-                        <input type="text" name="AdSoyad" id="editAdSoyad" class="form-control" required>
+@if (Context.Session.GetInt32("AdminID") != null)
+{
+    <div class="modal fade" id="kayipDuzenleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0">
+                <form action="/Kayiplar/KayitGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
+                    <input type="hidden" name="Id" id="editId" />
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">Kaydı Düzenle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Vefat Tarihi</label>
-                        <input type="date" name="VefatTarihiInput" id="editVefatTarihi" class="form-control" required>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ad Soyad</label>
+                            <input type="text" name="AdSoyad" id="editAdSoyad" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Vefat Tarihi</label>
+                            <input type="date" name="VefatTarihiInput" id="editVefatTarihi" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fotoğrafı Değiştir (İsteğe bağlı)</label>
+                            <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Açıklama</label>
+                            <textarea name="Aciklama" id="editAciklama" class="form-control" rows="3"></textarea>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Fotoğrafı Değiştir (İsteğe bağlı)</label>
-                        <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-warning px-4">Güncelle</button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Açıklama</label>
-                        <textarea name="Aciklama" id="editAciklama" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                    <button type="submit" class="btn btn-warning px-4">Güncelle</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="kayipEkleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/Kayiplar/KayitEkle" method="post" enctype="multipart/form-data">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">Yeni Kayıt Ekle</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Ad Soyad</label>
-                        <input type="text" name="AdSoyad" class="form-control" required>
+    <div class="modal fade" id="kayipEkleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/Kayiplar/KayitEkle" method="post" enctype="multipart/form-data">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title">Yeni Kayıt Ekle</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Vefat Tarihi</label>
-                        <input type="date" name="VefatTarihiInput" class="form-control" required>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Ad Soyad</label>
+                            <input type="text" name="AdSoyad" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Vefat Tarihi</label>
+                            <input type="date" name="VefatTarihiInput" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fotoğraf</label>
+                            <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kısa Açıklama / Not</label>
+                            <textarea name="Aciklama" class="form-control" rows="3"></textarea>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Fotoğraf</label>
-                        <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-dark w-100">Kaydet</button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Kısa Açıklama / Not</label>
-                        <textarea name="Aciklama" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark w-100">Kaydet</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
 
 <style>
+    /* CSS kodların aynen korunuyor */
     .memorial-card {
         transition: all 0.4s ease;
         border-radius: 15px;

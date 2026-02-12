@@ -16,9 +16,12 @@
                     Son güncelleme: @Model.About?.GuncellemeTarihi?.ToString("dd MMMM yyyy")
                 </div>
             </div>
-            <button class="btn btn-warning rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#editAboutModal">
-                <i class="fas fa-edit me-2"></i>Sayfayı Düzenle
-            </button>
+            @if (Context.Session.GetInt32("AdminID") != null)
+            {
+                <button class="btn btn-warning rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#editAboutModal">
+                    <i class="fas fa-edit me-2"></i>Sayfayı Düzenle
+                </button>
+            }
         </div>
 
         <div class="content-card mt-4">
@@ -28,10 +31,12 @@
     </div>
 </section>
 
-<div class="modal fade" id="editAboutModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content border-0">
-            <form action="/Dernek/BolumGuncelle" method="post">
+@if (Context.Session.GetInt32("AdminID") != null)
+{
+    <div class="modal fade" id="editAboutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content border-0">
+                <form action="/Dernek/BolumGuncelle" method="post">
                 <input type="hidden" name="Id" value="@Model.About?.Id" />
                 <input type="hidden" name="Slug" value="@Model.About?.Slug" />
                 <input type="hidden" name="Aktif" value="true" /> @* Sayfa şu an aktifse aktif kalsın *@
@@ -54,10 +59,11 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
                     <button type="submit" class="btn btn-primary px-5">Değişiklikleri Uygula</button>
                 </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
 
 
 

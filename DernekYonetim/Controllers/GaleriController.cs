@@ -25,6 +25,11 @@ public class GaleriController : Controller
     [HttpPost]
     public async Task<IActionResult> Ekle(string Baslik, string Aciklama, IFormFile Fotograf)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
         if (Fotograf != null && Fotograf.Length > 0)
         {
             // 1. Dosya adını benzersiz yapalım
@@ -66,6 +71,11 @@ public class GaleriController : Controller
     // FOTOĞRAF SİLME
     public async Task<IActionResult> Sil(int id)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
         var foto = await _context.Galeris.FindAsync(id);
         if (foto != null)
         {
@@ -83,6 +93,11 @@ public class GaleriController : Controller
     [HttpPost]
     public async Task<IActionResult> Guncelle(int Id, string Baslik, string Aciklama, IFormFile? Fotograf)
     {
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
         var mevcutKayit = await _context.Galeris.FindAsync(Id);
         if (mevcutKayit == null) return NotFound();
 

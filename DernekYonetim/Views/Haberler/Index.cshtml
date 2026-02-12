@@ -12,9 +12,13 @@
                 <h2 class="section-heading text-uppercase mb-0">Haberler</h2>
                 <p class="text-muted">Derneğimizden güncel duyurular ve haberler</p>
             </div>
-            <button class="btn btn-primary btn-lg rounded-pill" data-bs-toggle="modal" data-bs-target="#haberEkleModal">
-                <i class="fas fa-paper-plane me-2"></i>Yeni Haber Paylaş
-            </button>
+
+            @if (Context.Session.GetInt32("AdminID") != null)
+            {
+                <button class="btn btn-primary btn-lg rounded-pill" data-bs-toggle="modal" data-bs-target="#haberEkleModal">
+                    <i class="fas fa-paper-plane me-2"></i>Yeni Haber Paylaş
+                </button>
+            }
         </div>
 
         <div class="row g-4">
@@ -42,23 +46,30 @@
                                 <small class="text-muted">
                                     <i class="far fa-calendar-alt me-1"></i> @item.YayimTarihi?.ToString("dd.MM.yyyy")
                                 </small>
-                                <div class="admin-btns">
-                                    <button class="btn btn-link text-warning p-0 me-2"
-                                            onclick="haberDuzenle(@item.Id, '@Html.Raw(item.Baslik)', '@Html.Raw(item.Ozet)', '@Html.Raw(item.Icerik)', '@item.KategoriId')">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <a href="/Haberler/Sil/@item.Id" class="text-danger" onclick="return confirm('Silinsin mi?')">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                    
-                                </div>
+
+                                @if (Context.Session.GetInt32("AdminID") != null)
+                                {
+                                    <div class="admin-btns">
+                                        <button class="btn btn-link text-warning p-0 me-2"
+                                                onclick="haberDuzenle(@item.Id,
+                                                                            '@Html.Raw(item.Baslik?.Replace("'", "\\'"))',
+                                                                            '@Html.Raw(item.Ozet?.Replace("'", "\\'"))',
+                                                                            '@Html.Raw(item.Icerik?.Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " "))',
+                                                                            '@item.KategoriId')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <a href="/Haberler/Sil/@item.Id" class="text-danger" onclick="return confirm('Bu haberi silmek istediğinize emin misiniz?')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                }
                             </div>
                             <h5 class="card-title fw-bold">@item.Baslik</h5>
                             <p class="card-text text-muted small">@item.Ozet</p>
                         </div>
 
                         <div class="card-footer bg-white border-0 pb-4">
-                            <button class="btn btn-outline-dark btn-sm w-100 rounded-pill">Detayları Gör</button>
+                            <a href="/Haberler/Detay/@item.Id" class="btn btn-outline-dark btn-sm w-100 rounded-pill">Detayları Gör</a>
                         </div>
                     </div>
                 </div>
@@ -67,110 +78,113 @@
     </div>
 </section>
 
-<div class="modal fade" id="haberDuzenleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
-            <form action="/Haberler/HaberGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
-                <input type="hidden" name="Id" id="editHaberId" />
+@if (Context.Session.GetInt32("AdminID") != null)
+{
+    <div class="modal fade" id="haberDuzenleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <form action="/Haberler/HaberGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
+                    <input type="hidden" name="Id" id="editHaberId" />
 
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Haber Başlığı</label>
-                            <input type="text" name="Baslik" id="editBaslik" class="form-control" required />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Kategori</label>
-                            <select name="KategoriId" id="editKategoriId" class="form-select" required>
-                                <option value="">Seçiniz...</option>
-                                @if (ViewBag.KategoriListesi != null)
-                                {
-                                    foreach (var item in (SelectList)ViewBag.KategoriListesi)
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Haber Başlığı</label>
+                                <input type="text" name="Baslik" id="editBaslik" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Kategori</label>
+                                <select name="KategoriId" id="editKategoriId" class="form-select" required>
+                                    <option value="">Seçiniz...</option>
+                                    @if (ViewBag.KategoriListesi != null)
                                     {
-                                        <option value="@item.Value">@item.Text</option>
+                                        foreach (var item in (SelectList)ViewBag.KategoriListesi)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
                                     }
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Fotoğrafı Değiştir (İsteğe Bağlı)</label>
-                            <input type="file" name="Fotograf" class="form-control" accept="image/*" />
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Kısa Özet</label>
-                            <textarea name="Ozet" id="editOzet" class="form-control" rows="2" required></textarea>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Haber İçeriği</label>
-                            <textarea name="Icerik" id="editIcerik" class="form-control" rows="4"></textarea>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Fotoğrafı Değiştir (İsteğe Bağlı)</label>
+                                <input type="file" name="Fotograf" class="form-control" accept="image/*" />
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Kısa Özet</label>
+                                <textarea name="Ozet" id="editOzet" class="form-control" rows="2" required></textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Haber İçeriği</label>
+                                <textarea name="Icerik" id="editIcerik" class="form-control" rows="4"></textarea>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                    <button type="submit" class="btn btn-warning px-5">Değişiklikleri Kaydet</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-warning px-5">Değişiklikleri Kaydet</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
+    <div class="modal fade" id="haberEkleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0">
+                <form action="/Haberler/HaberKaydet" method="post" enctype="multipart/form-data">
+                    <div class="modal-body p-4">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Haber Başlığı</label>
+                                <input type="text" name="Baslik" class="form-control" required />
+                            </div>
 
-<div class="modal fade" id="haberEkleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0">
-            <form action="/Haberler/HaberKaydet" method="post" enctype="multipart/form-data">
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Haber Başlığı</label>
-                            <input type="text" name="Baslik" class="form-control" required />
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Kategori</label>
-                            <select name="KategoriId" class="form-select" required>
-                                <option value="">Seçiniz...</option>
-                                @if (ViewBag.KategoriListesi != null)
-                                {
-                                    foreach (var item in (SelectList)ViewBag.KategoriListesi)
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Kategori</label>
+                                <select name="KategoriId" class="form-select" required>
+                                    <option value="">Seçiniz...</option>
+                                    @if (ViewBag.KategoriListesi != null)
                                     {
-                                        <option value="@item.Value">@item.Text</option>
+                                        foreach (var item in (SelectList)ViewBag.KategoriListesi)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
                                     }
-                                }
-                            </select>
-                        </div>
+                                </select>
+                            </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Kapak Fotoğrafı</label>
-                            <input type="file" name="Fotograf" class="form-control" accept="image/*" />
-                        </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Kapak Fotoğrafı</label>
+                                <input type="file" name="Fotograf" class="form-control" accept="image/*" />
+                            </div>
 
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Kısa Özet</label>
-                            <textarea name="Ozet" class="form-control" rows="2" required></textarea>
-                        </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Kısa Özet</label>
+                                <textarea name="Ozet" class="form-control" rows="2" required></textarea>
+                            </div>
 
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Haber İçeriği</label>
-                            <textarea name="Icerik" class="form-control" rows="4"></textarea>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Haber İçeriği</label>
+                                <textarea name="Icerik" class="form-control" rows="4"></textarea>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                    <button type="submit" class="btn btn-success px-5">Haberi Yayınla</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-success px-5">Haberi Yayınla</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
 
 <style>
+    /* CSS kodların aynen korunuyor */
     .news-card {
         transition: all 0.3s cubic-bezier(.25,.8,.25,1);
     }
@@ -190,12 +204,13 @@
         transform: scale(1.1);
     }
 
-    .admin-btns a {
+    .admin-btns a, .admin-btns button {
         opacity: 0.6;
         transition: 0.3s;
+        text-decoration: none; /* Link alt çizgisini kaldırdık */
     }
 
-        .admin-btns a:hover {
+        .admin-btns a:hover, .admin-btns button:hover {
             opacity: 1;
         }
 </style>
