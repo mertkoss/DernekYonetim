@@ -23,27 +23,32 @@
             background-color: #f8f9fa;
         }
 
-    /* Detay Satırı (Başlangıçta gizli) */
+    /* Detay Satırı */
     .detail-row {
         display: none;
         background-color: #fcfcfc;
     }
 
-    /* Durum Etiketleri */
-    .badge-odendi {
-        background-color: #d1e7dd;
-        color: #0f5132;
-        padding: 5px 10px;
+    /* Aidat Etiketi */
+    .badge-aidat {
+        background-color: #e9ecef;
+        color: #495057;
+        border: 1px solid #ced4da;
+        padding: 4px 8px;
         border-radius: 4px;
+        font-size: 0.85rem;
         font-weight: 600;
+        margin-right: 3px;
+        margin-bottom: 3px;
+        display: inline-block;
     }
 
-    .badge-odenmedi {
-        background-color: #f8d7da;
-        color: #842029;
-        padding: 5px 10px;
+    .badge-yok {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 4px 8px;
         border-radius: 4px;
-        font-weight: 600;
+        font-size: 0.8rem;
     }
 
     .toggle-icon {
@@ -59,8 +64,8 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="section-heading text-uppercase">Üye Listesi</h2>
-                <p class="text-muted">Üye detaylarını görmek için satıra tıklayınız.</p>
+                <h2 class="section-heading text-uppercase">Üye Aidat Yönetimi</h2>
+                <p class="text-muted">Üye aidatlarını görüntüleyin ve yeni ödeme girişi yapın.</p>
             </div>
             <div>
                 <button class="btn btn-primary">
@@ -78,11 +83,9 @@
                         <th>Ad Soyad</th>
                         <th>Telefon</th>
                         <th>Meslek</th>
-                        <th>Derbis</th>
-                        <th>2025 Aidat</th>
-                        <th>2026 Aidat</th>
-                        <th>2027 Aidat</th>
-                        <th>İşlemler</th>
+                        <th>Ödenen Aidatlar</th>
+                        <th style="width: 280px;">Aidat Girişi (Yıl / Tutar)</th>
+                        <th style="width: 100px;">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,90 +103,78 @@
                             </td>
                             <td>@item.Telefon</td>
                             <td>@item.Meslek</td>
-                            <td class="text-center">
-                                @if (item.DerbisDurumu == "Evet" || item.DerbisDurumu == "Var")
+
+                            <td>
+                                @if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
                                 {
-                                    <span class="badge bg-success">Kayıtlı</span>
+                                    @foreach (var aidat in item.OdenenAidatlar)
+                                    {
+                                        <span class="badge-aidat">
+                                            @aidat.Yil: @aidat.Tutar?.ToString("N0") TL
+                                        </span>
+                                    }
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Kayıt Yok</span>
+                                    <span class="badge-yok">Ödeme Yok</span>
                                 }
                             </td>
 
-                            <td class="text-center">
-                                @if (item.Aidat2025.OdendiMi)
-                                {
-                                    <span class="badge-odendi">@item.Aidat2025.Tutar?.ToString("N0") TL</span>
-                                }
-                                else
-                                {
-                                    <span class="badge-odenmedi">Ödenmedi</span>
-                                }
+                            <td onclick="event.stopPropagation()">
+                                <form asp-action="AidatEkle" method="post" class="row g-1 align-items-center">
+                                    <input type="hidden" name="uyeId" value="@item.UyeId" />
+                                    <div class="col-4">
+                                        <input type="number" name="yil" class="form-control form-control-sm text-center"
+                                               placeholder="Yıl" value="@DateTime.Now.Year" required />
+                                    </div>
+                                    <div class="col-5">
+                                        <input type="number" name="tutar" class="form-control form-control-sm text-center"
+                                               placeholder="TL" required />
+                                    </div>
+                                    <div class="col-3">
+                                        <button type="submit" class="btn btn-sm btn-success w-100">
+                                            <i class="fa fa-save"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </td>
 
-                            <td class="text-center">
-                                @if (item.Aidat2026.OdendiMi)
-                                {
-                                    <span class="badge-odendi">@item.Aidat2026.Tutar?.ToString("N0") TL</span>
-                                }
-                                else
-                                {
-                                    <span class="badge-odenmedi">Ödenmedi</span>
-                                }
-                            </td>
-
-                            <td class="text-center">
-                                @if (item.Aidat2027.OdendiMi)
-                                {
-                                    <span class="badge-odendi">@item.Aidat2027.Tutar?.ToString("N0") TL</span>
-                                }
-                                else
-                                {
-                                    <span class="badge-odenmedi">Ödenmedi</span>
-                                }
-                            </td>
-
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation()">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation()">
-                                    <i class="fa fa-trash"></i>
-                                </button>
+                            <td class="text-center" onclick="event.stopPropagation()">
+                                <button class="btn btn-sm btn-outline-warning"><i class="fa fa-edit"></i></button>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
 
                         <tr id="detail-@item.UyeId" class="detail-row">
-                            <td colspan="10">
+                            <td colspan="8">
                                 <div class="p-3">
                                     <div class="row">
                                         <div class="col-md-3">
                                             <h6 class="text-primary fw-bold">Kimlik Bilgileri</h6>
                                             <ul class="list-unstyled text-muted small">
                                                 <li><strong>TC No:</strong> @item.TcKimlikNo</li>
-                                                <li><strong>Doğum Tarihi:</strong> @item.DogumTarihi</li>
-                                                <li><strong>Doğum Yeri:</strong> @item.DogumYeri</li>
+                                                <li><strong>Doğum:</strong> @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-") / @item.DogumYeri</li>
                                             </ul>
                                         </div>
                                         <div class="col-md-3">
-                                            <h6 class="text-primary fw-bold">Eğitim Bilgileri</h6>
+                                            <h6 class="text-primary fw-bold">Eğitim</h6>
                                             <ul class="list-unstyled text-muted small">
-                                                <li><strong>Üniversite:</strong> @item.Universite</li>
-                                                <li><strong>Mezuniyet Yılı:</strong> @item.MezuniyetYili</li>
+                                                <li>@item.Universite</li>
+                                                <li>Mezuniyet: @item.MezuniyetYili</li>
                                             </ul>
                                         </div>
                                         <div class="col-md-3">
-                                            <h6 class="text-primary fw-bold">İletişim Bilgileri</h6>
+                                            <h6 class="text-primary fw-bold">İletişim</h6>
                                             <ul class="list-unstyled text-muted small">
-                                                <li><strong>Email:</strong> @item.Email</li>
-                                                <li><strong>Adres:</strong> @item.AdresTam</li>
+                                                <li>@item.Email</li>
+                                                <li>@item.AdresTam</li>
                                             </ul>
                                         </div>
                                         <div class="col-md-3">
                                             <h6 class="text-primary fw-bold">Diğer</h6>
                                             <ul class="list-unstyled text-muted small">
-                                                <li><strong>Üyelik Tarihi:</strong> @item.UyelikTarihi</li>
+                                                <li><strong>Üyelik Tarihi:</strong> @item.UyelikTarihi.ToShortDateString()</li>
+                                                <li><strong>Derbis:</strong> @item.DerbisDurumu</li>
                                             </ul>
                                         </div>
                                     </div>

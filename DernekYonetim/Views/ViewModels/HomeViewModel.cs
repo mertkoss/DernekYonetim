@@ -45,10 +45,13 @@ namespace DernekYonetim.Models
         // Derbis
         public string DerbisDurumu { get; set; }
 
-        // Aidat Durumları
-        public AidatDurumu Aidat2025 { get; set; }
-        public AidatDurumu Aidat2026 { get; set; }
-        public AidatDurumu Aidat2027 { get; set; }
+        public List<AidatOzet> OdenenAidatlar { get; set; } = new List<AidatOzet>();
+    }
+
+    public class AidatOzet
+    {
+        public int Yil { get; set; }
+        public decimal? Tutar { get; set; }
     }
 
     // Yardımcı Class
