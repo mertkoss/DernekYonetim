@@ -19,6 +19,11 @@ namespace DernekYonetim.Controllers
         // 1. LİSTELEME SAYFASI
         public IActionResult Index()
         {
+            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
+
+            // Bu bilgiyi sayfaya (View) gönderiyoruz
+            ViewBag.GirisYapti = girisVarMi;
+
             // Veritabanından tüm ilişkili verileri çekiyoruz
             var uyeler = _context.Uyelers
                 .Include(u => u.EgitimMesleks)

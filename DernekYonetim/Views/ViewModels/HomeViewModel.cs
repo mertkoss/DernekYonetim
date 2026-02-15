@@ -28,6 +28,7 @@ namespace DernekYonetim.Models
         public DateOnly UyelikTarihi { get; set; }
         public string AdSoyad { get; set; }
         public string TcKimlikNo { get; set; }
+        public string EvlilikSoyadi { get; set; }
 
         // Kişisel & İletişim (Detayda görünecekler)
         public DateOnly? DogumTarihi { get; set; }

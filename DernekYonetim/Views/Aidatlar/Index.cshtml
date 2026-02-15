@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Üye Listesi ve Aidat Takibi";
     Layout = "_Layout";
+
+    bool girisYaptiMi = ViewBag.GirisYapti == true;
 }
 
 <style>
@@ -75,9 +77,13 @@
                 <p class="text-muted">Üye listesi, detay bilgileri ve aidat geçmişi.</p>
             </div>
             <div>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
-                    <i class="fa fa-plus"></i> Yeni Üye Ekle
-                </button>
+                @* GÜVENLİK 1: Sadece giriş yapanlar "Yeni Üye Ekle" butonunu görür *@
+                @if (girisYaptiMi)
+                {
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
+                        <i class="fa fa-plus"></i> Yeni Üye Ekle
+                    </button>
+                }
             </div>
         </div>
 
@@ -91,7 +97,12 @@
                         <th>Telefon</th>
                         <th>Meslek</th>
                         <th>Ödenen Aidatlar</th>
-                        <th style="width: 100px;">İşlemler</th>
+
+                        @* GÜVENLİK 2: "İşlemler" başlığı sadece giriş yapana görünür *@
+                        @if (girisYaptiMi)
+                        {
+                            <th style="width: 100px;">İşlemler</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -102,14 +113,38 @@
                             <td class="fw-bold text-center">@item.UyeNo</td>
                             <td>
                                 <div class="fw-bold">
-                                    @item.AdSoyad
+                                    @if (girisYaptiMi)
+                                    {
+                                        @item.AdSoyad
+                                        @if (!string.IsNullOrEmpty(item.EvlilikSoyadi))
+                                        {
+                                            <span class="small text-muted">(@item.EvlilikSoyadi)</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Maskeleme Kodu
+                                        @foreach (var kelime in item.AdSoyad.Split(' '))
+                                        {
+                                            if (!string.IsNullOrEmpty(kelime))
+                                            {
+                                                <span>@kelime.Substring(0, 1)***** </span>
+                                            }
+                                        }
+                                    }
                                 </div>
-                                @if (item.Vefat)
+                            </td>
+
+                            <td>
+                                @if (girisYaptiMi)
                                 {
-                                    <small class="text-danger fw-bold">(VEFAT)</small>
+                                    @item.Telefon
+                                }
+                                else
+                                {
+                                    <span class="text-muted">*** ** **</span>
                                 }
                             </td>
-                            <td>@item.Telefon</td>
                             <td>@item.Meslek</td>
 
                             <td>
@@ -128,25 +163,67 @@
                                 }
                             </td>
 
-                            <td class="text-center" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-outline-warning" title="Düzenle" onclick="editUye(@item.UyeId)">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteUye(@item.UyeId)">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </td>
+                            @* GÜVENLİK 3: Düzenle/Sil butonları sadece giriş yapana görünür *@
+                            @if (girisYaptiMi)
+                            {
+                                <td class="text-center" onclick="event.stopPropagation()">
+                                    <button class="btn btn-sm btn-outline-warning" title="Düzenle" onclick="editUye(@item.UyeId)">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteUye(@item.UyeId)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            }
                         </tr>
 
                         <tr id="detail-@item.UyeId" class="detail-row">
-                            <td colspan="7">
+                            @* colspan ayarı: Eğer giriş yapıldıysa 7 sütun, yapılmadıysa 6 sütun birleştir *@
+                            <td colspan="@(girisYaptiMi ? "7" : "6")">
                                 <div class="p-3">
                                     <div class="row">
                                         <div class="col-md-3">
                                             <h6 class="text-primary fw-bold">Kimlik Bilgileri</h6>
                                             <ul class="list-unstyled text-muted small">
-                                                <li><strong>TC No:</strong> @item.TcKimlikNo</li>
-                                                <li><strong>Doğum:</strong> @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-") / @item.DogumYeri</li>
+                                                <li>
+                                                    <strong>TC No:</strong>
+                                                    @if (girisYaptiMi)
+                                                    {
+                                                        @item.TcKimlikNo
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>***********</span>
+                                                    }
+                                                </li>
+
+                                                @if (!string.IsNullOrEmpty(item.EvlilikSoyadi))
+                                                {
+                                                    <li>
+                                                        <strong>Evlilik Soyadı:</strong>
+                                                        @if (girisYaptiMi)
+                                                        {
+                                                            @item.EvlilikSoyadi
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>*****</span>
+                                                        }
+                                                    </li>
+                                                }
+
+                                                <li>
+                                                    <strong>Doğum:</strong>
+                                                    @if (girisYaptiMi)
+                                                    {
+                                                        @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-")
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>**.**.****</span>
+                                                    }
+                                                    / @item.DogumYeri
+                                                </li>
                                             </ul>
                                         </div>
                                         <div class="col-md-3">
@@ -205,125 +282,51 @@
 
             <form id="uyeForm" action="/Aidatlar/YeniUyeEkle" method="post">
                 @Html.AntiForgeryToken()
-
                 <input type="hidden" name="UyeId" id="hiddenUyeId" value="0" />
 
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="uyeTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik Bilgileri</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="iletisim-tab" data-bs-toggle="tab" data-bs-target="#iletisim" type="button" role="tab">İletişim</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="egitim-tab" data-bs-toggle="tab" data-bs-target="#egitim" type="button" role="tab">Eğitim & Meslek</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="diger-tab" data-bs-toggle="tab" data-bs-target="#diger" type="button" role="tab">Derbis & İlk Aidat</button>
-                        </li>
+                        <li class="nav-item" role="presentation"><button class="nav-link active" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik Bilgileri</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link" id="iletisim-tab" data-bs-toggle="tab" data-bs-target="#iletisim" type="button" role="tab">İletişim</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link" id="egitim-tab" data-bs-toggle="tab" data-bs-target="#egitim" type="button" role="tab">Eğitim & Meslek</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link" id="diger-tab" data-bs-toggle="tab" data-bs-target="#diger" type="button" role="tab">Derbis & İlk Aidat</button></li>
                     </ul>
 
                     <div class="tab-content" id="uyeTabsContent">
-
                         <div class="tab-pane fade show active" id="kimlik" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Üye No</label>
-                                    <input type="text" name="UyeNo" class="form-control" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Üyelik Tarihi</label>
-                                    <input type="date" name="UyelikTarihi" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">TC Kimlik No</label>
-                                    <input type="text" name="TckimlikNo" class="form-control" required maxlength="11">
-                                </div>
-                                <div class="col-md-6">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Ad</label>
-                                    <input type="text" name="Ad" class="form-control" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Soyad</label>
-                                    <input type="text" name="Soyad" class="form-control" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Evlilik Soyadı</label>
-                                    <input type="text" name="EvlilikSoyadi" class="form-control" placeholder="(Varsa)">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Doğum Tarihi</label>
-                                    <input type="date" name="DogumTarihi" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Doğum Yeri</label>
-                                    <input type="text" name="DogumYeri" class="form-control">
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="Vefat" value="true" id="vefatCheck">
-                                        <label class="form-check-label text-danger fw-bold" for="vefatCheck">
-                                            Vefat Durumu
-                                        </label>
-                                    </div>
-                                </div>
+                                <div class="col-md-6"><label class="form-label">Üye No</label><input type="text" name="UyeNo" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Üyelik Tarihi</label><input type="date" name="UyelikTarihi" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required></div>
+                                <div class="col-md-6"><label class="form-label">TC Kimlik No</label><input type="text" name="TckimlikNo" class="form-control" required maxlength="11"></div>
+                                <div class="col-md-6"></div>
+                                <div class="col-md-4"><label class="form-label">Ad</label><input type="text" name="Ad" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Soyad</label><input type="text" name="Soyad" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Evlilik Soyadı</label><input type="text" name="EvlilikSoyadi" class="form-control" placeholder="(Varsa)"></div>
+                                <div class="col-md-6"><label class="form-label">Doğum Tarihi</label><input type="date" name="DogumTarihi" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">Doğum Yeri</label><input type="text" name="DogumYeri" class="form-control"></div>
+                                <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="Vefat" value="true" id="vefatCheck"><label class="form-check-label text-danger fw-bold" for="vefatCheck">Vefat Durumu</label></div></div>
                             </div>
                         </div>
-
                         <div class="tab-pane fade" id="iletisim" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Telefon</label>
-                                    <input type="text" name="Telefon" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">E-Mail</label>
-                                    <input type="email" name="Email" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">İl</label>
-                                    <input type="text" name="Il" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">İlçe</label>
-                                    <input type="text" name="Ilce" class="form-control">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Tam Adres</label>
-                                    <textarea name="Adres" class="form-control" rows="3"></textarea>
-                                </div>
+                                <div class="col-md-6"><label class="form-label">Telefon</label><input type="text" name="Telefon" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">E-Mail</label><input type="email" name="Email" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">İl</label><input type="text" name="Il" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">İlçe</label><input type="text" name="Ilce" class="form-control"></div>
+                                <div class="col-12"><label class="form-label">Tam Adres</label><textarea name="Adres" class="form-control" rows="3"></textarea></div>
                             </div>
                         </div>
-
                         <div class="tab-pane fade" id="egitim" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Üniversite</label>
-                                    <input type="text" name="Universite" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Fakülte</label>
-                                    <input type="text" name="Fakulte" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Mezuniyet Yılı</label>
-                                    <input type="number" name="MezuniyetYili" class="form-control" placeholder="YYYY">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Meslek</label>
-                                    <input type="text" name="Meslek" class="form-control">
-                                </div>
+                                <div class="col-md-6"><label class="form-label">Üniversite</label><input type="text" name="Universite" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">Fakülte</label><input type="text" name="Fakulte" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">Mezuniyet Yılı</label><input type="number" name="MezuniyetYili" class="form-control" placeholder="YYYY"></div>
+                                <div class="col-md-6"><label class="form-label">Meslek</label><input type="text" name="Meslek" class="form-control"></div>
                             </div>
                         </div>
-
                         <div class="tab-pane fade" id="diger" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-12">
-                                    <h6 class="text-secondary border-bottom pb-2">Derbis Kaydı</h6>
-                                </div>
+                                <div class="col-12"><h6 class="text-secondary border-bottom pb-2">Derbis Kaydı</h6></div>
                                 <div class="col-md-6">
                                     <label class="form-label">Derbis Durumu</label>
                                     <select name="KayitDurumu" class="form-select">
@@ -332,28 +335,11 @@
                                         <option value="Yok">Derbis Kaydı Yok</option>
                                     </select>
                                 </div>
-
-                                <div class="col-12 mt-4">
-                                    <h6 class="text-secondary border-bottom pb-2">Aidat İşlemleri</h6>
-                                </div>
-
-                                <div class="col-12 mb-2">
-                                    <label class="form-label text-muted small">Ödenmiş Aidatlar:</label>
-                                    <div id="aidatListesiBadge" class="d-flex flex-wrap gap-2">
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label">Yeni Aidat Yılı</label>
-                                    <input type="number" name="AidatYili" class="form-control" value="@DateTime.Now.Year">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Yeni Aidat Tutarı (TL)</label>
-                                    <input type="number" step="0.01" name="AidatTutari" class="form-control" placeholder="Tutar Giriniz">
-                                </div>
-                                <div class="col-12">
-                                    <small class="text-muted fst-italic">* Tutar girip kaydederseniz yeni ödeme eklenir.</small>
-                                </div>
+                                <div class="col-12 mt-4"><h6 class="text-secondary border-bottom pb-2">Aidat İşlemleri</h6></div>
+                                <div class="col-12 mb-2"><label class="form-label text-muted small">Ödenmiş Aidatlar:</label><div id="aidatListesiBadge" class="d-flex flex-wrap gap-2"></div></div>
+                                <div class="col-md-6"><label class="form-label">Yeni Aidat Yılı</label><input type="number" name="AidatYili" class="form-control" value="@DateTime.Now.Year"></div>
+                                <div class="col-md-6"><label class="form-label">Yeni Aidat Tutarı (TL)</label><input type="number" step="0.01" name="AidatTutari" class="form-control" placeholder="Tutar Giriniz"></div>
+                                <div class="col-12"><small class="text-muted fst-italic">* Tutar girip kaydederseniz yeni ödeme eklenir.</small></div>
                             </div>
                         </div>
                     </div>
@@ -387,134 +373,101 @@
         }
     }
 
-    // 1. Formu Sıfırla (Yeni Üye)
     function resetForm() {
         document.getElementById("uyeForm").reset();
         document.getElementById("uyeForm").action = "/Aidatlar/YeniUyeEkle";
         document.getElementById("hiddenUyeId").value = "0";
         document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-user-plus"></i> Yeni Üye Kaydı';
         document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-save"></i> Üyeyi Kaydet';
-
         document.querySelector('input[name="AidatYili"]').disabled = false;
         document.querySelector('input[name="AidatTutari"]').disabled = false;
-        document.getElementById("aidatListesiBadge").innerHTML = ""; // Listeyi temizle
+        document.getElementById("aidatListesiBadge").innerHTML = "";
     }
 
-    // 2. Üyeyi Düzenle (Verileri Getir)
     function editUye(id) {
-        fetch('/Aidatlar/UyeGetir/' + id)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("uyeForm").action = "/Aidatlar/UyeGuncelle";
-                document.getElementById("hiddenUyeId").value = data.uyeId;
+         fetch('/Aidatlar/UyeGetir/' + id)
+             .then(response => response.json())
+             .then(data => {
+                 document.getElementById("uyeForm").action = "/Aidatlar/UyeGuncelle";
+                 document.getElementById("hiddenUyeId").value = data.uyeId;
+                 document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-edit"></i> Üye Düzenle: ' + data.ad + ' ' + data.soyad;
+                 document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-refresh"></i> Güncelle';
+                 document.querySelector('input[name="UyeNo"]').value = data.uyeNo;
+                 document.querySelector('input[name="UyelikTarihi"]').value = data.uyelikTarihi;
+                 document.querySelector('input[name="TckimlikNo"]').value = data.tcKimlikNo;
+                 document.querySelector('input[name="Ad"]').value = data.ad;
+                 document.querySelector('input[name="Soyad"]').value = data.soyad;
+                 document.querySelector('input[name="EvlilikSoyadi"]').value = data.evlilikSoyadi;
+                 document.querySelector('input[name="DogumTarihi"]').value = data.dogumTarihi;
+                 document.querySelector('input[name="DogumYeri"]').value = data.dogumYeri;
+                 document.querySelector('input[name="Vefat"]').checked = data.vefat;
+                 document.querySelector('input[name="Telefon"]').value = data.telefon;
+                 document.querySelector('input[name="Email"]').value = data.email;
+                 document.querySelector('input[name="Il"]').value = data.il;
+                 document.querySelector('input[name="Ilce"]').value = data.ilce;
+                 document.querySelector('textarea[name="Adres"]').value = data.adres;
+                 document.querySelector('input[name="Universite"]').value = data.universite;
+                 document.querySelector('input[name="Fakulte"]').value = data.fakulte;
+                 document.querySelector('input[name="MezuniyetYili"]').value = data.mezuniyetYili;
+                 document.querySelector('input[name="Meslek"]').value = data.meslek;
+                 document.querySelector('select[name="KayitDurumu"]').value = data.kayitDurumu;
 
-                document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-edit"></i> Üye Düzenle: ' + data.ad + ' ' + data.soyad;
-                document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-refresh"></i> Güncelle';
+                 var aidatDiv = document.getElementById("aidatListesiBadge");
+                 aidatDiv.innerHTML = "";
+                 if (data.gecmisAidatlar && data.gecmisAidatlar.length > 0) {
+                     data.gecmisAidatlar.forEach(aidat => {
+                         var span = document.createElement("span");
+                         span.className = "badge bg-secondary d-flex align-items-center";
+                         span.style.gap = "8px";
+                         span.id = "aidat-badge-" + aidat.id;
+                         span.innerHTML = `${aidat.yil}: ${aidat.tutar} TL <i class="fa fa-times-circle text-danger" style="cursor:pointer; background:white; border-radius:50%;" onclick="deleteAidat(${aidat.id})" title="Bu ödemeyi sil"></i>`;
+                         aidatDiv.appendChild(span);
+                     });
+                 } else {
+                     aidatDiv.innerHTML = "<span class='text-muted small'>Geçmiş ödeme yok.</span>";
+                 }
 
-                // Inputları Doldur
-                document.querySelector('input[name="UyeNo"]').value = data.uyeNo;
-                document.querySelector('input[name="UyelikTarihi"]').value = data.uyelikTarihi;
-                document.querySelector('input[name="TckimlikNo"]').value = data.tcKimlikNo;
-                document.querySelector('input[name="Ad"]').value = data.ad;
-                document.querySelector('input[name="Soyad"]').value = data.soyad;
-                document.querySelector('input[name="EvlilikSoyadi"]').value = data.evlilikSoyadi;
-                document.querySelector('input[name="DogumTarihi"]').value = data.dogumTarihi;
-                document.querySelector('input[name="DogumYeri"]').value = data.dogumYeri;
-                document.querySelector('input[name="Vefat"]').checked = data.vefat;
-                document.querySelector('input[name="Telefon"]').value = data.telefon;
-                document.querySelector('input[name="Email"]').value = data.email;
-                document.querySelector('input[name="Il"]').value = data.il;
-                document.querySelector('input[name="Ilce"]').value = data.ilce;
-                document.querySelector('textarea[name="Adres"]').value = data.adres;
-                document.querySelector('input[name="Universite"]').value = data.universite;
-                document.querySelector('input[name="Fakulte"]').value = data.fakulte;
-                document.querySelector('input[name="MezuniyetYili"]').value = data.mezuniyetYili;
-                document.querySelector('input[name="Meslek"]').value = data.meslek;
-                document.querySelector('select[name="KayitDurumu"]').value = data.kayitDurumu;
+                 var yilInput = document.querySelector('input[name="AidatYili"]');
+                 var tutarInput = document.querySelector('input[name="AidatTutari"]');
+                 yilInput.value = new Date().getFullYear();
+                 tutarInput.value = "";
+                 yilInput.disabled = false;
+                 tutarInput.disabled = false;
 
-                // --- GÜNCELLENEN AİDAT LİSTELEME KISMI ---
-                var aidatDiv = document.getElementById("aidatListesiBadge");
-                aidatDiv.innerHTML = "";
-
-                if (data.gecmisAidatlar && data.gecmisAidatlar.length > 0) {
-                    data.gecmisAidatlar.forEach(aidat => {
-                        // Badge oluşturuyoruz, yanına da Silme butonu (X) ekliyoruz
-                        var span = document.createElement("span");
-                        span.className = "badge bg-secondary d-flex align-items-center";
-                        span.style.gap = "8px"; // Yazı ile X arası boşluk
-                        span.id = "aidat-badge-" + aidat.id; // Silince bulmak için ID veriyoruz
-
-                        // İçerik HTML'i: Yıl, Tutar ve Kırmızı X İkonu
-                        span.innerHTML = `
-                            ${aidat.yil}: ${aidat.tutar} TL
-                            <i class="fa fa-times-circle text-danger"
-                               style="cursor:pointer; background:white; border-radius:50%;"
-                               onclick="deleteAidat(${aidat.id})"
-                               title="Bu ödemeyi sil"></i>
-                        `;
-
-                        aidatDiv.appendChild(span);
-                    });
-                } else {
-                    aidatDiv.innerHTML = "<span class='text-muted small'>Geçmiş ödeme yok.</span>";
-                }
-
-                // Yeni Giriş İçin Inputları Temizle ve AÇ
-                var yilInput = document.querySelector('input[name="AidatYili"]');
-                var tutarInput = document.querySelector('input[name="AidatTutari"]');
-
-                yilInput.value = new Date().getFullYear();
-                tutarInput.value = "";
-
-                yilInput.disabled = false;
-                tutarInput.disabled = false;
-
-                var myModal = new bootstrap.Modal(document.getElementById('yeniUyeModal'));
-                myModal.show();
-            })
-            .catch(error => console.error('Hata:', error));
+                 var myModal = new bootstrap.Modal(document.getElementById('yeniUyeModal'));
+                 myModal.show();
+             })
+             .catch(error => console.error('Hata:', error));
     }
 
-    // --- 3. ÜYE SİLME FONKSİYONU ---
     function deleteUye(id) {
         if (confirm("Bu üyeyi ve bağlı tüm verilerini (Aidat, Derbis, Eğitim) silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
-            // Post işlemi başlatmak için geçici bir form oluşturup gönderiyoruz
             var form = document.createElement('form');
             form.method = 'POST';
             form.action = '/Aidatlar/UyeSil/' + id;
-
-            // CSRF Token eklememiz lazım (ASP.NET Core güvenliği için)
             var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             var hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
             hiddenInput.name = '__RequestVerificationToken';
             hiddenInput.value = token;
             form.appendChild(hiddenInput);
-
             document.body.appendChild(form);
             form.submit();
         }
     }
 
-    // --- 4. TEKİL AİDAT SİLME FONKSİYONU ---
     function deleteAidat(id) {
         if (confirm("Bu aidat kaydını silmek istediğinize emin misiniz?")) {
-
-            // AJAX ile silme isteği gönderiyoruz (Sayfa yenilenmesin diye)
             var formData = new FormData();
             formData.append("id", id);
-
-            // CSRF Token
             var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             formData.append("__RequestVerificationToken", token);
-
             fetch('/Aidatlar/AidatSil', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
                 if (response.ok) {
-                    // Başarılıysa o badge'i ekrandan kaldır
                     var badge = document.getElementById("aidat-badge-" + id);
                     if(badge) badge.remove();
                 } else {
