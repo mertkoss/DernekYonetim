@@ -117,10 +117,17 @@ namespace DernekYonetim.Controllers
                     _context.EgitimMesleks.Add(egitim);
                 }
 
-                string? derbisDurum = null;
-                if (model.KayitDurumu == "Evet" || model.KayitDurumu == "Hayır")
+                // C) DERBİS TABLOSUNA KAYIT
+                // Arayüz: "Var/Yok/Belirtilmedi" -> DB: "Evet/Hayır/NULL"
+                string? derbisDurum = null; // Varsayılan (Belirtilmedi)
+
+                if (model.KayitDurumu == "Var")
                 {
-                    derbisDurum = model.KayitDurumu;
+                    derbisDurum = "Evet";
+                }
+                else if (model.KayitDurumu == "Yok")
+                {
+                    derbisDurum = "Hayır";
                 }
 
                 var derbis = new DerbisKaydi
@@ -169,6 +176,10 @@ namespace DernekYonetim.Controllers
             var egitim = uye.EgitimMesleks.FirstOrDefault();
             var derbis = uye.DerbisKaydis.FirstOrDefault();
 
+            string uiKayitDurumu = "Belirtilmedi";
+            if (derbis?.KayitDurumu == "Evet") uiKayitDurumu = "Var";
+            else if (derbis?.KayitDurumu == "Hayır") uiKayitDurumu = "Yok";
+
             var data = new
             {
                 uyeId = uye.UyeId,
@@ -190,7 +201,7 @@ namespace DernekYonetim.Controllers
                 fakulte = egitim?.Fakulte,
                 mezuniyetYili = egitim?.MezuniyetYili,
                 meslek = egitim?.Meslek,
-                kayitDurumu = derbis?.KayitDurumu ?? "Kaydı Yok"
+                kayitDurumu = uiKayitDurumu
             };
 
             return Json(data);
@@ -250,12 +261,18 @@ namespace DernekYonetim.Controllers
                     }
                 }
 
+                // C) Derbis Güncelle
                 var derbis = _context.DerbisKaydis.FirstOrDefault(x => x.UyeId == UyeId);
 
-                string? derbisDurum = null;
-                if (model.KayitDurumu == "Evet" || model.KayitDurumu == "Hayır")
+                string? derbisDurum = null; // Varsayılan: Belirtilmedi (NULL)
+
+                if (model.KayitDurumu == "Var")
                 {
-                    derbisDurum = model.KayitDurumu;
+                    derbisDurum = "Evet";
+                }
+                else if (model.KayitDurumu == "Yok")
+                {
+                    derbisDurum = "Hayır";
                 }
 
                 if (derbis != null)

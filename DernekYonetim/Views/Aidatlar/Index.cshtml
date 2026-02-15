@@ -165,7 +165,21 @@
                                             <h6 class="text-primary fw-bold">Diğer</h6>
                                             <ul class="list-unstyled text-muted small">
                                                 <li><strong>Üyelik Tarihi:</strong> @item.UyelikTarihi.ToShortDateString()</li>
-                                                <li><strong>Derbis:</strong> @item.DerbisDurumu</li>
+                                                <li>
+                                                    <strong>Derbis:</strong>
+                                                    @if (item.DerbisDurumu == "Evet")
+                                                    {
+                                                        <span class="badge bg-success"><i class="fa fa-check-circle"></i> Kaydı Var</span>
+                                                    }
+                                                    else if (item.DerbisDurumu == "Hayır")
+                                                    {
+                                                        <span class="badge bg-danger"><i class="fa fa-times-circle"></i> Kaydı Yok</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Belirtilmedi</span>
+                                                    }
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -309,11 +323,11 @@
                                     <h6 class="text-secondary border-bottom pb-2">Derbis Kaydı</h6>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Kayıt Durumu</label>
+                                    <label class="form-label">Derbis Durumu</label>
                                     <select name="KayitDurumu" class="form-select">
-                                        <option value="Kaydı Yok">Kaydı Yok</option>
-                                        <option value="Aktif">Aktif</option>
-                                        <option value="Pasif">Pasif</option>
+                                        <option value="Belirtilmedi" selected>Belirtilmedi</option>
+                                        <option value="Var">Derbis Kaydı Var</option>
+                                        <option value="Yok">Derbis Kaydı Yok</option>
                                     </select>
                                 </div>
 
