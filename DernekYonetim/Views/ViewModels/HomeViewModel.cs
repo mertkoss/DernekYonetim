@@ -61,4 +61,40 @@ namespace DernekYonetim.Models
         public decimal? Tutar { get; set; }
         public string DurumAciklamasi { get; set; }
     }
+    public class YeniUyeGirisModel
+    {
+        // Kimlik
+        public string UyeNo { get; set; }
+
+        // BURASI DEĞİŞTİ: DateOnly yerine DateTime
+        public DateTime UyelikTarihi { get; set; }
+        public string TckimlikNo { get; set; }
+        public string Ad { get; set; }
+        public string Soyad { get; set; }
+        public string? EvlilikSoyadi { get; set; }
+
+        // BURASI DEĞİŞTİ: DateOnly? yerine DateTime?
+        public DateTime? DogumTarihi { get; set; }
+        public string? DogumYeri { get; set; }
+        public bool Vefat { get; set; }
+
+        // İletişim
+        public string? Telefon { get; set; }
+        public string? Email { get; set; }
+        public string? Il { get; set; }
+        public string? Ilce { get; set; }
+        public string? Adres { get; set; }
+
+        // Eğitim
+        public string? Universite { get; set; }
+        public string? Fakulte { get; set; }
+        public int? MezuniyetYili { get; set; }
+        public string? Meslek { get; set; }
+
+        // Diğer
+        public string? KayitDurumu { get; set; }
+        public int? AidatYili { get; set; }
+        public decimal? AidatTutari { get; set; }
+    }
+
 }

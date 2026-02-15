@@ -58,17 +58,24 @@
     .open .toggle-icon {
         transform: rotate(90deg);
     }
+
+    /* Modal İçi Düzenlemeler */
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        color: #0d6efd;
+        border-bottom: 3px solid #0d6efd;
+    }
 </style>
 
 <section class="page-section" style="padding-top:100px;">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="section-heading text-uppercase">Üye Aidat Yönetimi</h2>
-                <p class="text-muted">Üye aidatlarını görüntüleyin ve yeni ödeme girişi yapın.</p>
+                <h2 class="section-heading text-uppercase">Üye Yönetimi</h2>
+                <p class="text-muted">Üye listesi, detay bilgileri ve aidat geçmişi.</p>
             </div>
             <div>
-                <button class="btn btn-primary">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#yeniUyeModal">
                     <i class="fa fa-plus"></i> Yeni Üye Ekle
                 </button>
             </div>
@@ -84,7 +91,6 @@
                         <th>Telefon</th>
                         <th>Meslek</th>
                         <th>Ödenen Aidatlar</th>
-                        <th style="width: 280px;">Aidat Girişi (Yıl / Tutar)</th>
                         <th style="width: 100px;">İşlemler</th>
                     </tr>
                 </thead>
@@ -93,9 +99,11 @@
                     {
                         <tr class="main-row" onclick="toggleRow(@item.UyeId)">
                             <td class="text-center"><i id="icon-@item.UyeId" class="fa fa-chevron-right toggle-icon text-muted"></i></td>
-                            <td class="fw-bold">@item.UyeNo</td>
+                            <td class="fw-bold text-center">@item.UyeNo</td>
                             <td>
-                                <div class="fw-bold">@item.AdSoyad</div>
+                                <div class="fw-bold">
+                                    @item.AdSoyad
+                                </div>
                                 @if (item.Vefat)
                                 {
                                     <small class="text-danger fw-bold">(VEFAT)</small>
@@ -120,33 +128,14 @@
                                 }
                             </td>
 
-                            <td onclick="event.stopPropagation()">
-                                <form asp-action="AidatEkle" method="post" class="row g-1 align-items-center">
-                                    <input type="hidden" name="uyeId" value="@item.UyeId" />
-                                    <div class="col-4">
-                                        <input type="number" name="yil" class="form-control form-control-sm text-center"
-                                               placeholder="Yıl" value="@DateTime.Now.Year" required />
-                                    </div>
-                                    <div class="col-5">
-                                        <input type="number" name="tutar" class="form-control form-control-sm text-center"
-                                               placeholder="TL" required />
-                                    </div>
-                                    <div class="col-3">
-                                        <button type="submit" class="btn btn-sm btn-success w-100">
-                                            <i class="fa fa-save"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </td>
-
                             <td class="text-center" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-outline-warning"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-warning" title="Düzenle"><i class="fa fa-edit"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="Sil"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
 
                         <tr id="detail-@item.UyeId" class="detail-row">
-                            <td colspan="8">
+                            <td colspan="7">
                                 <div class="p-3">
                                     <div class="row">
                                         <div class="col-md-3">
@@ -188,7 +177,167 @@
     </div>
 </section>
 
+<div class="modal fade" id="yeniUyeModal" tabindex="-1" aria-labelledby="yeniUyeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="yeniUyeModalLabel"><i class="fa fa-user-plus"></i> Yeni Üye Kaydı</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+
+            <form action="/Aidatlar/YeniUyeEkle" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="uyeTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik Bilgileri</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="iletisim-tab" data-bs-toggle="tab" data-bs-target="#iletisim" type="button" role="tab">İletişim</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="egitim-tab" data-bs-toggle="tab" data-bs-target="#egitim" type="button" role="tab">Eğitim & Meslek</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="diger-tab" data-bs-toggle="tab" data-bs-target="#diger" type="button" role="tab">Derbis & İlk Aidat</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="uyeTabsContent">
+
+                        <div class="tab-pane fade show active" id="kimlik" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Üye No</label>
+                                    <input type="text" name="UyeNo" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Üyelik Tarihi</label>
+                                    <input type="date" name="UyelikTarihi" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">TC Kimlik No</label>
+                                    <input type="text" name="TckimlikNo" class="form-control" required maxlength="11">
+                                </div>
+                                <div class="col-md-6">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Ad</label>
+                                    <input type="text" name="Ad" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Soyad</label>
+                                    <input type="text" name="Soyad" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Evlilik Soyadı</label>
+                                    <input type="text" name="EvlilikSoyadi" class="form-control" placeholder="(Varsa)">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Doğum Tarihi</label>
+                                    <input type="date" name="DogumTarihi" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Doğum Yeri</label>
+                                    <input type="text" name="DogumYeri" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="Vefat" value="true" id="vefatCheck">
+                                        <label class="form-check-label text-danger fw-bold" for="vefatCheck">
+                                            Vefat Durumu
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="iletisim" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Telefon</label>
+                                    <input type="text" name="Telefon" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">E-Mail</label>
+                                    <input type="email" name="Email" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">İl</label>
+                                    <input type="text" name="Il" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">İlçe</label>
+                                    <input type="text" name="Ilce" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Tam Adres</label>
+                                    <textarea name="Adres" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="egitim" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Üniversite</label>
+                                    <input type="text" name="Universite" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Fakülte</label>
+                                    <input type="text" name="Fakulte" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mezuniyet Yılı</label>
+                                    <input type="number" name="MezuniyetYili" class="form-control" placeholder="YYYY">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Meslek</label>
+                                    <input type="text" name="Meslek" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="diger" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <h6 class="text-secondary border-bottom pb-2">Derbis Kaydı</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Kayıt Durumu</label>
+                                    <select name="KayitDurumu" class="form-select">
+                                        <option value="Kaydı Yok">Kaydı Yok</option>
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Pasif">Pasif</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-4">
+                                    <h6 class="text-secondary border-bottom pb-2">İlk Aidat Girişi (Opsiyonel)</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Aidat Yılı</label>
+                                    <input type="number" name="AidatYili" class="form-control" value="@DateTime.Now.Year">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Aidat Tutarı (TL)</label>
+                                    <input type="number" step="0.01" name="AidatTutari" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Üyeyi Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Tablo açılır/kapanır satır kodu
     function toggleRow(id) {
         var detailRow = document.getElementById('detail-' + id);
         var icon = document.getElementById('icon-' + id);
