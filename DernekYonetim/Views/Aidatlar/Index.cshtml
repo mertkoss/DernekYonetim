@@ -75,7 +75,7 @@
                 <p class="text-muted">Üye listesi, detay bilgileri ve aidat geçmişi.</p>
             </div>
             <div>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#yeniUyeModal">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
                     <i class="fa fa-plus"></i> Yeni Üye Ekle
                 </button>
             </div>
@@ -129,7 +129,9 @@
                             </td>
 
                             <td class="text-center" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-outline-warning" title="Düzenle"><i class="fa fa-edit"></i></button>
+                                <button class="btn btn-sm btn-outline-warning" title="Düzenle" onclick="editUye(@item.UyeId)">
+                                    <i class="fa fa-edit"></i>
+                                </button>
                                 <button class="btn btn-sm btn-outline-danger" title="Sil"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
@@ -185,8 +187,11 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
 
-            <form action="/Aidatlar/YeniUyeEkle" method="post">
+            <form id="uyeForm" action="/Aidatlar/YeniUyeEkle" method="post">
                 @Html.AntiForgeryToken()
+
+                <input type="hidden" name="UyeId" id="hiddenUyeId" value="0" />
+
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="uyeTabs" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -313,7 +318,7 @@
                                 </div>
 
                                 <div class="col-12 mt-4">
-                                    <h6 class="text-secondary border-bottom pb-2">İlk Aidat Girişi (Opsiyonel)</h6>
+                                    <h6 class="text-secondary border-bottom pb-2">İlk Aidat Girişi (Sadece Yeni Kayıtta)</h6>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Aidat Yılı</label>
@@ -329,7 +334,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Üyeyi Kaydet</button>
+                    <button type="submit" id="btnKaydet" class="btn btn-primary"><i class="fa fa-save"></i> Üyeyi Kaydet</button>
                 </div>
             </form>
         </div>
@@ -354,5 +359,72 @@
             icon.classList.remove("fa-chevron-right");
             icon.classList.add("fa-chevron-down");
         }
+    }
+
+    // --- YENİ EKLENEN KISIM: DÜZENLEME FONKSİYONLARI ---
+
+    // 1. Yeni Üye Butonuna Basınca Formu Temizle
+    function resetForm() {
+        document.getElementById("uyeForm").reset(); // Formu sıfırla
+        document.getElementById("uyeForm").action = "/Aidatlar/YeniUyeEkle"; // Rotayı "Ekle" yap
+        document.getElementById("hiddenUyeId").value = "0"; // ID'yi sıfırla
+        document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-user-plus"></i> Yeni Üye Kaydı';
+        document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-save"></i> Üyeyi Kaydet';
+
+        // Aidat kısmını aktif et (Yeni üyede aidat girilebilir)
+        document.querySelector('input[name="AidatYili"]').disabled = false;
+        document.querySelector('input[name="AidatTutari"]').disabled = false;
+    }
+
+    // 2. Düzenle Butonuna Basınca Verileri Çek ve Modalı Aç
+    function editUye(id) {
+        // Önce fetch ile veriyi çekiyoruz
+        fetch('/Aidatlar/UyeGetir/' + id)
+            .then(response => response.json())
+            .then(data => {
+                // Veriler geldi, şimdi kutucukları dolduralım
+
+                // Formun rotasını "Güncelle" yapıyoruz
+                document.getElementById("uyeForm").action = "/Aidatlar/UyeGuncelle";
+                document.getElementById("hiddenUyeId").value = data.uyeId;
+
+                // Başlık ve butonu değiştir
+                document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-edit"></i> Üye Düzenle: ' + data.ad + ' ' + data.soyad;
+                document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-refresh"></i> Güncelle';
+
+                // --- Inputları Doldurma ---
+                document.querySelector('input[name="UyeNo"]').value = data.uyeNo;
+                document.querySelector('input[name="UyelikTarihi"]').value = data.uyelikTarihi;
+                document.querySelector('input[name="TckimlikNo"]').value = data.tcKimlikNo;
+                document.querySelector('input[name="Ad"]').value = data.ad;
+                document.querySelector('input[name="Soyad"]').value = data.soyad;
+                document.querySelector('input[name="EvlilikSoyadi"]').value = data.evlilikSoyadi;
+                document.querySelector('input[name="DogumTarihi"]').value = data.dogumTarihi;
+                document.querySelector('input[name="DogumYeri"]').value = data.dogumYeri;
+
+                document.querySelector('input[name="Vefat"]').checked = data.vefat;
+
+                document.querySelector('input[name="Telefon"]').value = data.telefon;
+                document.querySelector('input[name="Email"]').value = data.email;
+                document.querySelector('input[name="Il"]').value = data.il;
+                document.querySelector('input[name="Ilce"]').value = data.ilce;
+                document.querySelector('textarea[name="Adres"]').value = data.adres;
+
+                document.querySelector('input[name="Universite"]').value = data.universite;
+                document.querySelector('input[name="Fakulte"]').value = data.fakulte;
+                document.querySelector('input[name="MezuniyetYili"]').value = data.mezuniyetYili;
+                document.querySelector('input[name="Meslek"]').value = data.meslek;
+
+                document.querySelector('select[name="KayitDurumu"]').value = data.kayitDurumu;
+
+                // Güncellemede Aidat Girişini Kapat (Çünkü aidat ayrı yönetilmeli)
+                document.querySelector('input[name="AidatYili"]').disabled = true;
+                document.querySelector('input[name="AidatTutari"]').disabled = true;
+
+                // Modalı kodla açıyoruz
+                var myModal = new bootstrap.Modal(document.getElementById('yeniUyeModal'));
+                myModal.show();
+            })
+            .catch(error => console.error('Hata:', error));
     }
 </script>

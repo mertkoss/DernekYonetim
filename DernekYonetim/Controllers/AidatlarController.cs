@@ -40,8 +40,6 @@ namespace DernekYonetim.Controllers
                     UyeNo = uye.UyeNo,
                     UyelikTarihi = uye.UyelikTarihi,
                     AdSoyad = $"{uye.Ad} {uye.Soyad}",
-                    // Evlilik soyadı varsa parantez içinde ekleyelim, yoksa boş geçelim
-                    // İstersen: AdSoyad = $"{uye.Ad} {uye.Soyad} {(string.IsNullOrEmpty(uye.EvlilikSoyadi) ? "" : "(" + uye.EvlilikSoyadi + ")")}",
                     TcKimlikNo = uye.TckimlikNo,
                     DogumTarihi = uye.DogumTarihi,
                     DogumYeri = uye.DogumYeri,
@@ -66,12 +64,11 @@ namespace DernekYonetim.Controllers
             return View(modelList);
         }
 
-        // 2. YENİ ÜYE EKLEME İŞLEMİ (MODAL FORMUNDAN GELEN)
+        // 2. YENİ ÜYE EKLEME İŞLEMİ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult YeniUyeEkle(YeniUyeGirisModel model)
         {
-            // Hata varsa görmek için breakpoint'i buraya koy
             if (!ModelState.IsValid)
             {
                 var hatalar = string.Join(" | ", ModelState.Values
@@ -84,23 +81,17 @@ namespace DernekYonetim.Controllers
 
             try
             {
-                // A) ÜYE TABLOSUNA KAYIT
                 var yeniUye = new Uyeler
                 {
                     UyeNo = model.UyeNo,
-                    // ÇEVİRME İŞLEMİ BURADA:
                     UyelikTarihi = DateOnly.FromDateTime(model.UyelikTarihi),
-
                     Ad = model.Ad,
                     Soyad = model.Soyad,
                     EvlilikSoyadi = model.EvlilikSoyadi,
                     TckimlikNo = model.TckimlikNo,
-
-                    // NULL KONTROLLÜ ÇEVİRME:
                     DogumTarihi = model.DogumTarihi.HasValue
-                                  ? DateOnly.FromDateTime(model.DogumTarihi.Value)
-                                  : null,
-
+                                    ? DateOnly.FromDateTime(model.DogumTarihi.Value)
+                                    : null,
                     DogumYeri = model.DogumYeri,
                     Telefon = model.Telefon,
                     Email = model.Email,
@@ -113,7 +104,6 @@ namespace DernekYonetim.Controllers
                 _context.Uyelers.Add(yeniUye);
                 _context.SaveChanges();
 
-                // B) EĞİTİM
                 if (!string.IsNullOrEmpty(model.Universite) || !string.IsNullOrEmpty(model.Meslek))
                 {
                     var egitim = new EgitimMeslek
@@ -127,8 +117,6 @@ namespace DernekYonetim.Controllers
                     _context.EgitimMesleks.Add(egitim);
                 }
 
-                // C) DERBİS TABLOSUNA KAYIT
-                // ÇÖZÜM BURADA: Eğer "Kaydı Yok" seçildiyse veritabanına null gönderiyoruz.
                 string? derbisDurum = null;
                 if (model.KayitDurumu == "Evet" || model.KayitDurumu == "Hayır")
                 {
@@ -142,7 +130,6 @@ namespace DernekYonetim.Controllers
                 };
                 _context.DerbisKaydis.Add(derbis);
 
-                // D) AİDAT
                 if (model.AidatTutari > 0)
                 {
                     var aidat = new Aidatlar
@@ -162,15 +149,141 @@ namespace DernekYonetim.Controllers
             }
             catch (Exception ex)
             {
+                transaction.Rollback();
+                string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest("Kayıt Hatası Detayı: " + detayliHata);
+            }
+        } // <--- BURASI! Önceki metot burada bitmeli.
+
+        // 3. ÜYE BİLGİLERİNİ GETİR
+        [HttpGet]
+        public IActionResult UyeGetir(int id)
+        {
+            var uye = _context.Uyelers
+                .Include(u => u.EgitimMesleks)
+                .Include(u => u.DerbisKaydis)
+                .FirstOrDefault(x => x.UyeId == id);
+
+            if (uye == null) return NotFound();
+
+            var egitim = uye.EgitimMesleks.FirstOrDefault();
+            var derbis = uye.DerbisKaydis.FirstOrDefault();
+
+            var data = new
+            {
+                uyeId = uye.UyeId,
+                uyeNo = uye.UyeNo,
+                uyelikTarihi = uye.UyelikTarihi.ToString("yyyy-MM-dd"),
+                tcKimlikNo = uye.TckimlikNo,
+                ad = uye.Ad,
+                soyad = uye.Soyad,
+                evlilikSoyadi = uye.EvlilikSoyadi,
+                dogumTarihi = uye.DogumTarihi.HasValue ? uye.DogumTarihi.Value.ToString("yyyy-MM-dd") : "",
+                dogumYeri = uye.DogumYeri,
+                vefat = uye.Vefat ?? false,
+                telefon = uye.Telefon,
+                email = uye.Email,
+                il = uye.Il,
+                ilce = uye.Ilce,
+                adres = uye.Adres,
+                universite = egitim?.Universite,
+                fakulte = egitim?.Fakulte,
+                mezuniyetYili = egitim?.MezuniyetYili,
+                meslek = egitim?.Meslek,
+                kayitDurumu = derbis?.KayitDurumu ?? "Kaydı Yok"
+            };
+
+            return Json(data);
+        }
+
+        // 4. ÜYE GÜNCELLEME İŞLEMİ
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UyeGuncelle(YeniUyeGirisModel model, int UyeId)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                var uye = _context.Uyelers.Find(UyeId);
+                if (uye == null) return NotFound("Üye bulunamadı.");
+
+                uye.UyeNo = model.UyeNo;
+                uye.UyelikTarihi = DateOnly.FromDateTime(model.UyelikTarihi);
+                uye.TckimlikNo = model.TckimlikNo;
+                uye.Ad = model.Ad;
+                uye.Soyad = model.Soyad;
+                uye.EvlilikSoyadi = model.EvlilikSoyadi;
+                uye.DogumTarihi = model.DogumTarihi.HasValue ? DateOnly.FromDateTime(model.DogumTarihi.Value) : null;
+                uye.DogumYeri = model.DogumYeri;
+                uye.Vefat = model.Vefat;
+                uye.Telefon = model.Telefon;
+                uye.Email = model.Email;
+                uye.Il = model.Il;
+                uye.Ilce = model.Ilce;
+                uye.Adres = model.Adres;
+
+                _context.Uyelers.Update(uye);
+
+                var egitim = _context.EgitimMesleks.FirstOrDefault(x => x.UyeId == UyeId);
+                if (egitim != null)
+                {
+                    egitim.Universite = model.Universite;
+                    egitim.Fakulte = model.Fakulte;
+                    egitim.MezuniyetYili = model.MezuniyetYili;
+                    egitim.Meslek = model.Meslek;
+                    _context.EgitimMesleks.Update(egitim);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(model.Universite) || !string.IsNullOrEmpty(model.Meslek))
+                    {
+                        var yeniEgitim = new EgitimMeslek
+                        {
+                            UyeId = UyeId,
+                            Universite = model.Universite,
+                            Fakulte = model.Fakulte,
+                            MezuniyetYili = model.MezuniyetYili,
+                            Meslek = model.Meslek
+                        };
+                        _context.EgitimMesleks.Add(yeniEgitim);
+                    }
+                }
+
+                var derbis = _context.DerbisKaydis.FirstOrDefault(x => x.UyeId == UyeId);
+
+                string? derbisDurum = null;
+                if (model.KayitDurumu == "Evet" || model.KayitDurumu == "Hayır")
+                {
+                    derbisDurum = model.KayitDurumu;
+                }
+
+                if (derbis != null)
+                {
+                    derbis.KayitDurumu = derbisDurum;
+                    _context.DerbisKaydis.Update(derbis);
+                }
+                else
+                {
+                    var yeniDerbis = new DerbisKaydi { UyeId = UyeId, KayitDurumu = derbisDurum };
+                    _context.DerbisKaydis.Add(yeniDerbis);
+                }
+
+                _context.SaveChanges();
+                transaction.Commit();
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
                 // İşlemi geri al
                 transaction.Rollback();
 
-                // Asıl hatayı (InnerException) bulup ekrana basalım
+                // Hatanın asıl sebebini (InnerException) buluyoruz
                 string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
 
-                return BadRequest("Kayıt Hatası Detayı: " + detayliHata);
+                return BadRequest("Güncelleme Hatası Detayı: " + detayliHata);
             }
-
         }
     }
 }
