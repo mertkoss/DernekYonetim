@@ -8,69 +8,175 @@
 }
 
 <style>
-    /* Tablo Tasarımı */
-    .table-container {
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        overflow: hidden;
-        background: white;
+    /* Bu sınıf, hem başlığı hem tabloyu hizaya sokar */
+    .page-wrapper {
+        max-width: 1200px; /* Genişlik sınırı (Tablo ile aynı) */
+        margin: 0 auto; /* Sayfanın tam ortasına getir */
+        padding: 0 15px; /* Mobilde kenarlara yapışmasın */
     }
 
+    /* Tablonun kendi genişlik sınırını kaldırıyoruz, çünkü artık page-wrapper onu tutuyor */
+    .table-container {
+        width: 100%; /* Kutuya tam sığsın */
+        /* max-width sildik */
+        /* margin sildik */
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid #eaeaea;
+    }
+    /* Tablonun sonsuz uzamasını engeller, ortalar ve kart görünümü verir */
+    .table-container {
+        max-width: 1200px; /* İstersen burayı 1400px yapabilirsin */
+        margin: 0 auto; /* Sayfanın tam ortasına hizalar */
+        background: #ffffff;
+        border-radius: 12px; /* Köşeleri yuvarlat */
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08); /* Modern, yumuşak gölge */
+        overflow: hidden; /* Köşelerin sivri kalmasını engeller */
+        border: 1px solid #eaeaea;
+    }
+
+    /* 2. TABLO GENEL TASARIMI */
+    .table {
+        margin-bottom: 0; /* Bootstrap'in alt boşluğunu sıfırla */
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        /* Tablo Başlıkları (Header) */
+        .table thead th {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); /* Modern Mavi Gradyan */
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 16px;
+            border: none;
+            vertical-align: middle;
+        }
+
+        /* Tablo Hücreleri */
+        .table tbody td {
+            padding: 16px 12px;
+            vertical-align: middle;
+            color: #555;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f0f2f5;
+            border-right: none;
+            border-left: none;
+        }
+
+    /* 3. SATIR EFEKTLERİ (MAIN ROW) */
     .main-row {
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: all 0.25s ease;
+        background-color: #fff;
     }
 
         .main-row:hover {
-            background-color: #f8f9fa;
+            background-color: #f8fbff !important; /* Üzerine gelince çok hafif mavi */
+            transform: scale(1.005); /* Çok hafif büyüme efekti */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* Satırı öne çıkaran gölge */
+            position: relative;
+            z-index: 10;
+            border-left: 4px solid #4e73df; /* Sol tarafa mavi çizgi ekle */
         }
 
-    /* Detay Satırı */
+        /* Satır açıldığında (Active State) */
+        .main-row.open {
+            background-color: #f1f6fd;
+            border-left: 4px solid #4e73df;
+            font-weight: 600;
+        }
+
+    /* 4. DETAY SATIRI (DETAIL ROW - DRAWER) */
     .detail-row {
         display: none;
         background-color: #fcfcfc;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.03); /* İçeri gömük hissi */
     }
 
-    /* Aidat Etiketi */
+        .detail-row td {
+            padding: 0 !important; /* İçeriğin padding'i ile çakışmasın */
+            border-top: none !important;
+        }
+
+        /* Detay içeriğinin kutusu */
+        .detail-row .p-3 {
+            padding: 25px !important;
+            border-bottom: 2px solid #eef2f7;
+        }
+
+    /* 5. ROZETLER (BADGES) - MODERN PILL TASARIM */
     .badge-aidat {
-        background-color: #e9ecef;
-        color: #495057;
-        border: 1px solid #ced4da;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-right: 3px;
-        margin-bottom: 3px;
-        display: inline-block;
+        background-color: #e7f1ff; /* Açık Mavi */
+        color: #0d6efd; /* Koyu Mavi Yazı */
+        border: 1px solid #cce5ff;
+        padding: 6px 12px;
+        border-radius: 50px; /* Tam yuvarlak (Pill) */
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        display: inline-flex;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     }
 
     .badge-yok {
         background-color: #fff3cd;
         color: #856404;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
+        border: 1px solid #ffeeba;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
     }
 
+    /* 6. İKON VE BUTONLAR */
     .toggle-icon {
-        transition: transform 0.3s;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Yaylanma efekti */
+        color: #aaa;
     }
 
     .open .toggle-icon {
         transform: rotate(90deg);
+        color: #4e73df;
     }
 
-    /* Modal İçi Düzenlemeler */
-    .nav-tabs .nav-link.active {
-        font-weight: bold;
-        color: #0d6efd;
-        border-bottom: 3px solid #0d6efd;
+    /* Tablo içindeki butonları biraz küçültüp hizalayalım */
+    .table .btn-sm {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 6px;
+        margin: 0 2px;
     }
+
+    /* 7. SCROLLBAR (Tablo taşarsa şık görünsün) */
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 8px;
+    }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
 </style>
 
-<section class="page-section" style="padding-top:100px;">
-    <div class="container-fluid">
+<section class="page-section" style="padding-top:100px; padding-bottom: 50px; background-color: #f8f9fc;">
+
+    <div class="page-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="section-heading text-uppercase">Üye Yönetimi</h2>
