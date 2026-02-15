@@ -132,7 +132,9 @@
                                 <button class="btn btn-sm btn-outline-warning" title="Düzenle" onclick="editUye(@item.UyeId)">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" title="Sil"><i class="fa fa-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteUye(@item.UyeId)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
 
@@ -385,84 +387,141 @@
         }
     }
 
-    // --- YENİ EKLENEN KISIM: DÜZENLEME FONKSİYONLARI ---
-
-    // 1. Yeni Üye Butonuna Basınca Formu Temizle
+    // 1. Formu Sıfırla (Yeni Üye)
     function resetForm() {
-        document.getElementById("uyeForm").reset(); // Formu sıfırla
-        document.getElementById("uyeForm").action = "/Aidatlar/YeniUyeEkle"; // Rotayı "Ekle" yap
-        document.getElementById("hiddenUyeId").value = "0"; // ID'yi sıfırla
+        document.getElementById("uyeForm").reset();
+        document.getElementById("uyeForm").action = "/Aidatlar/YeniUyeEkle";
+        document.getElementById("hiddenUyeId").value = "0";
         document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-user-plus"></i> Yeni Üye Kaydı';
         document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-save"></i> Üyeyi Kaydet';
 
-        // Aidat kısmını aktif et (Yeni üyede aidat girilebilir)
         document.querySelector('input[name="AidatYili"]').disabled = false;
         document.querySelector('input[name="AidatTutari"]').disabled = false;
+        document.getElementById("aidatListesiBadge").innerHTML = ""; // Listeyi temizle
     }
 
-    // 2. Düzenle Butonuna Basınca Verileri Çek ve Modalı Aç
+    // 2. Üyeyi Düzenle (Verileri Getir)
     function editUye(id) {
-         fetch('/Aidatlar/UyeGetir/' + id)
-             .then(response => response.json())
-             .then(data => {
-                 document.getElementById("uyeForm").action = "/Aidatlar/UyeGuncelle";
-                 document.getElementById("hiddenUyeId").value = data.uyeId;
+        fetch('/Aidatlar/UyeGetir/' + id)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("uyeForm").action = "/Aidatlar/UyeGuncelle";
+                document.getElementById("hiddenUyeId").value = data.uyeId;
 
-                 document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-edit"></i> Üye Düzenle: ' + data.ad + ' ' + data.soyad;
-                 document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-refresh"></i> Güncelle';
+                document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-edit"></i> Üye Düzenle: ' + data.ad + ' ' + data.soyad;
+                document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-refresh"></i> Güncelle';
 
-                 // Inputları Doldur
-                 document.querySelector('input[name="UyeNo"]').value = data.uyeNo;
-                 document.querySelector('input[name="UyelikTarihi"]').value = data.uyelikTarihi;
-                 document.querySelector('input[name="TckimlikNo"]').value = data.tcKimlikNo;
-                 document.querySelector('input[name="Ad"]').value = data.ad;
-                 document.querySelector('input[name="Soyad"]').value = data.soyad;
-                 document.querySelector('input[name="EvlilikSoyadi"]').value = data.evlilikSoyadi;
-                 document.querySelector('input[name="DogumTarihi"]').value = data.dogumTarihi;
-                 document.querySelector('input[name="DogumYeri"]').value = data.dogumYeri;
-                 document.querySelector('input[name="Vefat"]').checked = data.vefat;
-                 document.querySelector('input[name="Telefon"]').value = data.telefon;
-                 document.querySelector('input[name="Email"]').value = data.email;
-                 document.querySelector('input[name="Il"]').value = data.il;
-                 document.querySelector('input[name="Ilce"]').value = data.ilce;
-                 document.querySelector('textarea[name="Adres"]').value = data.adres;
-                 document.querySelector('input[name="Universite"]').value = data.universite;
-                 document.querySelector('input[name="Fakulte"]').value = data.fakulte;
-                 document.querySelector('input[name="MezuniyetYili"]').value = data.mezuniyetYili;
-                 document.querySelector('input[name="Meslek"]').value = data.meslek;
-                 document.querySelector('select[name="KayitDurumu"]').value = data.kayitDurumu;
+                // Inputları Doldur
+                document.querySelector('input[name="UyeNo"]').value = data.uyeNo;
+                document.querySelector('input[name="UyelikTarihi"]').value = data.uyelikTarihi;
+                document.querySelector('input[name="TckimlikNo"]').value = data.tcKimlikNo;
+                document.querySelector('input[name="Ad"]').value = data.ad;
+                document.querySelector('input[name="Soyad"]').value = data.soyad;
+                document.querySelector('input[name="EvlilikSoyadi"]').value = data.evlilikSoyadi;
+                document.querySelector('input[name="DogumTarihi"]').value = data.dogumTarihi;
+                document.querySelector('input[name="DogumYeri"]').value = data.dogumYeri;
+                document.querySelector('input[name="Vefat"]').checked = data.vefat;
+                document.querySelector('input[name="Telefon"]').value = data.telefon;
+                document.querySelector('input[name="Email"]').value = data.email;
+                document.querySelector('input[name="Il"]').value = data.il;
+                document.querySelector('input[name="Ilce"]').value = data.ilce;
+                document.querySelector('textarea[name="Adres"]').value = data.adres;
+                document.querySelector('input[name="Universite"]').value = data.universite;
+                document.querySelector('input[name="Fakulte"]').value = data.fakulte;
+                document.querySelector('input[name="MezuniyetYili"]').value = data.mezuniyetYili;
+                document.querySelector('input[name="Meslek"]').value = data.meslek;
+                document.querySelector('select[name="KayitDurumu"]').value = data.kayitDurumu;
 
-                 // --- AİDAT KISMI (ÖNEMLİ DEĞİŞİKLİK) ---
+                // --- GÜNCELLENEN AİDAT LİSTELEME KISMI ---
+                var aidatDiv = document.getElementById("aidatListesiBadge");
+                aidatDiv.innerHTML = "";
 
-                 // 1. Geçmiş Aidatları Listele (Badge olarak)
-                 var aidatDiv = document.getElementById("aidatListesiBadge");
-                 aidatDiv.innerHTML = ""; // Önce temizle
+                if (data.gecmisAidatlar && data.gecmisAidatlar.length > 0) {
+                    data.gecmisAidatlar.forEach(aidat => {
+                        // Badge oluşturuyoruz, yanına da Silme butonu (X) ekliyoruz
+                        var span = document.createElement("span");
+                        span.className = "badge bg-secondary d-flex align-items-center";
+                        span.style.gap = "8px"; // Yazı ile X arası boşluk
+                        span.id = "aidat-badge-" + aidat.id; // Silince bulmak için ID veriyoruz
 
-                 if (data.gecmisAidatlar && data.gecmisAidatlar.length > 0) {
-                     data.gecmisAidatlar.forEach(aidat => {
-                         // Her aidat için bir etiket oluştur
-                         var span = document.createElement("span");
-                         span.className = "badge bg-secondary";
-                         span.textContent = aidat.yil + ": " + aidat.tutar + " TL";
-                         aidatDiv.appendChild(span);
-                     });
-                 } else {
-                     aidatDiv.innerHTML = "<span class='text-muted small'>Geçmiş ödeme yok.</span>";
-                 }
+                        // İçerik HTML'i: Yıl, Tutar ve Kırmızı X İkonu
+                        span.innerHTML = `
+                            ${aidat.yil}: ${aidat.tutar} TL
+                            <i class="fa fa-times-circle text-danger"
+                               style="cursor:pointer; background:white; border-radius:50%;"
+                               onclick="deleteAidat(${aidat.id})"
+                               title="Bu ödemeyi sil"></i>
+                        `;
 
-                 // 2. Yeni Giriş İçin Inputları Temizle ve AÇ (Disabled False)
-                 var yilInput = document.querySelector('input[name="AidatYili"]');
-                 var tutarInput = document.querySelector('input[name="AidatTutari"]');
+                        aidatDiv.appendChild(span);
+                    });
+                } else {
+                    aidatDiv.innerHTML = "<span class='text-muted small'>Geçmiş ödeme yok.</span>";
+                }
 
-                 yilInput.value = new Date().getFullYear(); // Mevcut yıl gelsin
-                 tutarInput.value = ""; // Tutar boş gelsin ki kullanıcı yeni girsin
+                // Yeni Giriş İçin Inputları Temizle ve AÇ
+                var yilInput = document.querySelector('input[name="AidatYili"]');
+                var tutarInput = document.querySelector('input[name="AidatTutari"]');
 
-                 yilInput.disabled = false;
-                 tutarInput.disabled = false;
+                yilInput.value = new Date().getFullYear();
+                tutarInput.value = "";
 
-                 var myModal = new bootstrap.Modal(document.getElementById('yeniUyeModal'));
-                 myModal.show();
-             })
-             .catch(error => console.error('Hata:', error));
-     }
+                yilInput.disabled = false;
+                tutarInput.disabled = false;
+
+                var myModal = new bootstrap.Modal(document.getElementById('yeniUyeModal'));
+                myModal.show();
+            })
+            .catch(error => console.error('Hata:', error));
+    }
+
+    // --- 3. ÜYE SİLME FONKSİYONU ---
+    function deleteUye(id) {
+        if (confirm("Bu üyeyi ve bağlı tüm verilerini (Aidat, Derbis, Eğitim) silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
+            // Post işlemi başlatmak için geçici bir form oluşturup gönderiyoruz
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Aidatlar/UyeSil/' + id;
+
+            // CSRF Token eklememiz lazım (ASP.NET Core güvenliği için)
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            var hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = '__RequestVerificationToken';
+            hiddenInput.value = token;
+            form.appendChild(hiddenInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // --- 4. TEKİL AİDAT SİLME FONKSİYONU ---
+    function deleteAidat(id) {
+        if (confirm("Bu aidat kaydını silmek istediğinize emin misiniz?")) {
+
+            // AJAX ile silme isteği gönderiyoruz (Sayfa yenilenmesin diye)
+            var formData = new FormData();
+            formData.append("id", id);
+
+            // CSRF Token
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            formData.append("__RequestVerificationToken", token);
+
+            fetch('/Aidatlar/AidatSil', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Başarılıysa o badge'i ekrandan kaldır
+                    var badge = document.getElementById("aidat-badge-" + id);
+                    if(badge) badge.remove();
+                } else {
+                    alert("Silme işlemi başarısız oldu.");
+                }
+            })
+            .catch(error => console.error('Hata:', error));
+        }
+    }
 </script>

@@ -206,6 +206,7 @@ namespace DernekYonetim.Controllers
 
                 // YENİ EKLENEN KISIM: Geçmiş Aidatları Listele
                 gecmisAidatlar = uye.Aidatlars.OrderBy(x => x.Yil).Select(x => new {
+                    id = x.Id, 
                     yil = x.Yil,
                     tutar = x.Tutar
                 }).ToList()
@@ -310,13 +311,46 @@ namespace DernekYonetim.Controllers
             }
             catch (Exception ex)
             {
-                // DÜZELTME: transaction.Rollback(); BURADAN SİLİNDİ.
-                // using bloğu hata durumunda işlemi otomatik geri alır.
 
                 string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 return BadRequest("Güncelleme Hatası Detayı: " + detayliHata);
             }
-        
     }
+        // 5. ÜYE SİLME İŞLEMİ (Tüm ilişkili verilerle birlikte)
+        [HttpPost]
+        public IActionResult UyeSil(int id)
+        {
+            var uye = _context.Uyelers
+                .Include(u => u.EgitimMesleks)
+                .Include(u => u.DerbisKaydis)
+                .Include(u => u.Aidatlars)
+                .FirstOrDefault(x => x.UyeId == id);
+
+            if (uye == null) return NotFound();
+
+            // İlişkili kayıtları temizle
+            if (uye.EgitimMesleks.Any()) _context.EgitimMesleks.RemoveRange(uye.EgitimMesleks);
+            if (uye.DerbisKaydis.Any()) _context.DerbisKaydis.RemoveRange(uye.DerbisKaydis);
+            if (uye.Aidatlars.Any()) _context.Aidatlars.RemoveRange(uye.Aidatlars);
+
+            // Ana üyeyi sil
+            _context.Uyelers.Remove(uye);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+        // 6. TEKİL AİDAT SİLME (Modal İçinden)
+        [HttpPost]
+        public IActionResult AidatSil(int id)
+        {
+            var aidat = _context.Aidatlars.Find(id);
+            if (aidat != null)
+            {
+                _context.Aidatlars.Remove(aidat);
+                _context.SaveChanges();
+                return Ok("Silindi");
+            }
+            return NotFound();
+        }
     }
 }
