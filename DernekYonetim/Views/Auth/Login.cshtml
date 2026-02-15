@@ -11,371 +11,348 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Yazı Tipleri (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- İkon Seti (FontAwesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #ffffff;
-            --text: #0f172a;
-            --muted: #64748b;
-            --border: #e5e7eb;
-            --soft: #f8fafc;
-            --primary: #2563eb;
-            --primary-soft: #eff6ff;
-            --shadow: 0 18px 45px rgba(15,23,42,.08);
-            --shadow2: 0 10px 24px rgba(15,23,42,.06);
-            --radius: 18px;
-        }
-
-        * {
-            box-sizing: border-box;
+            --renk-lacivert: #0a1a5c; /* Kurumsal Lacivert */
+            --renk-altin: #b8860b; /* Kurumsal Altın */
+            --renk-arkaplan: #f8fafc;
+            --renk-yazi: #334155;
         }
 
         body {
             margin: 0;
-            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        .top-accent {
-            height: 10px;
-            background: linear-gradient(90deg, rgba(37,99,235,.25), rgba(16,185,129,.18), rgba(168,85,247,.18));
-        }
-
-        .page {
-            min-height: calc(100vh - 10px);
-            display: flex;
-            align-items: center;
-            padding: 48px 0;
-        }
-
-        .title {
-            font-weight: 700;
-            letter-spacing: -.02em;
-            margin: 0;
-        }
-
-        .subtitle {
-            margin: 6px 0 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .wrap {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .side {
-            position: relative;
-            min-height: 220px;
-            background: radial-gradient(600px 240px at 30% 30%, rgba(37,99,235,.18), transparent 60%), radial-gradient(520px 220px at 70% 30%, rgba(16,185,129,.14), transparent 60%), radial-gradient(520px 220px at 60% 80%, rgba(168,85,247,.12), transparent 60%), linear-gradient(180deg, #ffffff, #f8fafc);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .side-inner {
-            position: absolute;
-            inset: 0;
-            padding: 26px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .badge-soft {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 999px;
-            background: var(--primary-soft);
-            color: #1d4ed8;
-            font-weight: 600;
-            font-size: 13px;
-            width: fit-content;
-        }
-
-        .mini-card {
-            background: rgba(255,255,255,.85);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 12px 14px;
-            box-shadow: var(--shadow2);
-        }
-
-            .mini-card b {
-                font-weight: 700;
-            }
-
-            .mini-card div {
-                color: var(--muted);
-                font-size: 13px;
-                margin-top: 2px;
-            }
-
-        .login-wrap {
-            padding: 22px;
-        }
-        @@media (min-width: 992px) {
-            .wrap
-
-        {
-            display: grid;
-            grid-template-columns: 42% 58%;
-        }
-
-        .side {
-            min-height: 520px;
-            border-bottom: none;
-            border-right: 1px solid var(--border);
-        }
-
-        .login-wrap {
-            padding: 34px;
-        }
-
-        }
-
-        .form-group {
-            position: relative;
-            margin-bottom: 14px;
-        }
-
-        .form-control {
-            height: 50px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--text);
-            padding: 16px 44px 10px 14px;
-            outline: none;
-            box-shadow: none !important;
-        }
-
-            .form-control:focus {
-                border-color: rgba(37,99,235,.55);
-                box-shadow: 0 0 0 4px rgba(37,99,235,.10) !important;
-            }
-
-        .form-control-placeholder {
-            position: absolute;
-            top: 15px;
-            left: 14px;
-            color: #94a3b8;
-            pointer-events: none;
-            transition: .15s ease;
-            font-size: 13px;
-        }
-
-        .form-control:not(:placeholder-shown) + .form-control-placeholder,
-        .form-control:focus + .form-control-placeholder {
-            top: 7px;
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .field-icon {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            cursor: pointer;
-        }
-
-            .field-icon:hover {
-                color: #475569;
-            }
-
-        .btn-primary {
-            height: 50px;
-            border-radius: 14px;
-            font-weight: 700;
-            letter-spacing: -.01em;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border: none;
-            box-shadow: 0 12px 24px rgba(37,99,235,.18);
-        }
-
-            .btn-primary:hover {
-                filter: brightness(1.02);
-            }
-
-        .helper-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .checkbox-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--muted);
-            user-select: none;
-            font-size: 14px;
-        }
-
-            .checkbox-wrap input {
-                accent-color: #2563eb;
-            }
-
-        a {
-            color: #1d4ed8;
-            text-decoration: none;
-        }
-
-            a:hover {
-                text-decoration: underline;
-            }
-
-        .error-box {
-            margin-top: 10px;
-            background: #fff1f2;
-            border: 1px solid #fecdd3;
-            color: #9f1239;
-            border-radius: 14px;
-            padding: 10px 12px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 16px 0;
-        }
-
-        .icon-row {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: #fff;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--renk-arkaplan);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #475569;
-            box-shadow: var(--shadow2);
+            position: relative;
         }
 
-            .icon-btn:hover {
-                background: var(--soft);
+        /* Mavi Arka Plan Dekoru */
+        .arkaplan-dekor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: var(--renk-lacivert);
+            border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+            z-index: 0;
+        }
+
+        /* Kart Yapısı */
+        .giris-karti {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+            margin: 20px;
+        }
+
+        .kart-baslik {
+            text-align: center;
+            padding: 40px 30px 10px 30px;
+        }
+
+        .logo-kutu {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 15px auto;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 4px solid var(--renk-arkaplan);
+            overflow: hidden;
+        }
+
+        .baslik-yazi {
+            color: var(--renk-lacivert);
+            font-weight: 800;
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .kart-icerik {
+            padding: 20px 40px 40px 40px;
+        }
+
+        .form-grup {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .etiket {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--renk-yazi);
+            margin-bottom: 8px;
+            display: block;
+            margin-left: 4px;
+        }
+
+        .input-kapsayici {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .ozel-input {
+            width: 100%;
+            height: 50px;
+            padding: 10px 45px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            color: #333;
+            outline: none;
+            transition: 0.3s;
+            background: #f8fafc;
+            position: relative;
+            z-index: 1;
+        }
+
+            .ozel-input:focus {
+                background: #fff;
+                border-color: var(--renk-lacivert);
+                box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.1);
             }
+
+        /* --- İKON RENKLENDİRME --- */
+        .ikon-sol {
+            position: absolute;
+            left: 15px;
+            color: var(--renk-altin); /* Varsayılan: Altın Rengi */
+            font-size: 18px;
+            z-index: 10;
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        /* Input'a tıklayınca ikon Lacivert olur */
+        .ozel-input:focus ~ .ikon-sol {
+            color: var(--renk-lacivert);
+        }
+
+        .ikon-sag {
+            position: absolute;
+            right: 15px;
+            color: var(--renk-lacivert);
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 10;
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+
+            .ikon-sag:hover {
+                opacity: 1;
+                color: var(--renk-altin);
+            }
+
+        .btn-lacivert {
+            width: 100%;
+            height: 50px;
+            background-color: var(--renk-lacivert);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+            .btn-lacivert:hover {
+                background-color: #051030;
+            }
+
+        .link-unuttum {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--renk-altin);
+            text-decoration: none;
+            float: right;
+            margin-top: 8px;
+        }
+
+        .alt-gecis {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--renk-lacivert);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .hata-kutusu {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .gizli {
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            padding: 15px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
     </style>
 </head>
-
 <body>
-    <div class="top-accent"></div>
 
-    <section class="page">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-9 col-xl-8">
-                    <div class="text-center mb-3">
-                        <h2 class="title">Dernek Yönetim Paneli</h2>
-                        <p class="subtitle">Hesabınla giriş yap</p>
-                    </div>
+    <div class="arkaplan-dekor"></div>
 
-                    <div class="wrap">
-                        <div class="side">
-                            <div class="side-inner">
-                                <div>
-                                    <span class="badge-soft">
-                                        <span class="fa fa-lock"></span>
-                                        Güvenli Giriş
-                                    </span>
-                                </div>
+    <div class="giris-karti">
 
-                                <div class="mini-card">
-                                    <b>Hızlı erişim</b>
-                                    <div>Kullanıcı adını ve şifreni girerek panele eriş.</div>
-                                </div>
-
-                                <div class="mini-card">
-                                    <b>Yeni misin?</b>
-                                    <div>Hesabın yoksa sağ taraftan “Üye Ol” ile oluşturabilirsin.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="login-wrap">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <h3 class="mb-1" style="font-weight:800; letter-spacing:-.02em;">Giriş Yap</h3>
-                                    <div style="color:var(--muted); font-size:14px;">Devam etmek için bilgilerini gir.</div>
-                                </div>
-
-                                <div class="icon-row">
-                                    <a href="#" class="icon-btn" title="Bilgi"><span class="fa fa-info"></span></a>
-                                    <a href="#" class="icon-btn" title="Yardım"><span class="fa fa-question"></span></a>
-                                </div>
-                            </div>
-
-                            <div class="divider"></div>
-
-                            <!-- Senin istediğin şekilde: method post + name alanları aynı -->
-                            <form method="post">
-                                <div class="form-group">
-                                    <input name="email" type="email" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder">E-Posta Adresi</label>
-                                </div>
-
-                                <div class="form-group">
-                                    <input id="password-field" name="sifre" type="password" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder">Şifre</label>
-                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary w-100 mt-2">
-                                    Giriş Yap
-                                </button>
-
-                                @if (ViewBag.Hata != null)
-                                {
-                                    <div class="error-box">@ViewBag.Hata</div>
-                                }
-
-                            </form>
-                        </div>
-                    </div>
-
-                </div>
+        <div class="kart-baslik">
+            <div class="logo-kutu">
+                <!-- LOGO YOLU: Burayı kendi resim yolunuzla değiştirin -->
+                <img src="~/lib/img/logos/aod.svg"
+                     style="width:100%; height:100%; object-fit:cover;"
+                     alt="Logo"
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold;\'>AÖD</span>'">
             </div>
+            <h2 class="baslik-yazi" id="baslik">Yönetici Girişi</h2>
+            <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-top:5px;">Ankara Öğretim Derneği</div>
         </div>
-    </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div class="kart-icerik">
+
+            @if (ViewBag.Hata != null)
+            {
+                <div class="hata-kutusu">
+                    <i class="fas fa-exclamation-triangle"></i> @ViewBag.Hata
+                </div>
+            }
+
+            <form method="post">
+
+                <!-- Ad Soyad (Gizli) -->
+                <div class="form-grup gizli" id="isim-alani">
+                    <label class="etiket">Ad Soyad</label>
+                    <div class="input-kapsayici">
+                        <input type="text" name="adsoyad" class="ozel-input" placeholder="Adınız Soyadınız">
+                        <i class="fas fa-user ikon-sol"></i>
+                    </div>
+                </div>
+
+                <!-- E-Posta -->
+                <div class="form-grup">
+                    <label class="etiket">E-Posta Adresi</label>
+                    <div class="input-kapsayici">
+                        <input type="email" name="email" class="ozel-input" placeholder="ornek@aod.org.tr" required>
+                        <!-- Altın rengi ikon -->
+                        <i class="fas fa-envelope ikon-sol"></i>
+                    </div>
+                </div>
+
+                <!-- Şifre -->
+                <div class="form-grup">
+                    <label class="etiket">Şifre</label>
+                    <div class="input-kapsayici">
+                        <input type="password" name="sifre" id="sifreInput" class="ozel-input" placeholder="••••••••" required>
+                        <!-- Altın rengi kilit -->
+                        <i class="fas fa-lock ikon-sol"></i>
+                        <!-- Lacivert göz -->
+                        <i class="fas fa-eye ikon-sag" onclick="sifreGoster()"></i>
+                    </div>
+                    <a href="#" class="link-unuttum" id="link-unuttum">Şifremi Unuttum?</a>
+                </div>
+
+                <button type="submit" class="btn-lacivert" id="btn-gonder">
+                    Giriş Yap <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="alt-gecis">
+                    <span style="font-size:14px; color:#64748b;" id="text-alt">Hesabınız yok mu?</span>
+                    <button type="button" class="btn-text" onclick="modDegistir()">
+                        <span id="btn-text-alt">Yeni Üyelik Oluştur</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="footer">
+            &copy; @DateTime.Now.Year Ankara Öğretim Derneği
+        </div>
+
+    </div>
+
     <script>
-        (function () {
-          document.addEventListener("click", function (e) {
-            const toggle = e.target.closest(".toggle-password");
-            if (!toggle) return;
+        function sifreGoster() {
+            var input = document.getElementById("sifreInput");
+            if (input.type === "password") input.type = "text";
+            else input.type = "password";
+        }
 
-            const selector = toggle.getAttribute("toggle");
-            const input = document.querySelector(selector);
-            if (!input) return;
+        var girisModu = true;
+        function modDegistir() {
+            girisModu = !girisModu;
+            var baslik = document.getElementById("baslik");
+            var isimAlani = document.getElementById("isim-alani");
+            var linkUnuttum = document.getElementById("link-unuttum");
+            var btnGonder = document.getElementById("btn-gonder");
+            var textAlt = document.getElementById("text-alt");
+            var btnTextAlt = document.getElementById("btn-text-alt");
 
-            const isPassword = input.getAttribute("type") === "password";
-            input.setAttribute("type", isPassword ? "text" : "password");
-
-            toggle.classList.toggle("fa-eye");
-            toggle.classList.toggle("fa-eye-slash");
-          });
-        })();
+            if (!girisModu) {
+                baslik.innerText = "Yeni Üyelik";
+                isimAlani.classList.remove("gizli");
+                linkUnuttum.classList.add("gizli");
+                btnGonder.innerHTML = 'Kayıt Ol <i class="fa-solid fa-check"></i>';
+                textAlt.innerText = "Zaten hesabınız var mı?";
+                btnTextAlt.innerText = "Giriş Ekranına Dön";
+            } else {
+                baslik.innerText = "Yönetici Girişi";
+                isimAlani.classList.add("gizli");
+                linkUnuttum.classList.remove("gizli");
+                btnGonder.innerHTML = 'Giriş Yap <i class="fa-solid fa-arrow-right"></i>';
+                textAlt.innerText = "Hesabınız yok mu?";
+                btnTextAlt.innerText = "Yeni Üyelik Oluştur";
+            }
+        }
     </script>
-</body>
-</html>
+</body></html>
