@@ -162,13 +162,13 @@ namespace DernekYonetim.Controllers
             }
         } // <--- BURASI! Önceki metot burada bitmeli.
 
-        // 3. ÜYE BİLGİLERİNİ GETİR
         [HttpGet]
         public IActionResult UyeGetir(int id)
         {
             var uye = _context.Uyelers
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
+                .Include(u => u.Aidatlars) // Aidatları çekmeyi unutma!
                 .FirstOrDefault(x => x.UyeId == id);
 
             if (uye == null) return NotFound();
@@ -176,6 +176,7 @@ namespace DernekYonetim.Controllers
             var egitim = uye.EgitimMesleks.FirstOrDefault();
             var derbis = uye.DerbisKaydis.FirstOrDefault();
 
+            // DB: "Evet/Hayır" -> UI: "Var/Yok" Çevirisi
             string uiKayitDurumu = "Belirtilmedi";
             if (derbis?.KayitDurumu == "Evet") uiKayitDurumu = "Var";
             else if (derbis?.KayitDurumu == "Hayır") uiKayitDurumu = "Yok";
@@ -201,7 +202,13 @@ namespace DernekYonetim.Controllers
                 fakulte = egitim?.Fakulte,
                 mezuniyetYili = egitim?.MezuniyetYili,
                 meslek = egitim?.Meslek,
-                kayitDurumu = uiKayitDurumu
+                kayitDurumu = uiKayitDurumu,
+
+                // YENİ EKLENEN KISIM: Geçmiş Aidatları Listele
+                gecmisAidatlar = uye.Aidatlars.OrderBy(x => x.Yil).Select(x => new {
+                    yil = x.Yil,
+                    tutar = x.Tutar
+                }).ToList()
             };
 
             return Json(data);
@@ -212,6 +219,7 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UyeGuncelle(YeniUyeGirisModel model, int UyeId)
         {
+            // using kullandığımız için işlem sonunda veya hatada otomatik temizlik yapılır.
             using var transaction = _context.Database.BeginTransaction();
 
             try
@@ -219,6 +227,7 @@ namespace DernekYonetim.Controllers
                 var uye = _context.Uyelers.Find(UyeId);
                 if (uye == null) return NotFound("Üye bulunamadı.");
 
+                // A) Temel Bilgileri Güncelle
                 uye.UyeNo = model.UyeNo;
                 uye.UyelikTarihi = DateOnly.FromDateTime(model.UyelikTarihi);
                 uye.TckimlikNo = model.TckimlikNo;
@@ -236,6 +245,7 @@ namespace DernekYonetim.Controllers
 
                 _context.Uyelers.Update(uye);
 
+                // B) Eğitim Bilgilerini Güncelle
                 var egitim = _context.EgitimMesleks.FirstOrDefault(x => x.UyeId == UyeId);
                 if (egitim != null)
                 {
@@ -261,19 +271,12 @@ namespace DernekYonetim.Controllers
                     }
                 }
 
-                // C) Derbis Güncelle
+                // C) Derbis Güncelle (Var/Yok -> Evet/Hayır Çevirisi)
                 var derbis = _context.DerbisKaydis.FirstOrDefault(x => x.UyeId == UyeId);
+                string? derbisDurum = null;
 
-                string? derbisDurum = null; // Varsayılan: Belirtilmedi (NULL)
-
-                if (model.KayitDurumu == "Var")
-                {
-                    derbisDurum = "Evet";
-                }
-                else if (model.KayitDurumu == "Yok")
-                {
-                    derbisDurum = "Hayır";
-                }
+                if (model.KayitDurumu == "Var") derbisDurum = "Evet";
+                else if (model.KayitDurumu == "Yok") derbisDurum = "Hayır";
 
                 if (derbis != null)
                 {
@@ -286,6 +289,20 @@ namespace DernekYonetim.Controllers
                     _context.DerbisKaydis.Add(yeniDerbis);
                 }
 
+                // D) AİDAT GÜNCELLEME / EKLEME
+                // Düzenleme ekranında alt kısma girilen Yıl ve Tutar, yeni bir aidat satırı olarak eklenir.
+                if (model.AidatTutari > 0)
+                {
+                    var yeniAidat = new Aidatlar
+                    {
+                        UyeId = UyeId,
+                        Yil = model.AidatYili ?? DateTime.Now.Year,
+                        Tutar = model.AidatTutari,
+                        Durum = "Ödendi"
+                    };
+                    _context.Aidatlars.Add(yeniAidat);
+                }
+
                 _context.SaveChanges();
                 transaction.Commit();
 
@@ -293,14 +310,13 @@ namespace DernekYonetim.Controllers
             }
             catch (Exception ex)
             {
-                // İşlemi geri al
-                transaction.Rollback();
+                // DÜZELTME: transaction.Rollback(); BURADAN SİLİNDİ.
+                // using bloğu hata durumunda işlemi otomatik geri alır.
 
-                // Hatanın asıl sebebini (InnerException) buluyoruz
                 string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-
                 return BadRequest("Güncelleme Hatası Detayı: " + detayliHata);
             }
-        }
+        
+    }
     }
 }
