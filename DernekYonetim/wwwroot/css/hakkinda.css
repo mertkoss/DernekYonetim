@@ -1,65 +1,158 @@
-/* Navbar fixed-top offset */
-.dernek-hakkinda-section {
-    padding-top: 140px; /* navbar + nefes */
-    padding-bottom: 80px;
-    background-color: #f8f9fa;
+/* =========================================
+   1. GENEL DEÐÝÞKENLER
+   ========================================= */
+:root {
+    --renk-lacivert: #0a1a5c;
+    --renk-altin: #b8860b; /* Kurumsal Altýn */
+    --renk-acik-altin: #d4a017; /* Hover Rengi */
+    --renk-gri-bg: #f8fafc; /* Arka Plan */
+    --renk-text: #334155; /* Metin Rengi */
 }
 
-/* Baþlýk alaný */
+/* =========================================
+   2. SAYFA DÜZENÝ
+   ========================================= */
+.dernek-hakkinda-section {
+    padding-top: 150px; /* Navbar'ýn altýnda kalmamasý için */
+    padding-bottom: 80px;
+    background-color: var(--renk-gri-bg);
+    min-height: 100vh;
+}
+
+/* =========================================
+   3. BAÞLIK ALANI (HEADER)
+   ========================================= */
 .page-header {
     text-align: center;
     margin-bottom: 50px;
+    position: relative;
 }
 
 .page-title {
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif; /* Anasayfa baþlýk fontu */
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--renk-lacivert);
+    margin-bottom: 15px;
+}
+
+/* Baþlýk Altýndaki Altýn Çizgi (Ýmza Tasarým) */
+.page-header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: var(--renk-altin);
+    margin: 15px auto;
+    border-radius: 2px;
 }
 
 .page-meta {
-    font-size: 0.9rem;
-    color: #6c757d;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: #64748b;
+    font-style: italic;
+    background: #fff;
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* Ýçerik kartý */
+/* =========================================
+   4. ÝÇERÝK KARTI
+   ========================================= */
 .content-card {
     background: #ffffff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    padding: 60px; /* Ferah iç boþluk */
+    border-radius: 20px;
+    /* Anasayfa kartlarýndaki gölgenin aynýsý */
+    box-shadow: 0 20px 60px rgba(10, 26, 92, 0.08);
+    border-top: 5px solid var(--renk-lacivert); /* Üstte kurumsal çizgi */
+    /* Metin Okunabilirliði */
+    font-family: 'Inter', sans-serif;
     line-height: 1.8;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    color: var(--renk-text);
 }
 
-    /* Ýçerik içindeki elemanlar */
+    /* Paragraflar */
     .content-card p {
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.5rem;
+        text-align: justify; /* Resmi görünüm için iki yana yasla */
     }
 
+    /* Ýç Baþlýklar (H2, H3, H4) */
+    .content-card h2,
     .content-card h3,
     .content-card h4 {
-        margin-top: 2rem;
+        font-family: 'Playfair Display', serif;
+        color: var(--renk-lacivert);
+        font-weight: 700;
+        margin-top: 2.5rem;
         margin-bottom: 1rem;
-        font-weight: 600;
+        padding-left: 15px;
+        border-left: 4px solid var(--renk-altin); /* Sol tarafa altýn þerit */
     }
 
+    /* Listeler (UL, OL) */
     .content-card ul {
         padding-left: 20px;
+        margin-bottom: 1.5rem;
     }
 
     .content-card li {
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        position: relative;
+        list-style: none; /* Varsayýlan noktayý kaldýr */
+        padding-left: 10px;
     }
 
-/* Mobil uyum */
+        /* Liste Baþý Simgesi (Hatasýz Kod) */
+        .content-card li::before {
+            /* \f054 = FontAwesome 'Chevron Right' kodu. Bu sayede dosya kaydederken hata vermez. */
+            content: '\f054';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--renk-altin);
+            font-size: 12px;
+            position: absolute;
+            left: -15px;
+            top: 5px;
+        }
+
+/* =========================================
+   5. DÜZENLEME BUTONU (Admin)
+   ========================================= */
+/* Bootstrap'in sarý butonunu bizim altýna çeviriyoruz */
+.dernek-hakkinda-section .btn-warning {
+    background-color: var(--renk-altin);
+    border-color: var(--renk-altin);
+    color: #fff;
+    font-weight: 600;
+}
+
+    .dernek-hakkinda-section .btn-warning:hover {
+        background-color: var(--renk-acik-altin);
+        border-color: var(--renk-acik-altin);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
+    }
+
+/* =========================================
+   6. MOBÝL UYUM
+   ========================================= */
 @media (max-width: 768px) {
     .page-title {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
 
     .content-card {
-        padding: 25px;
+        padding: 30px;
+    }
+
+    .page-header::after {
+        width: 60px;
     }
 }
