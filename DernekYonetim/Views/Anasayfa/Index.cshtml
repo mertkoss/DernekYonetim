@@ -223,28 +223,39 @@
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-graduation-cap"></i></div>
-                    <div class="stat-number">1965</div>
+
+                    <div class="stat-number counter" data-count="1965">0</div>
+
                     <div class="stat-label">Kuruluş Yılı</div>
                 </div>
             </div>
+
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-users"></i></div>
-                    <div class="stat-number">5000+</div>
+
+                    <div class="stat-number counter" data-count="5000" data-suffix="+">0</div>
+
                     <div class="stat-label">Mezun</div>
                 </div>
             </div>
+
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-hand-holding-heart"></i></div>
-                    <div class="stat-number">1200</div>
+
+                    <div class="stat-number counter" data-count="1200">0</div>
+
                     <div class="stat-label">Bursiyer</div>
                 </div>
             </div>
+
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-eye"></i></div>
-                    <div class="stat-number">15K</div>
+
+                    <div class="stat-number counter" data-count="@ViewBag.ZiyaretciSayisi">0</div>
+
                     <div class="stat-label">Ziyaret</div>
                 </div>
             </div>
@@ -336,3 +347,40 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        // jQuery'nin yüklendiğinden emin olalım
+        if (typeof jQuery == 'undefined') {
+            console.error("HATA: jQuery kütüphanesi sayfada yüklü değil! Layout dosyanızı kontrol edin.");
+        } else {
+            console.log("Başarılı: jQuery çalışıyor, sayaca başlanıyor...");
+
+            $(document).ready(function () {
+                $('.counter').each(function () {
+                    var $this = $(this);
+
+                    // Sayıyı al ve sayıya çevir (ParseInt)
+                    var countTo = parseInt($this.attr('data-count'));
+                    var suffix = $this.attr('data-suffix') || "";
+
+                    console.log("Hedef Sayı: " + countTo); // Konsola yazdırır
+
+                    $({ countNum: 0 }).animate({
+                        countNum: countTo
+                    },
+                    {
+                        duration: 2000,
+                        easing: 'swing',
+                        step: function () {
+                            $this.text(Math.ceil(this.countNum).toLocaleString('tr-TR') + suffix);
+                        },
+                        complete: function () {
+                            $this.text(Math.ceil(this.countNum).toLocaleString('tr-TR') + suffix);
+                        }
+                    });
+                });
+            });
+        }
+    </script>
+}
