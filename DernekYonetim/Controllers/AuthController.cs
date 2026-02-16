@@ -51,36 +51,58 @@ namespace DernekYonetim.Controllers
         }
 
         // --- REGISTER BÖLÜMÜ ---
-
         [HttpGet]
         public IActionResult Register()
         {
+            // Sayfa ilk açıldığında tabloyu doldurmak için listeyi çekiyoruz
+            ViewBag.Adminler = _context.AdminKullanicilars
+                                       .OrderByDescending(x => x.AdminId) // En son eklenen en üstte
+                                       .ToList();
+
             return View(new AdminKullanicilar());
         }
 
         [HttpPost]
         public IActionResult Register(AdminKullanicilar model)
         {
-            if (string.IsNullOrEmpty(model.KullaniciAdi) || string.IsNullOrEmpty(model.SifreHash))
+            // 1. Validasyon Kontrolü
+            if (!ModelState.IsValid)
             {
-                ViewBag.Hata = "Lütfen tüm alanları doldurun!";
+                ViewBag.Hata = "Lütfen bilgileri eksiksiz doldurun.";
+                // Hata varsa listeyi tekrar doldurup sayfayı geri döndür (Tablo kaybolmasın)
+                ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
                 return View(model);
             }
 
+            // 2. Kullanıcı Adı Kontrolü
             if (_context.AdminKullanicilars.Any(x => x.KullaniciAdi == model.KullaniciAdi))
             {
                 ViewBag.Hata = "Bu kullanıcı adı zaten alınmış.";
+                // Hata varsa listeyi tekrar doldur
+                ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
                 return View(model);
             }
 
+            // 3. Kayıt İşlemi
             model.AktifMi = true;
             model.KayitTarihi = DateTime.Now;
 
             _context.AdminKullanicilars.Add(model);
             _context.SaveChanges();
 
-            // Kayıt sonrası login sayfasına yönlendirmek daha kullanıcı dostudur
-            return RedirectToAction("Login");
+            // 4. Yönlendirme
+            // EĞER: Kayıt olduktan sonra tabloyu bu sayfada görmek istiyorsan Redirect YAPMA.
+            // Şöyle yaparsan sayfada kalır ve yeni eklenen kişiyi tabloda görürsün:
+
+            ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
+            ModelState.Clear(); // Form kutularını temizler
+            ViewBag.Hata = null; // Varsa hatayı siler
+
+            // Başarılı mesajı eklemek istersen View'a bir alan daha ekleyebilirsin veya ViewBag.Hata'yı success gibi kullanabilirsin.
+            return View(new AdminKullanicilar());
+
+            // EĞER: Direkt Login'e atmak istiyorsan eski kodun kalabilir:
+            // return RedirectToAction("Login");
         }
 
 

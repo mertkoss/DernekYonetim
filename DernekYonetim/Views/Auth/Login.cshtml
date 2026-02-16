@@ -1,7 +1,5 @@
 ﻿@{
     ViewData["Title"] = "Giriş Yap";
-    // Layout kullanıyorsan ve bu sayfa full HTML olduğu için sorun çıkarsa aç:
-    // Layout = null;
 }
 
 <!doctype html>
@@ -11,19 +9,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Yazı Tipleri (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- İkon Seti (FontAwesome) -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- Bootstrap CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --renk-lacivert: #0a1a5c; /* Kurumsal Lacivert */
-            --renk-altin: #b8860b; /* Kurumsal Altın */
+            --renk-lacivert: #0a1a5c;
+            --renk-altin: #b8860b;
             --renk-arkaplan: #f8fafc;
             --renk-yazi: #334155;
         }
@@ -40,7 +35,6 @@
             position: relative;
         }
 
-        /* Mavi Arka Plan Dekoru */
         .arkaplan-dekor {
             position: absolute;
             top: 0;
@@ -53,7 +47,6 @@
             z-index: 0;
         }
 
-        /* Kart Yapısı */
         .giris-karti {
             background-color: #ffffff;
             width: 100%;
@@ -137,18 +130,16 @@
                 box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.1);
             }
 
-        /* --- İKON RENKLENDİRME --- */
         .ikon-sol {
             position: absolute;
             left: 15px;
-            color: var(--renk-altin); /* Varsayılan: Altın Rengi */
+            color: var(--renk-altin);
             font-size: 18px;
             z-index: 10;
             pointer-events: none;
             transition: color 0.3s ease;
         }
 
-        /* Input'a tıklayınca ikon Lacivert olur */
         .ozel-input:focus ~ .ikon-sol {
             color: var(--renk-lacivert);
         }
@@ -208,13 +199,17 @@
         }
 
         .btn-text {
-            background: none;
-            border: none;
+            /* Linki butona benzetmek yerine direkt link stili veriyoruz */
             color: var(--renk-lacivert);
             font-weight: 700;
             font-size: 14px;
+            text-decoration: none;
             cursor: pointer;
         }
+
+            .btn-text:hover {
+                text-decoration: underline;
+            }
 
         .hata-kutusu {
             background-color: #fee2e2;
@@ -224,10 +219,6 @@
             font-size: 13px;
             margin-bottom: 20px;
             border: 1px solid #fecaca;
-        }
-
-        .gizli {
-            display: none;
         }
 
         .footer {
@@ -248,13 +239,12 @@
 
         <div class="kart-baslik">
             <div class="logo-kutu">
-                <!-- LOGO YOLU: Burayı kendi resim yolunuzla değiştirin -->
                 <img src="~/lib/img/logos/aod.svg"
                      style="width:100%; height:100%; object-fit:cover;"
                      alt="Logo"
                      onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold;\'>AÖD</span>'">
             </div>
-            <h2 class="baslik-yazi" id="baslik">Yönetici Girişi</h2>
+            <h2 class="baslik-yazi">Yönetici Girişi</h2>
             <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-top:5px;">Ankara Öğretim Derneği</div>
         </div>
 
@@ -267,49 +257,35 @@
                 </div>
             }
 
-            <form method="post">
+            <form asp-action="Login" asp-controller="Auth" method="post">
 
-                <!-- Ad Soyad (Gizli) -->
-                <div class="form-grup gizli" id="isim-alani">
-                    <label class="etiket">Ad Soyad</label>
-                    <div class="input-kapsayici">
-                        <input type="text" name="adsoyad" class="ozel-input" placeholder="Adınız Soyadınız">
-                        <i class="fas fa-user ikon-sol"></i>
-                    </div>
-                </div>
-
-                <!-- E-Posta -->
                 <div class="form-grup">
                     <label class="etiket">E-Posta Adresi</label>
                     <div class="input-kapsayici">
                         <input type="email" name="email" class="ozel-input" placeholder="ornek@aod.org.tr" required>
-                        <!-- Altın rengi ikon -->
                         <i class="fas fa-envelope ikon-sol"></i>
                     </div>
                 </div>
 
-                <!-- Şifre -->
                 <div class="form-grup">
                     <label class="etiket">Şifre</label>
                     <div class="input-kapsayici">
                         <input type="password" name="sifre" id="sifreInput" class="ozel-input" placeholder="••••••••" required>
-                        <!-- Altın rengi kilit -->
                         <i class="fas fa-lock ikon-sol"></i>
-                        <!-- Lacivert göz -->
                         <i class="fas fa-eye ikon-sag" onclick="sifreGoster()"></i>
                     </div>
-                    <a href="#" class="link-unuttum" id="link-unuttum">Şifremi Unuttum?</a>
+                    <a href="#" class="link-unuttum">Şifremi Unuttum?</a>
                 </div>
 
-                <button type="submit" class="btn-lacivert" id="btn-gonder">
+                <button type="submit" class="btn-lacivert">
                     Giriş Yap <i class="fas fa-arrow-right"></i>
                 </button>
 
                 <div class="alt-gecis">
-                    <span style="font-size:14px; color:#64748b;" id="text-alt">Hesabınız yok mu?</span>
-                    <button type="button" class="btn-text" onclick="modDegistir()">
-                        <span id="btn-text-alt">Yeni Üyelik Oluştur</span>
-                    </button>
+                    <span style="font-size:14px; color:#64748b;">Hesabınız yok mu?</span>
+                    <a href="/Auth/Register" class="btn-text">
+                        Yeni Üyelik Oluştur
+                    </a>
                 </div>
 
             </form>
@@ -327,32 +303,6 @@
             if (input.type === "password") input.type = "text";
             else input.type = "password";
         }
-
-        var girisModu = true;
-        function modDegistir() {
-            girisModu = !girisModu;
-            var baslik = document.getElementById("baslik");
-            var isimAlani = document.getElementById("isim-alani");
-            var linkUnuttum = document.getElementById("link-unuttum");
-            var btnGonder = document.getElementById("btn-gonder");
-            var textAlt = document.getElementById("text-alt");
-            var btnTextAlt = document.getElementById("btn-text-alt");
-
-            if (!girisModu) {
-                baslik.innerText = "Yeni Üyelik";
-                isimAlani.classList.remove("gizli");
-                linkUnuttum.classList.add("gizli");
-                btnGonder.innerHTML = 'Kayıt Ol <i class="fa-solid fa-check"></i>';
-                textAlt.innerText = "Zaten hesabınız var mı?";
-                btnTextAlt.innerText = "Giriş Ekranına Dön";
-            } else {
-                baslik.innerText = "Yönetici Girişi";
-                isimAlani.classList.add("gizli");
-                linkUnuttum.classList.remove("gizli");
-                btnGonder.innerHTML = 'Giriş Yap <i class="fa-solid fa-arrow-right"></i>';
-                textAlt.innerText = "Hesabınız yok mu?";
-                btnTextAlt.innerText = "Yeni Üyelik Oluştur";
-            }
-        }
     </script>
-</body></html>
+</body>
+</html>
