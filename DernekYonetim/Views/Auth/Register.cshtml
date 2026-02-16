@@ -16,497 +16,447 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #ffffff;
-            --text: #0f172a;
-            --muted: #64748b;
-            --border: #e5e7eb;
-            --soft: #f8fafc;
-            --primary: #2563eb;
-            --primary-soft: #eff6ff;
-            --shadow: 0 18px 45px rgba(15,23,42,.08);
-            --shadow2: 0 10px 24px rgba(15,23,42,.06);
-            --radius: 18px;
-        }
-
-        * {
-            box-sizing: border-box;
+            --renk-lacivert: #0a1a5c;
+            --renk-altin: #b8860b;
+            --renk-arkaplan: #f8fafc;
+            --renk-yazi: #334155;
         }
 
         body {
             margin: 0;
-            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        /* Sayfa üstü ince modern gradient şeridi (çok açık) */
-        .top-accent {
-            height: 10px;
-            background: linear-gradient(90deg, rgba(37,99,235,.25), rgba(16,185,129,.18), rgba(168,85,247,.18));
-        }
-
-        .page {
-            min-height: calc(100vh - 10px);
-            display: flex;
-            align-items: center;
-            padding: 48px 0;
-        }
-
-        .title {
-            font-weight: 700;
-            letter-spacing: -.02em;
-            margin: 0;
-        }
-
-        .subtitle {
-            margin: 6px 0 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        /* Ana kart */
-        .wrap {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        /* Sol taraf görsel alanı (açık) */
-        .side {
-            position: relative;
-            min-height: 220px;
-            background: radial-gradient(600px 240px at 30% 30%, rgba(37,99,235,.18), transparent 60%), radial-gradient(520px 220px at 70% 30%, rgba(16,185,129,.14), transparent 60%), radial-gradient(520px 220px at 60% 80%, rgba(168,85,247,.12), transparent 60%), linear-gradient(180deg, #ffffff, #f8fafc);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .side-inner {
-            position: absolute;
-            inset: 0;
-            padding: 26px;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--renk-arkaplan);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .badge-soft {
-            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 999px;
-            background: var(--primary-soft);
-            color: #1d4ed8;
-            font-weight: 600;
-            font-size: 13px;
-            width: fit-content;
-        }
-
-        .mini-card {
-            background: rgba(255,255,255,.8);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 12px 14px;
-            box-shadow: var(--shadow2);
-        }
-
-            .mini-card b {
-                font-weight: 700;
-            }
-
-            .mini-card div {
-                color: var(--muted);
-                font-size: 13px;
-                margin-top: 2px;
-            }
-
-        /* Sağ form alanı */
-        .login-wrap {
-            padding: 22px;
-        }
-        @@media (min-width: 992px) {
-            .wrap
-
-        {
-            display: grid;
-            grid-template-columns: 42% 58%;
-        }
-
-        .side {
-            min-height: 560px;
-            border-bottom: none;
-            border-right: 1px solid var(--border);
-        }
-
-        .login-wrap {
-            padding: 34px;
-        }
-
-        }
-
-        /* Form */
-        .form-group {
+            justify-content: flex-start; /* İçerik uzayabileceği için center yerine start */
             position: relative;
-            margin-bottom: 14px;
+            padding-bottom: 50px; /* Alt boşluk */
         }
 
-        .form-control {
-            height: 50px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--text);
-            padding: 16px 44px 10px 14px;
-            outline: none;
-            box-shadow: none !important;
-        }
-
-            .form-control:focus {
-                border-color: rgba(37,99,235,.55);
-                box-shadow: 0 0 0 4px rgba(37,99,235,.10) !important;
-            }
-
-        /* floating label */
-        .form-control-placeholder {
+        /* Arka Plan Dekoru (Login ile aynı) */
+        .arkaplan-dekor {
             position: absolute;
-            top: 15px;
-            left: 14px;
-            color: #94a3b8;
-            pointer-events: none;
-            transition: .15s ease;
-            font-size: 13px;
-        }
-
-        .form-control:not(:placeholder-shown) + .form-control-placeholder,
-        .form-control:focus + .form-control-placeholder {
-            top: 7px;
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        /* eye icon */
-        .field-icon {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            cursor: pointer;
-        }
-
-            .field-icon:hover {
-                color: #475569;
-            }
-
-        .btn-primary {
-            height: 50px;
-            border-radius: 14px;
-            font-weight: 700;
-            letter-spacing: -.01em;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border: none;
-            box-shadow: 0 12px 24px rgba(37,99,235,.18);
-        }
-
-            .btn-primary:hover {
-                filter: brightness(1.02);
-            }
-
-        .helper-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .checkbox-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--muted);
-            user-select: none;
-            font-size: 14px;
-        }
-
-            .checkbox-wrap input {
-                accent-color: #2563eb;
-            }
-
-        a {
-            color: #1d4ed8;
-            text-decoration: none;
-        }
-
-            a:hover {
-                text-decoration: underline;
-            }
-
-        .error-box {
-            margin-top: 10px;
-            background: #fff1f2;
-            border: 1px solid #fecdd3;
-            color: #9f1239;
-            border-radius: 14px;
-            padding: 10px 12px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        /* alt tablo */
-        .admin-table-wrap {
-            margin-top: 18px;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px;
-            box-shadow: var(--shadow2);
-        }
-
-            .admin-table-wrap h3 {
-                margin: 0 0 10px 0;
-                font-weight: 700;
-                letter-spacing: -.02em;
-                font-size: 18px;
-            }
-
-        table.admin-table {
+            top: 0;
+            left: 0;
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            height: 400px; /* Sabit yükseklik */
+            background-color: var(--renk-lacivert);
+            border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+            z-index: 0;
+        }
+
+        /* Ana Container */
+        .sayfa-icerik {
+            width: 100%;
+            max-width: 500px; /* Biraz daha geniş çünkü form uzun */
+            z-index: 10;
+            margin-top: 40px;
+        }
+
+        /* Kart Stili (Login ile aynı temel yapı) */
+        .ozel-kart {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             overflow: hidden;
-            border-radius: 14px;
-            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            position: relative;
         }
 
-            table.admin-table th, table.admin-table td {
-                padding: 10px 12px;
-                border-bottom: 1px solid var(--border);
-                background: #fff;
-                color: var(--text);
-            }
-
-            table.admin-table th {
-                background: var(--soft);
-                color: #334155;
-                font-weight: 700;
-                font-size: 13px;
-            }
-
-            table.admin-table tr:last-child td {
-                border-bottom: none;
-            }
-
-            table.admin-table tr:hover td {
-                background: #fafafa;
-            }
-
-        /* küçük üst ikonlar */
-        .icon-row {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
+        .kart-baslik {
+            text-align: center;
+            padding: 40px 30px 10px 30px;
         }
 
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+        .logo-kutu {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 15px auto;
             background: #fff;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #475569;
-            box-shadow: var(--shadow2);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 4px solid var(--renk-arkaplan);
+            overflow: hidden;
         }
 
-            .icon-btn:hover {
-                background: var(--soft);
+        .baslik-yazi {
+            color: var(--renk-lacivert);
+            font-weight: 800;
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .alt-baslik {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .kart-icerik {
+            padding: 20px 40px 40px 40px;
+        }
+
+        /* Form Elemanları (Login ile aynı) */
+        .form-grup {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .etiket {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--renk-yazi);
+            margin-bottom: 6px;
+            display: block;
+            margin-left: 4px;
+        }
+
+        .input-kapsayici {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .ozel-input {
+            width: 100%;
+            height: 50px;
+            padding: 10px 45px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            transition: 0.3s;
+            background: #f8fafc;
+            position: relative;
+            z-index: 1;
+        }
+
+            .ozel-input:focus {
+                background: #fff;
+                border-color: var(--renk-lacivert);
+                box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.1);
             }
 
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 16px 0;
+        .ikon-sol {
+            position: absolute;
+            left: 15px;
+            color: var(--renk-altin);
+            font-size: 16px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .ozel-input:focus ~ .ikon-sol {
+            color: var(--renk-lacivert);
+        }
+
+        .ikon-sag {
+            position: absolute;
+            right: 15px;
+            color: var(--renk-lacivert);
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 10;
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+
+            .ikon-sag:hover {
+                opacity: 1;
+                color: var(--renk-altin);
+            }
+
+        .btn-lacivert {
+            width: 100%;
+            height: 50px;
+            background-color: var(--renk-lacivert);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+            .btn-lacivert:hover {
+                background-color: #051030;
+            }
+
+        .alt-gecis {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-text {
+            color: var(--renk-lacivert);
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+            .btn-text:hover {
+                text-decoration: underline;
+            }
+
+        .hata-kutusu {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- TABLO STİLLERİ (Login tasarımına uygun) --- */
+        .tablo-baslik {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--renk-lacivert);
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid var(--renk-altin);
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+
+            .table-custom th {
+                background-color: var(--renk-lacivert);
+                color: #fff;
+                padding: 12px 15px;
+                font-weight: 600;
+                text-align: left;
+            }
+
+                .table-custom th:first-child {
+                    border-top-left-radius: 10px;
+                }
+
+                .table-custom th:last-child {
+                    border-top-right-radius: 10px;
+                }
+
+            .table-custom td {
+                padding: 12px 15px;
+                border-bottom: 1px solid #e2e8f0;
+                color: var(--renk-yazi);
+            }
+
+            .table-custom tr:last-child td {
+                border-bottom: none;
+            }
+
+            .table-custom tr:hover td {
+                background-color: #f1f5f9;
+            }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            padding: 15px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
         }
     </style>
 </head>
 
 <body>
-    <div class="top-accent"></div>
+    <div class="arkaplan-dekor"></div>
 
-    <section class="page">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-9 col-xl-8">
-                    <div class="text-center mb-3">
-                        <h2 class="title">Dernek Yönetim Paneli</h2>
-                        <p class="subtitle">Yeni admin hesabı oluştur</p>
-                    </div>
+    <div class="sayfa-icerik">
 
-                    <div class="wrap">
-                        <!-- Sol bilgi alanı -->
-                        <div class="side">
-                            <div class="side-inner">
-                                <div>
-                                    <span class="badge-soft">
-                                        <span class="fa fa-shield"></span>
-                                        Güvenli Kayıt
-                                    </span>
-                                </div>
-
-                                <div class="mini-card">
-                                    <b>İpucu</b>
-                                    <div>Kaydın DB’ye gidip gitmediğini alttaki tabloda anlık kontrol edebilirsin.</div>
-                                </div>
-
-                                <div class="mini-card">
-                                    <b>Modern Tasarım</b>
-                                    <div>Açık arka plan, beyaz input, siyah yazı.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sağ form -->
-                        <div class="login-wrap">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <h3 class="mb-1" style="font-weight:800; letter-spacing:-.02em;">Üye Ol</h3>
-                                    <div style="color:var(--muted); font-size:14px;">Bilgileri doldur ve hesabını oluştur.</div>
-                                </div>
-
-                                <div class="icon-row">
-                                    <a href="#" class="icon-btn" title="Bilgi"><span class="fa fa-info"></span></a>
-                                    <a href="#" class="icon-btn" title="Yardım"><span class="fa fa-question"></span></a>
-                                </div>
-                            </div>
-
-                            <div class="divider"></div>
-
-                            <form asp-action="Register" asp-controller="Auth" method="post" class="signin-form">
-                                <div class="form-group">
-                                    <input asp-for="KullaniciAdi" type="text" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder" for="KullaniciAdi">Kullanıcı Adı</label>
-                                    <span asp-validation-for="KullaniciAdi" class="text-danger"></span>
-                                </div>
-
-                                <div class="form-group">
-                                    <input asp-for="SifreHash" id="password-field" type="password" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder" for="SifreHash">Şifre</label>
-                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password" aria-label="Şifreyi göster/gizle"></span>
-                                    <span asp-validation-for="SifreHash" class="text-danger"></span>
-                                </div>
-
-                                <div class="form-group">
-                                    <input asp-for="AdSoyad" type="text" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder" for="AdSoyad">Ad Soyad</label>
-                                    <span asp-validation-for="AdSoyad" class="text-danger"></span>
-                                </div>
-
-                                <div class="form-group">
-                                    <input asp-for="Email" type="email" class="form-control" placeholder=" " required />
-                                    <label class="form-control-placeholder" for="Email">Email</label>
-                                    <span asp-validation-for="Email" class="text-danger"></span>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary w-100 mt-2">
-                                    Kayıt Ol
-                                </button>
-
-                                @if (ViewBag.Hata != null)
-                                {
-                                    <div class="error-box">@ViewBag.Hata</div>
-                                }
-
-                                <div class="helper-row">
-                                    <label class="checkbox-wrap mb-0">
-                                        <input type="checkbox" checked />
-                                        Beni hatırla
-                                    </label>
-
-                                    <a href="#">Şifremi unuttum</a>
-                                </div>
-
-                                <div class="text-center mt-3" style="color:var(--muted); font-size:14px;">
-                                    Zaten hesabın var mı? <a href="/Auth/Login">Giriş Yap</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- ✅ DB kontrol tablosu: SİLMEDİM -->
-                    <div class="admin-table-wrap">
-                        <h3>Mevcut Adminler</h3>
-
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:90px;">ID</th>
-                                    <th>Kullanıcı Adı</th>
-                                    <th>Ad Soyad</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var adminler = ViewBag.Adminler as List<AdminKullanicilar>;
-                                }
-
-                                @if (adminler != null && adminler.Any())
-                                {
-                                    foreach (var a in adminler)
-                                    {
-                                        <tr>
-                                            <td>@a.AdminId</td>
-                                            <td>@a.KullaniciAdi</td>
-                                            <td>@a.AdSoyad</td>
-                                            <td>@a.Email</td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" style="text-align:center; padding:12px; color:var(--muted);">
-                                            Henüz kayıt yok
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-
+        <!-- KAYIT KARTI -->
+        <div class="ozel-kart">
+            <div class="kart-baslik">
+                <div class="logo-kutu">
+                    <!-- Logo aynı şekilde korunur -->
+                    <img src="~/lib/img/logos/aod.svg"
+                         style="width:100%; height:100%; object-fit:cover;"
+                         alt="Logo"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold; font-size:24px;\'>AÖD</span>'">
                 </div>
+                <h2 class="baslik-yazi">Yeni Üye Kaydı</h2>
+                <div class="alt-baslik">Yönetim Paneli Erişimi</div>
+            </div>
+
+            <div class="kart-icerik">
+
+                @if (ViewBag.Hata != null)
+                {
+                    <div class="hata-kutusu">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>@ViewBag.Hata</span>
+                    </div>
+                }
+
+                <form asp-action="Register" asp-controller="Auth" method="post" autocomplete="off">
+
+                    <!-- Kullanıcı Adı -->
+                    <div class="form-grup">
+                        <label class="etiket" for="KullaniciAdi">Kullanıcı Adı</label>
+                        <div class="input-kapsayici">
+                            <input asp-for="KullaniciAdi" type="text" class="ozel-input" placeholder="admin_kullanici" required />
+                            <i class="fas fa-user ikon-sol"></i>
+                        </div>
+                        <span asp-validation-for="KullaniciAdi" class="text-danger" style="font-size:12px;"></span>
+                    </div>
+
+                    <!-- Ad Soyad -->
+                    <div class="form-grup">
+                        <label class="etiket" for="AdSoyad">Ad Soyad</label>
+                        <div class="input-kapsayici">
+                            <input asp-for="AdSoyad" type="text" class="ozel-input" placeholder="Adınız Soyadınız" required />
+                            <i class="fas fa-id-card ikon-sol"></i>
+                        </div>
+                        <span asp-validation-for="AdSoyad" class="text-danger" style="font-size:12px;"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-grup">
+                        <label class="etiket" for="Email">E-Posta Adresi</label>
+                        <div class="input-kapsayici">
+                            <input asp-for="Email" type="email" class="ozel-input" placeholder="ornek@aod.org.tr" required />
+                            <i class="fas fa-envelope ikon-sol"></i>
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger" style="font-size:12px;"></span>
+                    </div>
+
+                    <!-- Şifre -->
+                    <div class="form-grup">
+                        <label class="etiket" for="SifreHash">Şifre</label>
+                        <div class="input-kapsayici">
+                            <input asp-for="SifreHash" id="sifreInput" type="password" class="ozel-input" placeholder="••••••••" required />
+                            <i class="fas fa-lock ikon-sol"></i>
+                            <i class="fas fa-eye ikon-sag" onclick="sifreGoster()"></i>
+                        </div>
+                        <span asp-validation-for="SifreHash" class="text-danger" style="font-size:12px;"></span>
+                    </div>
+
+                    <!-- Kayıt Butonu -->
+                    <button type="submit" class="btn-lacivert">
+                        Hesabı Oluştur <i class="fas fa-user-plus"></i>
+                    </button>
+
+                    <!-- Giriş Linki -->
+                    <div class="alt-gecis">
+                        <span style="font-size:14px; color:#64748b;">Zaten hesabınız var mı?</span>
+                        <a href="/Auth/Login" class="btn-text">
+                            Giriş Yap
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="footer">
+                &copy; @DateTime.Now.Year Ankara Öğretim Derneği
             </div>
         </div>
+
+        <!-- TABLO KARTI (Tasarım Diline Uygun Hale Getirildi) -->
+        <div class="ozel-kart" style="padding: 25px;">
+            <h3 class="tablo-baslik">Mevcut Yöneticiler</h3>
+
+            <div style="overflow-x:auto;">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">ID</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>Ad Soyad</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var adminler = ViewBag.Adminler as List<AdminKullanicilar>;
+                        }
+
+                        @if (adminler != null && adminler.Any())
+                        {
+                            foreach (var a in adminler)
+                            {
+                                <tr>
+                                    <td>@a.AdminId</td>
+                                    <td><b>@a.KullaniciAdi</b></td>
+                                    <td>@a.AdSoyad</td>
+                                    <td>@a.Email</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;">
+                                    <i class="fas fa-info-circle"></i> Henüz kayıtlı yönetici bulunmamaktadır.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Scriptler -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        (function () {
-          document.addEventListener("click", function (e) {
-            const toggle = e.target.closest(".toggle-password");
-            if (!toggle) return;
+        function sifreGoster() {
+            var input = document.getElementById("sifreInput");
+            var icon = document.querySelector(".ikon-sag");
 
-            const selector = toggle.getAttribute("toggle");
-            const input = document.querySelector(selector);
-            if (!input) return;
-
-            const isPassword = input.getAttribute("type") === "password";
-            input.setAttribute("type", isPassword ? "text" : "password");
-
-            toggle.classList.toggle("fa-eye");
-            toggle.classList.toggle("fa-eye-slash");
-          });
-        })();
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
     </script>
 
 </body>
