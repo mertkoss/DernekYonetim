@@ -1,95 +1,58 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+﻿<nav class="navbar navbar-expand-lg navbar-light navbar-custom">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="~/lib/img/logos/aod.svg" alt="logo" />
+            <img src="~/lib/img/logos/aod.svg" alt="logo" style="height:40px; margin-right:10px;" />
+            Ankara Öğretim Derneği
         </a>
 
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarResponsive"
-                aria-controls="navbarResponsive"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
-            Menü
-            <i class="fas fa-bars ms-1"></i>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center">
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Dernek Hakkında
                     </a>
                     <ul class="dropdown-menu shadow border-0" aria-labelledby="navbarDropdown">
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/tarihce">Tarihçe</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/yonetim-kurulu">Yönetim Kurulu</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/denetim-kurulu">Denetim Kurulu</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/onur-kurulu">Onur Kurulu</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/amac">Amaç</a>
-                        </li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/tarihce">Tarihçe</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/yonetim-kurulu">Yönetim Kurulu</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/denetim-kurulu">Denetim Kurulu</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/onur-kurulu">Onur Kurulu</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/amac">Amaç</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/isletme-hesabi">İşletme Hesabı Tablosu</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/tuzuk">Tüzük</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/dernekler-kanunu">Dernekler Kanunu</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/dernekler-yonetmeligi">Dernekler Yönetmeliği</a>
-                        </li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/isletme-hesabi">İşletme Hesabı Tablosu</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/tuzuk">Tüzük</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/dernekler-kanunu">Dernekler Kanunu</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/dernekler-yonetmeligi">Dernekler Yönetmeliği</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="/Aidatlar/Index">Yıllık Aidatlarımız</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/banka-hesaplari">Banka Hesapları</a>
-                        </li>
+                        <li><a class="dropdown-item" href="/Aidatlar/Index">Yıllık Aidatlarımız</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/banka-hesaplari">Banka Hesapları</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/uyeler-aydinlatma">Üyeler İçin Aydınlatma Metni</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/ziyaretci-aydinlatma">Ziyaretçiler İçin Aydınlatma Metni</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Dernek/Hakkinda/cerez-politikasi">Çerez Politikası</a>
-                        </li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/uyeler-aydinlatma">Üyeler İçin Aydınlatma Metni</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/ziyaretci-aydinlatma">Ziyaretçiler İçin Aydınlatma Metni</a></li>
+                        <li><a class="dropdown-item" href="/Dernek/Hakkinda/cerez-politikasi">Çerez Politikası</a></li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Galeri">Galeri</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Kayiplar/Index">Kaybettiklerimiz</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Haberler/Index">Haberler</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Iletisim/Index">İletişim</a>
-                </li>
+
+                <li class="nav-item"><a class="nav-link" href="/Galeri">Galeri</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Kayiplar/Index">Kaybettiklerimiz</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Haberler/Index">Haberler</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Iletisim/Index">İletişim</a></li>
 
                 @if (Context.Session.GetInt32("AdminID") != null)
                 {
                     // --- GİRİŞ YAPILMIŞ HALİ ---
-                    <li class="nav-item d-flex align-items-center ms-lg-3 text-white">
-                        <small>Merhaba, @Context.Session.GetString("AdminAd")</small>
+                    // 1. Tasarımın yapısına uygun sade görünüm
+                    <li class="nav-item ms-lg-2">
+                        <span class="nav-link" style="opacity:0.8; font-size:0.9em;">
+                            Merhaba, @Context.Session.GetString("AdminAd")
+                        </span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-danger text-white px-3 ms-2" href="/Auth/Logout">
+                        <a class="nav-link text-danger" href="/Auth/Logout">
                             <i class="fas fa-sign-out-alt"></i> Çıkış
                         </a>
                     </li>
@@ -97,13 +60,13 @@
                 else
                 {
                     // --- GİRİŞ YAPILMAMIŞ HALİ ---
+                    // 1. Tasarımın orijinal "Üye Girişi" stili
                     <li class="nav-item">
-                        <a class="nav-link btn btn-outline-light ms-lg-3 px-3" href="/Auth/Login">
-                            <i class="fas fa-user"></i> Giriş Yap
+                        <a class="nav-link" href="/Auth/Login">
+                            <i class="fa fa-user me-1"></i> Üye Girişi
                         </a>
                     </li>
                 }
-
             </ul>
         </div>
     </div>
