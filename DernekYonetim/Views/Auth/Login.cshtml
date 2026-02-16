@@ -236,15 +236,30 @@
 
     <div class="giris-karti">
 
-        <div class="kart-baslik">
-            <div class="logo-kutu">
-                <img src="~/lib/img/logos/aod.svg"
-                     style="width:100%; height:100%; object-fit:cover;"
+        <div class="kart-baslik" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div class="logo-kutu" style="
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px; /* Logonun kenarlara yapışmasını önleyen boşluk */
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+
+                <img src="~/lib/img/logos/logo.jpeg"
+                     style="width: 100%; height: 100%; object-fit: contain;"
                      alt="Logo"
-                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold;\'>AÖD</span>'">
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold; font-size:24px;\'>AÖD</span>'">
             </div>
-            <h2 class="baslik-yazi">Yönetici Girişi</h2>
-            <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-top:5px;">Ankara Öğretim Derneği</div>
+
+            <h2 class="baslik-yazi" style="margin-top: 15px; margin-bottom: 0;">Yönetici Girişi</h2>
+            <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-top:5px;">
+                Ankara Öğretim Derneği
+            </div>
         </div>
 
         <div class="kart-icerik">

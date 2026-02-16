@@ -305,10 +305,21 @@
         <!-- KAYIT KARTI -->
         <div class="ozel-kart">
             <div class="kart-baslik">
-                <div class="logo-kutu">
-                    <!-- Logo aynı şekilde korunur -->
-                    <img src="~/lib/img/logos/aod.svg"
-                         style="width:100%; height:100%; object-fit:cover;"
+                <div class="logo-kutu" style="
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px; /* Logonun kenarlara yapışmasını önleyen boşluk */
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+
+                    <img src="~/lib/img/logos/logo.jpeg"
+                         style="width: 100%; height: 100%; object-fit: contain;"
                          alt="Logo"
                          onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold; font-size:24px;\'>AÖD</span>'">
                 </div>
@@ -390,49 +401,6 @@
             </div>
         </div>
 
-        <!-- TABLO KARTI (Tasarım Diline Uygun Hale Getirildi) -->
-        <div class="ozel-kart" style="padding: 25px;">
-            <h3 class="tablo-baslik">Mevcut Yöneticiler</h3>
-
-            <div style="overflow-x:auto;">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th style="width:50px;">ID</th>
-                            <th>Kullanıcı Adı</th>
-                            <th>Ad Soyad</th>
-                            <th>Email</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            var adminler = ViewBag.Adminler as List<AdminKullanicilar>;
-                        }
-
-                        @if (adminler != null && adminler.Any())
-                        {
-                            foreach (var a in adminler)
-                            {
-                                <tr>
-                                    <td>@a.AdminId</td>
-                                    <td><b>@a.KullaniciAdi</b></td>
-                                    <td>@a.AdSoyad</td>
-                                    <td>@a.Email</td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;">
-                                    <i class="fas fa-info-circle"></i> Henüz kayıtlı yönetici bulunmamaktadır.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
     </div>
     </section>

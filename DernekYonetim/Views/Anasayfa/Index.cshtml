@@ -122,6 +122,60 @@
     .school-body {
         padding: 20px;
     }
+
+    /* --- HAKKIMIZDA BÖLÜMÜ (YENİ EKLENECEK KISIM) --- */
+    .about-modern-section {
+        padding: 100px 0;
+        background-color: #fff;
+        position: relative;
+    }
+
+    /* Görselin modern duruşu için kapsayıcı */
+    .about-img-wrap {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1); /* Hafif gölge */
+        transition: transform 0.3s ease;
+    }
+
+        .about-img-wrap:hover {
+            transform: translateY(-5px); /* Üzerine gelince hafif yukarı kalksın */
+        }
+
+        .about-img-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+    /* HTML'de kullandığın 'text-gold-header' sınıfı */
+    .text-gold-header {
+        color: var(--renk-altin);
+        letter-spacing: 2px;
+        font-size: 0.9rem;
+    }
+
+    /* HTML'de kullandığın 'text-navy-header' sınıfı */
+    .text-navy-header {
+        color: var(--renk-lacivert);
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        line-height: 1.2;
+    }
+
+    /* İçerik metni */
+    .about-text {
+        color: var(--renk-text);
+        line-height: 1.8; /* Satır aralarını açarak okunabilirliği artırır */
+        font-size: 1.05rem;
+        opacity: 0.9;
+    }
+
+        /* İçerik içindeki paragraflar arası boşluk */
+        .about-text p {
+            margin-bottom: 20px;
+        }
 </style>
 
 <header class="hero-section">
@@ -197,6 +251,7 @@
         </div>
     </div>
 </section>
+ 
 
 <section class="schools-section">
     <div class="container">
@@ -230,6 +285,52 @@
                         <h5 style="color:#0a1a5c; font-weight:700;">İzmir Tevfik Fikret Lisesi</h5>
                         <p class="text-muted small">Ege'nin incisinde çağdaş eğitim.</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HAKKIMIZDA BÖLÜMÜ (DB ENTEGRASYONU) -->
+<section class="about-modern-section" id="hakkinda">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Sol: Görsel -->
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="about-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop" alt="Hakkımızda">
+                </div>
+            </div>
+
+            <!-- Sağ: DB İçeriği -->
+            <div class="col-lg-6 ps-lg-5">
+                <h6 class="text-uppercase fw-bold mb-2 text-gold-header">Hakkımızda</h6>
+
+                <!-- DB'den Başlık -->
+                <h2 class="fw-bold mb-3 text-navy-header">
+                    @(Model?.About?.Baslik ?? "Geçmişten Geleceğe Eğitim Köprüsü")
+                </h2>
+
+                <!-- DB'den İçerik -->
+                <div class="about-text mb-4">
+                    @if (!string.IsNullOrEmpty(Model?.About?.Icerik))
+                    {
+                        @Html.Raw(Model.About.Icerik)
+                    }
+                    else
+                    {
+                        <p>Ankara Öğretim Derneği, Tevfik Fikret Eğitim Kurumları'nın kurucusu olarak, Atatürk ilke ve devrimlerine bağlı, laik, çağdaş ve evrensel değerleri benimseyen bireyler yetiştirmeyi amaçlamaktadır.</p>
+                        <p>Eğitimde fırsat eşitliği yaratmak adına sağladığımız burslar ve projelerle binlerce öğrencinin hayatına dokunuyoruz.</p>
+                    }
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="/Dernek/Hakkinda" class="btn btn-outline-dark rounded-pill px-4" style="border-color:var(--renk-lacivert); color:var(--renk-lacivert);">
+                        Devamını Oku <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                    <a href="#iletisim" class="btn btn-outline-secondary rounded-pill px-4">
+                        İletişim
+                    </a>
                 </div>
             </div>
         </div>
