@@ -74,7 +74,6 @@ namespace DernekYonetim.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.Hata = "Lütfen bilgileri eksiksiz doldurun.";
-                // Hata varsa listeyi tekrar doldurup sayfayı geri döndür (Tablo kaybolmasın)
                 ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
                 return View(model);
             }
@@ -83,7 +82,6 @@ namespace DernekYonetim.Controllers
             if (_context.AdminKullanicilars.Any(x => x.KullaniciAdi == model.KullaniciAdi))
             {
                 ViewBag.Hata = "Bu kullanıcı adı zaten alınmış.";
-                // Hata varsa listeyi tekrar doldur
                 ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
                 return View(model);
             }
@@ -95,19 +93,13 @@ namespace DernekYonetim.Controllers
             _context.AdminKullanicilars.Add(model);
             _context.SaveChanges();
 
-            // 4. Yönlendirme
-            // EĞER: Kayıt olduktan sonra tabloyu bu sayfada görmek istiyorsan Redirect YAPMA.
-            // Şöyle yaparsan sayfada kalır ve yeni eklenen kişiyi tabloda görürsün:
+            // --- PROFESYONEL YÖNLENDİRME ---
+            // Başarılı bilgisini TempData ile taşıyoruz
+            TempData["KayitBasarili"] = true;
 
-            ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
-            ModelState.Clear(); // Form kutularını temizler
-            ViewBag.Hata = null; // Varsa hatayı siler
-
-            // Başarılı mesajı eklemek istersen View'a bir alan daha ekleyebilirsin veya ViewBag.Hata'yı success gibi kullanabilirsin.
-            return View(new AdminKullanicilar());
-
-            // EĞER: Direkt Login'e atmak istiyorsan eski kodun kalabilir:
-            // return RedirectToAction("Login");
+            // Sayfada kalıp tabloyu güncellemek yerine, 
+            // kullanıcıyı bilgilendirip Login'e atmak en sağlıklı kullanıcı deneyimidir.
+            return View(model);
         }
 
 
