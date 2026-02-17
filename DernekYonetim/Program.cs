@@ -20,6 +20,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 // MVC
+builder.Services.AddDataProtection();
+
 builder.Services.AddControllersWithViews();
 
 // DbContext (DernekYonetimDB baðlantýsý)

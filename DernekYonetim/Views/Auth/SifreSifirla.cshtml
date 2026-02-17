@@ -1,0 +1,253 @@
+﻿@{
+    ViewData["Title"] = "Yeni Şifre Belirle";
+    Layout = null; // Login ile aynı CSS'ler eklenecek
+}
+
+<style>
+    :root {
+        --renk-lacivert: #0a1a5c;
+        --renk-altin: #b8860b;
+        --renk-arkaplan: #f8fafc;
+        --renk-yazi: #334155;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--renk-arkaplan);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .arkaplan-dekor {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        background-color: var(--renk-lacivert);
+        border-bottom-left-radius: 50px;
+        border-bottom-right-radius: 50px;
+        z-index: 0;
+    }
+
+    .giris-karti {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 500px;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+        margin: 20px;
+    }
+
+    .kart-baslik {
+        text-align: center;
+        padding: 40px 30px 10px 30px;
+    }
+
+    .logo-kutu {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 15px auto;
+        background: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 4px solid var(--renk-arkaplan);
+        overflow: hidden;
+    }
+
+    .baslik-yazi {
+        color: var(--renk-lacivert);
+        font-weight: 800;
+        font-size: 22px;
+        margin: 0;
+    }
+
+    .kart-icerik {
+        padding: 20px 40px 40px 40px;
+    }
+
+    .form-grup {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .etiket {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--renk-yazi);
+        margin-bottom: 8px;
+        display: block;
+        margin-left: 4px;
+    }
+
+    .input-kapsayici {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .ozel-input {
+        width: 100%;
+        height: 50px;
+        padding: 10px 45px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        color: #333;
+        outline: none;
+        transition: 0.3s;
+        background: #f8fafc;
+        position: relative;
+        z-index: 1;
+    }
+
+        .ozel-input:focus {
+            background: #fff;
+            border-color: var(--renk-lacivert);
+            box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.1);
+        }
+
+    .ikon-sol {
+        position: absolute;
+        left: 15px;
+        color: var(--renk-altin);
+        font-size: 18px;
+        z-index: 10;
+        pointer-events: none;
+        transition: color 0.3s ease;
+    }
+
+    .ozel-input:focus ~ .ikon-sol {
+        color: var(--renk-lacivert);
+    }
+
+    .ikon-sag {
+        position: absolute;
+        right: 15px;
+        color: var(--renk-lacivert);
+        cursor: pointer;
+        font-size: 18px;
+        z-index: 10;
+        opacity: 0.7;
+        transition: 0.3s;
+    }
+
+        .ikon-sag:hover {
+            opacity: 1;
+            color: var(--renk-altin);
+        }
+
+    .btn-lacivert {
+        width: 100%;
+        height: 50px;
+        background-color: var(--renk-lacivert);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 50px;
+    }
+
+        .btn-lacivert:hover {
+            background-color: #051030;
+        }
+
+    .link-unuttum {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--renk-altin);
+        text-decoration: none;
+        float: right;
+        margin-top: 8px;
+    }
+
+    .alt-gecis {
+        text-align: center;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-text {
+        color: var(--renk-lacivert);
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .btn-text:hover {
+            text-decoration: underline;
+        }
+
+    .hata-kutusu {
+        background-color: #fee2e2;
+        color: #991b1b;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 20px;
+        border: 1px solid #fecaca;
+    }
+
+    .footer {
+        text-align: center;
+        font-size: 11px;
+        color: #94a3b8;
+        padding: 15px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+    }
+</style>
+<body>
+    <div class="giris-karti">
+        <div class="kart-baslik">
+            <h2 class="baslik-yazi">Yeni Şifre Belirle</h2>
+        </div>
+
+        <div class="kart-icerik">
+            @if (ViewBag.Hata != null)
+            {
+                <div class="hata-kutusu">@ViewBag.Hata</div>
+            }
+
+            <form asp-action="SifreSifirla" method="post">
+                <input type="hidden" name="token" value="@ViewBag.Token" />
+
+                <div class="form-grup">
+                    <label class="etiket">Yeni Şifre</label>
+                    <div class="input-kapsayici">
+                        <input type="password" name="yeniSifre" class="ozel-input" required>
+                    </div>
+                </div>
+
+                <div class="form-grup">
+                    <label class="etiket">Tekrar</label>
+                    <div class="input-kapsayici">
+                        <input type="password" name="yeniSifreTekrar" class="ozel-input" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-lacivert">Güncelle</button>
+            </form>
+        </div>
+    </div>
+</body>
