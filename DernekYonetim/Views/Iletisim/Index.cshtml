@@ -4,77 +4,117 @@
     Layout = "_Layout";
 }
 
-<section class="page-section" style="padding-top:120px">
+<section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px;">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-heading text-uppercase">Bize Ulaşın</h2>
-            <h3 class="section-subheading text-muted">Her türlü soru ve öneriniz için yanınızdayız.</h3>
+
+        <div class="text-center mb-5 pb-3">
+            <h2 class="section-heading text-primary-dark text-uppercase mb-3" style="letter-spacing: 2px;">Bize Ulaşın</h2>
+            <p class="text-muted fs-5">Derneğimizle ilgili her türlü soru, öneri ve görüşünüz için yanınızdayız.</p>
+
+            @if (Context.Session.GetInt32("AdminID") != null)
+            {
+                <button class="btn btn-gold rounded-pill mt-3 px-4 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#iletisimDuzenleModal">
+                    <i class="fas fa-edit me-2"></i>İletişim Bilgilerini Güncelle
+                </button>
+            }
         </div>
 
-        <div class="row">
-            <div class="col-lg-5 mb-4">
-                <div class="card border-0 shadow-sm p-4 h-100 bg-dark text-white rounded-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box bg-warning text-dark me-3">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">Adres</h5>
-                            <p class="mb-0 text-light opacity-75">@(Model?.Adres ?? "Adres bilgisi girilmemiş.")</p>
-                        </div>
+        <div class="row g-4 mb-5">
+            <div class="col-lg-4 col-md-6">
+                <div class="contact-info-card card h-100 border-0 shadow-sm rounded-4 text-center p-4 bg-white">
+                    <div class="icon-circle bg-light-blue mx-auto mb-3">
+                        <i class="fas fa-map-marker-alt text-primary-dark fa-2x"></i>
                     </div>
+                    <h5 class="fw-bold text-primary-dark">Adresimiz</h5>
+                    <p class="text-muted mb-0 small">@(Model?.Adres ?? "Adres bilgisi henüz girilmemiş.")</p>
+                </div>
+            </div>
 
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box bg-warning text-dark me-3">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">Telefon</h5>
-                            <p class="mb-0 text-light opacity-75">@(Model?.Telefon ?? "Telefon bilgisi girilmemiş.")</p>
-                        </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="contact-info-card card h-100 border-0 shadow-sm rounded-4 text-center p-4 bg-white">
+                    <div class="icon-circle bg-light-yellow mx-auto mb-3">
+                        <i class="fas fa-phone-alt text-warning fa-2x"></i>
                     </div>
+                    <h5 class="fw-bold text-primary-dark">Telefon</h5>
+                    <p class="text-muted mb-0 fs-5">@(Model?.Telefon ?? "Telefon bilgisi henüz girilmemiş.")</p>
+                </div>
+            </div>
 
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box bg-warning text-dark me-3">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">E-Posta</h5>
-                            <p class="mb-0 text-light opacity-75">@(Model?.Eposta ?? "E-posta bilgisi girilmemiş.")</p>
-                        </div>
+            <div class="col-lg-4 col-md-12">
+                <div class="contact-info-card card h-100 border-0 shadow-sm rounded-4 text-center p-4 bg-white">
+                    <div class="icon-circle bg-light-blue mx-auto mb-3">
+                        <i class="fas fa-envelope-open-text text-primary-dark fa-2x"></i>
                     </div>
+                    <h5 class="fw-bold text-primary-dark">E-Posta</h5>
+                    <a href="mailto:@(Model?.Eposta)" class="text-decoration-none text-muted fs-5">
+                        @(Model?.Eposta ?? "E-posta bilgisi henüz girilmemiş.")
+                    </a>
+                </div>
+            </div>
+        </div>
 
-                    <hr class="my-4 border-secondary">
+        <div class="row g-4 align-items-stretch">
 
-                    <h5 class="mb-3">Sosyal Medya</h5>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="btn btn-outline-light btn-social"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="btn btn-outline-light btn-social"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="btn btn-outline-light btn-social"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="btn btn-outline-light btn-social"><i class="fab fa-youtube"></i></a>
-                    </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100" style="min-height: 450px;">
+                    <iframe src="https://maps.google.com/maps?q=Ankara&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                            width="100%"
+                            height="100%"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
 
-                    @if (Context.Session.GetInt32("AdminID") != null)
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white h-100 p-4 p-md-5">
+                    <h4 class="fw-bold text-primary-dark mb-4">Mesaj Gönderin</h4>
+
+                    @if (TempData["MesajBasarili"] != null)
                     {
-                        <button class="btn btn-warning mt-4 fw-bold w-100" data-bs-toggle="modal" data-bs-target="#iletisimDuzenleModal">
-                            <i class="fas fa-edit me-2"></i>Bilgileri Güncelle
-                        </button>
+                        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3">
+                            <i class="fas fa-check-circle me-2"></i> @TempData["MesajBasarili"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
                     }
+                    @if (TempData["MesajHata"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["MesajHata"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form action="/Iletisim/MesajGonder" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Adınız Soyadınız</label>
+                                <input type="text" name="AdSoyad" class="form-control form-control-lg border-0 bg-light" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">E-Posta Adresiniz</label>
+                                <input type="email" name="Eposta" class="form-control form-control-lg border-0 bg-light" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Konu</label>
+                                <input type="text" name="Konu" class="form-control form-control-lg border-0 bg-light" required>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Mesajınız</label>
+                                <textarea name="Mesaj" class="form-control border-0 bg-light" rows="4" required></textarea>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-primary-dark btn-lg rounded-pill px-5 fw-bold shadow-sm w-100 w-md-auto">
+                                    <i class="fas fa-paper-plane me-2 text-warning"></i>Gönder
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="col-lg-7 mb-4">
-                <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden" style="min-height: 400px;">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3060.370978401367!2d32.76199857616922!3d39.91071347152533!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d3459d9df8a92d%3A0x5e3f3e939e331051!2sAnkara%20%C3%96zel%20Tevfik%20Fikret%20Okullar%C4%B1!5e0!3m2!1str!2str!4v1770930561424!5m2!1str!2str"
-                    width="600" 
-                    height="450" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
-                </div>
-            </div>
         </div>
     </div>
 </section>
@@ -82,30 +122,38 @@
 @if (Context.Session.GetInt32("AdminID") != null)
 {
     <div class="modal fade" id="iletisimDuzenleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content border-0">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
                 <form action="/Iletisim/Guncelle" method="post">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title fw-bold">İletişim Bilgilerini Düzenle</h5>
+                    <div class="modal-header border-0 bg-white pb-0">
+                        <h5 class="modal-title fw-bold text-primary-dark">
+                            <i class="fas fa-edit me-2 text-warning"></i>İletişim Bilgilerini Düzenle
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Adres</label>
-                            <textarea name="Adres" class="form-control" rows="3">@Model?.Adres</textarea>
+                    <div class="modal-body p-4 bg-white">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Dernek Adresi</label>
+                            <textarea name="Adres" class="form-control border-0 bg-light shadow-none" rows="3">@Model?.Adres</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Telefon Numarası</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-0 bg-light"><i class="fas fa-phone text-muted"></i></span>
+                                <input type="text" name="Telefon" class="form-control border-0 bg-light shadow-none" value="@Model?.Telefon">
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Telefon</label>
-                            <input type="text" name="Telefon" class="form-control" value="@Model?.Telefon">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">E-Posta</label>
-                            <input type="email" name="Eposta" class="form-control" value="@Model?.Eposta">
+                            <label class="form-label fw-bold text-muted small text-uppercase">E-Posta Adresi</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-0 bg-light"><i class="fas fa-envelope text-muted"></i></span>
+                                <input type="email" name="Eposta" class="form-control border-0 bg-light shadow-none" value="@Model?.Eposta">
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-                        <button type="submit" class="btn btn-warning fw-bold px-4">Kaydet</button>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-5 fw-bold">Değişiklikleri Kaydet</button>
                     </div>
                 </form>
             </div>
@@ -114,35 +162,73 @@
 }
 
 <style>
-    /* CSS kodların aynen korunuyor */
-    .icon-box {
-        width: 45px;
-        height: 45px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
+    /* Renk Paleti ve Stiller */
+    .text-primary-dark {
+        color: #0d2b4d !important;
     }
 
-    .btn-social {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
+    .bg-light-blue {
+        background-color: rgba(13, 43, 77, 0.05);
+    }
+
+    .bg-light-yellow {
+        background-color: rgba(255, 200, 0, 0.1);
+    }
+
+    .btn-gold {
+        background-color: #ffc800;
+        border-color: #ffc800;
+        color: #0d2b4d;
+    }
+
+        .btn-gold:hover {
+            background-color: #e6b400;
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+    .btn-primary-dark {
+        background-color: #0d2b4d;
+        color: white;
         transition: 0.3s;
     }
 
-        .btn-social:hover {
-            background-color: #ffc107;
-            color: #212529;
-            border-color: #ffc107;
+        .btn-primary-dark:hover {
+            background-color: #051030;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(13,43,77,0.2) !important;
         }
 
-    .rounded-4 {
-        border-radius: 1.5rem !important;
+    /* Kart Hover Efektleri */
+    .contact-info-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .contact-info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+        }
+
+    /* İkon Yuvarlakları */
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s ease;
+    }
+
+    .contact-info-card:hover .icon-circle {
+        transform: scale(1.1);
+    }
+
+    /* Form Odaklanma Efekti */
+    .form-control:focus {
+        background-color: #fff !important;
+        border: 1px solid #ffc800 !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 200, 0, 0.15) !important;
     }
 </style>
