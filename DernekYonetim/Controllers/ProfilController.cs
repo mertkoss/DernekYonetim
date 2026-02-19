@@ -56,4 +56,61 @@ public class ProfilController : Controller
 
         return RedirectToAction("Index");
     }
+
+    // SAYFAYI GÖRÜNTÜLEME (GET) - Şifre Değiştir
+    [HttpGet]
+    public IActionResult SifreDegistir()
+    {
+        // 1. Yetki Kontrolü
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        return View();
+    }
+
+    // ŞİFREYİ GÜNCELLEME İŞLEMİ (POST)
+    [HttpPost]
+    public async Task<IActionResult> SifreDegistir(string eskiSifre, string yeniSifre, string yeniSifreTekrar)
+    {
+        var adminId = HttpContext.Session.GetInt32("AdminID");
+        if (adminId == null) return RedirectToAction("Login", "Auth");
+
+        var mevcutKullanici = await _context.AdminKullanicilars.FindAsync(adminId);
+        if (mevcutKullanici == null) return RedirectToAction("Logout", "Auth");
+
+        // 1. ESKİ ŞİFRE DOĞRULAMASI (Kritik Güvenlik Adımı)
+        // Trim() kullanıyoruz çünkü AuthController'daki Login'de de kullanmışsın
+        if (mevcutKullanici.SifreHash.Trim() != eskiSifre)
+        {
+            ViewBag.Hata = "Mevcut şifrenizi yanlış girdiniz.";
+            return View();
+        }
+
+        // 2. YENİ ŞİFRELERİN UYUŞMA KONTROLÜ
+        if (yeniSifre != yeniSifreTekrar)
+        {
+            ViewBag.Hata = "Yeni girdiğiniz şifreler birbiriyle uyuşmuyor.";
+            return View();
+        }
+
+        // 3. ŞİFRE GÜVENLİK KONTROLÜ (Opsiyonel ama profesyonel)
+        if (yeniSifre.Length < 6)
+        {
+            ViewBag.Hata = "Yeni şifreniz en az 6 karakter uzunluğunda olmalıdır.";
+            return View();
+        }
+
+        // 4. ŞİFREYİ GÜNCELLE VE KAYDET
+        mevcutKullanici.SifreHash = yeniSifre;
+        _context.AdminKullanicilars.Update(mevcutKullanici);
+        await _context.SaveChangesAsync();
+
+        // 5. İŞLEM BAŞARILI MESAJI
+        ViewBag.Basarili = "Şifreniz güvenlik standartlarına uygun olarak başarıyla güncellendi.";
+
+        // Yönlendirme yapmıyoruz, aynı sayfada kalıp yeşil başarı kutusunu gösteriyoruz
+        return View();
+    }
 }

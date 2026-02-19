@@ -1,0 +1,169 @@
+﻿@{
+    ViewData["Title"] = "Şifre Değiştir";
+    Layout = "_Layout";
+}
+
+<section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px; min-height: 80vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6 col-md-8">
+
+                <div class="text-center mb-4">
+                    <h2 class="section-heading text-primary-dark text-uppercase mb-0">Güvenlik Ayarları</h2>
+                    <p class="text-muted">Hesap güvenliğiniz için şifrenizi düzenli olarak güncelleyin.</p>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="fw-bold text-primary-dark mb-0">
+                            <i class="fas fa-shield-alt me-2 text-warning"></i>Şifre Güncelleme
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+
+                        @if (ViewBag.Hata != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i> <strong>Hata:</strong> @ViewBag.Hata
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        @if (ViewBag.Basarili != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4">
+                                <i class="fas fa-check-circle me-2"></i> <strong>Başarılı!</strong> @ViewBag.Basarili
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <form action="/Profil/SifreDegistir" method="post">
+
+                            <div class="mb-4 position-relative">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Mevcut Şifreniz</label>
+                                <div class="input-group shadow-sm border-0 rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-muted px-1"></i></span>
+                                    <input type="password" name="eskiSifre" class="form-control form-control-lg border-0 bg-light" placeholder="Şu anki şifrenizi girin" required>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 text-muted opacity-25">
+
+                            <div class="mb-4 position-relative">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Yeni Şifre</label>
+                                <div class="input-group shadow-sm border-0 rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-key text-warning px-1"></i></span>
+                                    <input type="password" id="yeniSifreInput" name="yeniSifre" class="form-control form-control-lg border-0 bg-light" placeholder="En az 6 karakter" required minlength="6">
+                                </div>
+
+                                <div class="progress mt-2" style="height: 6px; border-radius: 3px; background-color: #e9ecef;">
+                                    <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%; transition: width 0.4s ease, background-color 0.4s ease;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <small class="text-muted" style="font-size: 0.75rem;">Harf, rakam ve sembol kullanın</small>
+                                    <span id="strengthText" class="small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-5 position-relative">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Yeni Şifre (Tekrar)</label>
+                                <div class="input-group shadow-sm border-0 rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-check-double text-warning px-1"></i></span>
+                                    <input type="password" name="yeniSifreTekrar" class="form-control form-control-lg border-0 bg-light" placeholder="Yeni şifrenizi tekrar girin" required minlength="6">
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <a href="/Profil/Index" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                                    <i class="fas fa-arrow-left me-2"></i> Profile Dön
+                                </a>
+                                <button type="submit" class="btn btn-primary-dark fw-bold rounded-pill px-4 shadow-sm">
+                                    <i class="fas fa-save me-2 text-warning"></i> Şifreyi Güncelle
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .text-primary-dark {
+        color: #0d2b4d !important;
+    }
+
+    .btn-primary-dark {
+        background-color: #0d2b4d;
+        color: white;
+        border: none;
+        transition: 0.3s ease;
+    }
+
+        .btn-primary-dark:hover {
+            background-color: #051030;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(13, 43, 77, 0.3) !important;
+        }
+
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: none !important;
+    }
+
+    .input-group:focus-within {
+        box-shadow: 0 0 0 3px rgba(255, 200, 0, 0.3) !important;
+        background-color: #fff !important;
+    }
+
+        .input-group:focus-within .input-group-text,
+        .input-group:focus-within .form-control {
+            background-color: #fff !important;
+        }
+</style>
+
+<script>
+    // ŞİFRE GÜCÜNÜ ÖLÇEN JAVASCRIPT KODU
+    document.getElementById('yeniSifreInput').addEventListener('input', function(e) {
+        var password = e.target.value;
+        var strengthBar = document.getElementById('strengthBar');
+        var strengthText = document.getElementById('strengthText');
+        var strength = 0;
+
+        // Kriterler: Uzunluk, Küçük Harf, Büyük Harf, Rakam/Sembol
+        if (password.length >= 6) strength += 25;
+        if (password.match(/[a-z]+/)) strength += 25;
+        if (password.match(/[A-Z]+/)) strength += 25;
+        if (password.match(/[0-9]+/) || password.match(/[\W]+/)) strength += 25;
+
+        // Çubuk genişliğini ayarla
+        strengthBar.style.width = strength + '%';
+
+        // Renkleri ve Metinleri Ayarla
+        if (password.length === 0) {
+            strengthBar.style.width = '0%';
+            strengthText.innerText = '';
+        } else if (strength < 50) {
+            // Zayıf: Kırmızı
+            strengthBar.className = 'progress-bar bg-danger';
+            strengthText.innerText = 'Zayıf';
+            strengthText.className = 'text-danger fw-bold small';
+        } else if (strength < 100) {
+            // Orta: Sarı/Turuncu
+            strengthBar.className = 'progress-bar bg-warning';
+            strengthText.innerText = 'Orta';
+            strengthText.className = 'text-warning fw-bold small';
+        } else {
+            // Güçlü: Yeşil
+            strengthBar.className = 'progress-bar bg-success';
+            strengthText.innerText = 'Güçlü';
+            strengthText.className = 'text-success fw-bold small';
+        }
+    });
+</script>
