@@ -1,0 +1,175 @@
+﻿@model DernekYonetim.Models.AdminKullanicilar
+@{
+    ViewData["Title"] = "Profilimi Güncelle";
+    Layout = "_Layout";
+}
+
+<section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px;">
+    <div class="container">
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="section-heading text-primary-dark text-uppercase mb-0">Hesap Ayarları</h2>
+                <p class="text-muted">Profil bilgilerinizi ve görünümünüzü buradan güncelleyebilirsiniz.</p>
+            </div>
+        </div>
+
+        @if (TempData["ProfilGuncellendi"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4">
+                <i class="fas fa-check-circle me-2"></i> <strong>Başarılı!</strong> @TempData["ProfilGuncellendi"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100 bg-white">
+                    <div class="card-body">
+
+                        <div class="profile-avatar mb-3 mx-auto d-flex align-items-center justify-content-center bg-light border border-warning position-relative" style="width: 120px; height: 120px; border-radius: 50%;">
+                            <i id="mainProfileIcon" class="fas fa-user-tie fa-4x text-primary-dark"></i>
+                        </div>
+
+                        <h4 class="fw-bold text-primary-dark mb-1">@Model.AdSoyad</h4>
+                        <p class="text-muted mb-4">@Model.KullaniciAdi</p>
+
+                        <hr class="text-muted mb-4">
+
+                        <h6 class="text-muted small fw-bold text-uppercase mb-3">Profil İkonu Seç</h6>
+                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-secondary icon-btn" onclick="selectIcon('fa-user-tie')">
+                                <i class="fas fa-user-tie"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary icon-btn" onclick="selectIcon('fa-user-graduate')">
+                                <i class="fas fa-user-graduate"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary icon-btn" onclick="selectIcon('fa-chalkboard-teacher')">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary icon-btn" onclick="selectIcon('fa-laptop-code')">
+                                <i class="fas fa-laptop-code"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary icon-btn" onclick="selectIcon('fa-user-shield')">
+                                <i class="fas fa-user-shield"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary icon-btn" onclick="selectIcon('fa-user-astronaut')">
+                                <i class="fas fa-user-astronaut"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="fw-bold text-primary-dark mb-0"><i class="fas fa-user-edit me-2 text-warning"></i>Profil Detayları</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/Profil/Index" method="post">
+                            <input type="hidden" name="Id" value="@Model.AdminId" />
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Ad Soyad</label>
+                                    <input type="text" name="AdSoyad" value="@Model.AdSoyad" class="form-control form-control-lg border-0 bg-light shadow-none" required>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Kullanıcı Adı</label>
+                                    <input type="text" name="KullaniciAdi" value="@Model.KullaniciAdi" class="form-control form-control-lg border-0 bg-light shadow-none" required>
+                                </div>
+
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">E-Posta Adresi</label>
+                                    <input type="email" name="Email" value="@Model.Email" class="form-control form-control-lg border-0 bg-light shadow-none" required>
+                                </div>
+
+                                <div class="col-12 mt-4 text-end">
+                                    <button type="submit" class="btn btn-warning fw-bold rounded-pill px-5 text-dark shadow-sm">
+                                        <i class="fas fa-save me-2"></i> Değişiklikleri Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .text-primary-dark {
+        color: #0d2b4d !important;
+    }
+
+    .form-control:focus {
+        background-color: #fff !important;
+        border: 1px solid #ffc800 !important;
+        box-shadow: 0 4px 10px rgba(255, 200, 0, 0.1) !important;
+    }
+
+    /* İkon Seçici Buton Stilleri */
+    .icon-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+    }
+
+        .icon-btn:hover {
+            background-color: #ffc800;
+            color: #0d2b4d;
+            border-color: #ffc800;
+            transform: scale(1.1);
+        }
+
+        /* Seçili ikonun stili */
+        .icon-btn.active-icon {
+            background-color: #0d2b4d;
+            color: #ffc800;
+            border-color: #0d2b4d;
+            box-shadow: 0 4px 8px rgba(13, 43, 77, 0.3);
+        }
+</style>
+
+<script>
+    // 1. Sayfa yüklendiğinde LocalStorage'dan ikonu oku ve uygula
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedIcon = localStorage.getItem('userProfileIcon') || 'fa-user-tie'; // Varsayılan fa-user-tie
+        applyIcon(savedIcon);
+    });
+
+    // 2. Kullanıcı yeni ikon seçtiğinde çalışacak fonksiyon
+    function selectIcon(iconClass) {
+        // Tarayıcıya kaydet
+        localStorage.setItem('userProfileIcon', iconClass);
+        // Ekrana uygula
+        applyIcon(iconClass);
+    }
+
+    // 3. İkonu ekrana basan ve butonları aktifleştiren yardımcı fonksiyon
+    function applyIcon(iconClass) {
+        // Ana profil ikonunu güncelle
+        const mainIcon = document.getElementById('mainProfileIcon');
+        mainIcon.className = `fas ${iconClass} fa-4x text-primary-dark`;
+
+        // Navbar'daki küçük ikonu da anında güncellemek istersen (Opsiyonel):
+        // (Eğer _Layout.cshtml'de navbar'daki ikona id="navProfileIcon" verirsen bu da anında değişir)
+        const navIcon = document.getElementById('navProfileIcon');
+        if(navIcon) navIcon.className = `fas ${iconClass} fs-5 me-1 text-warning align-middle`;
+
+        // Seçili butonun rengini koyulaştır (active-icon sınıfı ekle)
+        document.querySelectorAll('.icon-btn').forEach(btn => {
+            btn.classList.remove('active-icon');
+            if(btn.innerHTML.includes(iconClass)) {
+                btn.classList.add('active-icon');
+            }
+        });
+    }
+</script>
