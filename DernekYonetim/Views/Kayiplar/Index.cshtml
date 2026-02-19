@@ -4,91 +4,151 @@
     Layout = "_Layout";
 }
 
-<section class="page-section bg-light" style="padding-top:120px">
+<section class="page-section bg-light" style="padding-top:120px; padding-bottom: 100px;">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-heading text-uppercase">Kaybettiklerimiz</h2>
-            <h3 class="section-subheading text-muted">Aramızdan ayrılan değerli büyüklerimizi ve dostlarımızı saygıyla anıyoruz.</h3>
+
+        <div class="text-center mb-5 pb-4 border-bottom border-secondary border-opacity-25">
+            <h2 class="section-heading text-primary-dark text-uppercase mb-3" style="letter-spacing: 2px;">Kaybettiklerimiz</h2>
+            <p class="text-muted fs-5 fst-italic">"Aramızdan ayrılan değerli büyüklerimizi ve dostlarımızı sevgi, saygı ve özlemle anıyoruz..."</p>
 
             @if (Context.Session.GetInt32("AdminID") != null)
             {
-                <button class="btn btn-dark rounded-pill mt-3" data-bs-toggle="modal" data-bs-target="#kayipEkleModal">
+                <button class="btn btn-dark rounded-pill mt-4 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#kayipEkleModal">
                     <i class="fas fa-plus me-2"></i>Yeni Kayıt Ekle
                 </button>
             }
         </div>
 
-        <div class="row g-4">
-            @foreach (var item in Model)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card h-100 border-0 shadow-sm memorial-card">
-                        <div class="img-wrapper">
-                            <img src="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
-                                 class="card-img-top memorial-img" alt="@item.AdSoyad">
-                        </div>
-                        <div class="card-body text-center">
-                            <h5 class="fw-bold mb-1">@item.AdSoyad</h5>
-                            <p class="text-danger small mb-2">
-                                <i class="fas fa-cross me-1"></i> @(item.VefatTarihi?.ToString("dd.MM.yyyy") ?? "---")
-                            </p>
-                            <p class="card-text text-muted small">@item.Aciklama</p>
-                        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <div class="memorial-row bg-white shadow-sm rounded-4 p-4 mb-4 position-relative">
 
-                        @if (Context.Session.GetInt32("AdminID") != null)
-                        {
-                            <div class="card-footer bg-white border-0 text-center pb-3">
-                                <button class="btn btn-sm btn-outline-warning border-0"
-                                        onclick="kayipDuzenle(@item.Id,
-                                                                    '@Html.Raw(item.AdSoyad?.Replace("'", "\\'"))',
-                                                                    '@item.VefatTarihi?.ToString("yyyy-MM-dd")',
-                                                                    '@Html.Raw(item.Aciklama?.Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " "))')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <a href="/Kayiplar/Sil/@item.Id" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
+                            @if (Context.Session.GetInt32("AdminID") != null)
+                            {
+                                <div class="admin-controls position-absolute top-0 end-0 mt-3 me-3">
+                                    <button class="btn btn-sm btn-light text-warning shadow-sm rounded-circle me-1" title="Düzenle"
+                                            data-id="@item.Id"
+                                            data-adsoyad="@item.AdSoyad"
+                                            data-tarih="@item.VefatTarihi?.ToString("yyyy-MM-dd")"
+                                            data-aciklama="@item.Aciklama"
+                                            onclick="kayipDuzenle(this)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="/Kayiplar/Sil/@item.Id" class="btn btn-sm btn-light text-danger shadow-sm rounded-circle" title="Sil"
+                                       onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            }
+
+                            <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
+
+                                <div class="memorial-img-container flex-shrink-0 mb-4 mb-md-0 me-md-5">
+                                    <img src="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
+                                         alt="@item.AdSoyad" class="rounded-circle shadow-sm">
+                                </div>
+
+                                <div class="memorial-content flex-grow-1 text-center text-md-start w-100">
+                                    <h3 class="fw-bold text-primary-dark mb-1">@item.AdSoyad</h3>
+
+                                    <div class="text-secondary mb-3 pb-2 border-bottom d-inline-block">
+                                        <i class="fas fa-dove text-muted me-2"></i>
+                                        <span class="fw-bold">Vefat:</span> @(item.VefatTarihi?.ToString("dd MMMM yyyy") ?? "Bilinmiyor")
+                                    </div>
+
+                                    <p class="text-muted memorial-desc mb-3">
+                                        @item.Aciklama
+                                    </p>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Aciklama))
+                                    {
+                                        <button class="btn btn-link text-decoration-none text-warning fw-bold p-0"
+                                                data-adsoyad="@item.AdSoyad"
+                                                data-tarih="@item.VefatTarihi?.ToString("dd MMMM yyyy")"
+                                                data-img="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
+                                                data-aciklama="@item.Aciklama"
+                                                onclick="openTributeModal(this)">
+                                            Taziyeyi Oku <i class="fas fa-arrow-right ms-1 fs-6"></i>
+                                        </button>
+                                    }
+                                </div>
                             </div>
-                        }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-leaf fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Henüz eklenmiş bir kayıt bulunmuyor.</p>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="tributeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 pb-0 position-absolute w-100" style="z-index: 10;">
+                <button type="button" class="btn-close btn-close-white bg-dark bg-opacity-50 p-2 rounded-circle ms-auto m-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-5 bg-dark d-flex align-items-center justify-content-center p-4">
+                        <img id="tributeImg" src="" alt="" class="img-fluid rounded-circle shadow border border-3 border-secondary" style="width: 200px; height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-7 p-5 bg-white">
+                        <h2 id="tributeName" class="fw-bold text-primary-dark mb-1"></h2>
+                        <p class="text-muted mb-4 pb-3 border-bottom"><i class="fas fa-dove me-2"></i><span id="tributeDate"></span></p>
+
+                        <div class="custom-scrollbar pe-2" style="max-height: 300px; overflow-y: auto;">
+                            <p id="tributeText" class="text-secondary" style="white-space: pre-wrap; line-height: 1.8;"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @if (Context.Session.GetInt32("AdminID") != null)
 {
     <div class="modal fade" id="kayipDuzenleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content border-0">
+            <div class="modal-content border-0 shadow">
                 <form action="/Kayiplar/KayitGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
                     <input type="hidden" name="Id" id="editId" />
-                    <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title">Kaydı Düzenle</h5>
+                    <div class="modal-header bg-warning text-dark border-0">
+                        <h5 class="modal-title fw-bold">Kaydı Düzenle</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body bg-light p-4">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Ad Soyad</label>
-                            <input type="text" name="AdSoyad" id="editAdSoyad" class="form-control" required>
+                            <input type="text" name="AdSoyad" id="editAdSoyad" class="form-control border-0 shadow-sm" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Vefat Tarihi</label>
-                            <input type="date" name="VefatTarihiInput" id="editVefatTarihi" class="form-control" required>
+                            <input type="date" name="VefatTarihiInput" id="editVefatTarihi" class="form-control border-0 shadow-sm" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Fotoğrafı Değiştir (İsteğe bağlı)</label>
-                            <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                            <label class="form-label fw-bold">Fotoğrafı Değiştir</label>
+                            <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Açıklama</label>
-                            <textarea name="Aciklama" id="editAciklama" class="form-control" rows="3"></textarea>
+                            <label class="form-label fw-bold">Açıklama / Özgeçmiş</label>
+                            <textarea name="Aciklama" id="editAciklama" class="form-control border-0 shadow-sm" rows="5"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                        <button type="submit" class="btn btn-warning px-4">Güncelle</button>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-4">Güncelle</button>
                     </div>
                 </form>
             </div>
@@ -97,32 +157,33 @@
 
     <div class="modal fade" id="kayipEkleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content border-0 shadow">
                 <form action="/Kayiplar/KayitEkle" method="post" enctype="multipart/form-data">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title">Yeni Kayıt Ekle</h5>
+                    <div class="modal-header bg-dark text-white border-0">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-plus me-2 text-warning"></i>Yeni Kayıt Ekle</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body bg-light p-4">
                         <div class="mb-3">
-                            <label class="form-label">Ad Soyad</label>
-                            <input type="text" name="AdSoyad" class="form-control" required>
+                            <label class="form-label fw-bold">Ad Soyad</label>
+                            <input type="text" name="AdSoyad" class="form-control border-0 shadow-sm" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Vefat Tarihi</label>
-                            <input type="date" name="VefatTarihiInput" class="form-control" required>
+                            <label class="form-label fw-bold">Vefat Tarihi</label>
+                            <input type="date" name="VefatTarihiInput" class="form-control border-0 shadow-sm" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Fotoğraf</label>
-                            <input type="file" name="Fotograf" class="form-control" accept="image/*">
+                            <label class="form-label fw-bold">Fotoğraf</label>
+                            <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Kısa Açıklama / Not</label>
-                            <textarea name="Aciklama" class="form-control" rows="3"></textarea>
+                            <label class="form-label fw-bold">Açıklama / Özgeçmiş</label>
+                            <textarea name="Aciklama" class="form-control border-0 shadow-sm" rows="5"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-dark w-100">Kaydet</button>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">Kaydet</button>
                     </div>
                 </form>
             </div>
@@ -131,43 +192,99 @@
 }
 
 <style>
-    /* CSS kodların aynen korunuyor */
-    .memorial-card {
-        transition: all 0.4s ease;
-        border-radius: 15px;
-        overflow: hidden;
+    .text-primary-dark {
+        color: #0d2b4d !important;
     }
 
-        .memorial-card:hover {
-            transform: translateY(-10px);
+    /* YATAY SATIR STİLLERİ */
+    .memorial-row {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .memorial-row:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08) !important;
         }
 
-    .img-wrapper {
-        height: 250px;
-        overflow: hidden;
-        background-color: #f8f9fa;
+    /* YUVARLAK VE SİYAH-BEYAZ GÖRSEL */
+    .memorial-img-container {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        padding: 5px;
+        background: #fff;
+        border: 2px solid #e9ecef;
     }
 
-    .memorial-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: grayscale(100%); /* Saygılı bir hava için siyah beyaz */
-        transition: 0.5s;
-    }
+        .memorial-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%);
+            transition: filter 0.5s ease;
+        }
 
-    .memorial-card:hover .memorial-img {
+    .memorial-row:hover .memorial-img-container img {
         filter: grayscale(0%);
     }
-    /* Mouse üzerine gelince renklenir */
+
+    /* KISA METİN GÖRÜNÜMÜ */
+    .memorial-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Sadece 2 satır göster, gerisini 3 nokta yap */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* ADMİN BUTONLARI */
+    .admin-controls {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .memorial-row:hover .admin-controls {
+        opacity: 1;
+    }
+
+    /* POPUP SCROLLBAR */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #d1d1d1;
+        border-radius: 4px;
+    }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
 </style>
 
 <script>
-    function kayipDuzenle(id, adSoyad, tarih, aciklama) {
-        document.getElementById('editId').value = id;
-        document.getElementById('editAdSoyad').value = adSoyad;
-        document.getElementById('editVefatTarihi').value = tarih; // yyyy-MM-dd formatında gelmeli
-        document.getElementById('editAciklama').value = aciklama;
+    // Taziyeyi Okuma Modalı (Zarif Lightbox)
+    function openTributeModal(btn) {
+        // Butonun data özelliklerinden verileri çekiyoruz
+        document.getElementById('tributeName').innerText = btn.getAttribute('data-adsoyad');
+        document.getElementById('tributeDate').innerText = btn.getAttribute('data-tarih');
+        document.getElementById('tributeImg').src = btn.getAttribute('data-img');
+        document.getElementById('tributeText').innerText = btn.getAttribute('data-aciklama');
+
+        var tributeModal = new bootstrap.Modal(document.getElementById('tributeModal'));
+        tributeModal.show();
+    }
+
+    // Düzenleme Modalı (Güvenli Veri Aktarımı)
+    function kayipDuzenle(btn) {
+        document.getElementById('editId').value = btn.getAttribute('data-id');
+        document.getElementById('editAdSoyad').value = btn.getAttribute('data-adsoyad');
+        document.getElementById('editVefatTarihi').value = btn.getAttribute('data-tarih');
+        document.getElementById('editAciklama').value = btn.getAttribute('data-aciklama');
 
         var editModal = new bootstrap.Modal(document.getElementById('kayipDuzenleModal'));
         editModal.show();
