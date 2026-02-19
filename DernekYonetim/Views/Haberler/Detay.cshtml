@@ -1,0 +1,164 @@
+﻿@model DernekYonetim.Models.Haberler
+@{
+    ViewData["Title"] = Model.Baslik;
+    Layout = "_Layout";
+}
+
+<section class="page-section bg-white" style="padding-top:120px; padding-bottom: 80px;">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-9 col-xl-8">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <a href="/Haberler" class="text-decoration-none text-muted fw-bold">
+                        <i class="fas fa-arrow-left me-2"></i> Haberlere Dön
+                    </a>
+
+                    @if (Model.Kategori != null)
+                    {
+                        <span class="badge bg-gold text-dark py-2 px-3 fs-6 shadow-sm">
+                            <i class="fas fa-bookmark me-1"></i> @Model.Kategori.KategoriAdi
+                        </span>
+                    }
+                </div>
+
+                <h1 class="text-primary-dark fw-bold mb-3" style="line-height: 1.3;">@Model.Baslik</h1>
+
+                <div class="d-flex align-items-center text-muted mb-4 pb-3 border-bottom border-warning">
+                    <i class="far fa-calendar-alt me-2 text-warning fs-5"></i>
+                    <span class="fs-6 fw-bold">Yayınlanma Tarihi: @Model.YayimTarihi?.ToString("dd MMMM yyyy")</span>
+                </div>
+
+                @if (Context.Session.GetInt32("AdminID") != null)
+                {
+                    <div class="admin-action-bar bg-light p-3 rounded mb-4 border border-warning d-flex justify-content-between align-items-center shadow-sm">
+                        <span class="fw-bold text-primary-dark"><i class="fas fa-user-shield me-2 text-warning"></i>Yönetici İşlemleri</span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary-dark me-2 rounded-pill px-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#detayHaberDuzenleModal">
+                                <i class="fas fa-edit me-1"></i> Haberi Düzenle
+                            </button>
+                            <a href="/Haberler/Sil/@Model.Id" class="btn btn-sm btn-danger rounded-pill px-3"
+                               onclick="return confirm('Bu haberi silmek istediğinize emin misiniz? (Silindikten sonra haberler listesine yönlendirileceksiniz)')">
+                                <i class="fas fa-trash-alt me-1"></i> Sil
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Ozet))
+                {
+                    <p class="lead fw-bold text-secondary mb-5" style="font-size: 1.25rem; line-height: 1.6; border-left: 4px solid #ffc800; padding-left: 1rem;">
+                        @Model.Ozet
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.FotografYolu))
+                {
+                    <div class="mb-5 shadow rounded overflow-hidden">
+                        <img src="@Model.FotografYolu" alt="@Model.Baslik" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" />
+                    </div>
+                }
+
+                <div class="news-content text-muted fs-5" style="line-height: 1.8; word-wrap: break-word; white-space: pre-wrap;">
+                    @Model.Icerik
+                </div>
+
+                <div class="mt-5 pt-4 border-top border-light d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        <strong>Ankara Öğretim Derneği</strong> - Tüm Hakları Saklıdır
+                    </div>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle me-1"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle me-1"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (Context.Session.GetInt32("AdminID") != null)
+{
+    <div class="modal fade" id="detayHaberDuzenleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <form action="/Haberler/HaberGuncelle" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+
+                    <div class="modal-header bg-warning text-dark border-0">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 bg-light">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Haber Başlığı</label>
+                                <input type="text" name="Baslik" value="@Model.Baslik" class="form-control border-0 shadow-sm" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Kategori ID</label>
+                                <input type="number" name="KategoriId" value="@Model.KategoriId" class="form-control border-0 shadow-sm" required />
+                                <small class="text-muted">Kategori değiştirmek için ID giriniz (Mevcut: @(Model.Kategori?.KategoriAdi))</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Fotoğrafı Değiştir</label>
+                                <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*" />
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Kısa Özet</label>
+                                <textarea name="Ozet" class="form-control border-0 shadow-sm" rows="2" required>@Model.Ozet</textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
+                                <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="6">@Model.Icerik</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-5">Değişiklikleri Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    /* Detay Sayfası Özel Stilleri */
+    .text-primary-dark {
+        color: #0d2b4d !important;
+    }
+
+    .bg-gold {
+        background-color: #ffc800 !important;
+    }
+
+    /* İçerik içindeki olası linkler veya kalın yazılar için */
+    .news-content b, .news-content strong {
+        color: #0d2b4d;
+    }
+
+    .news-content a {
+        color: #ffc800;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .news-content a:hover {
+            color: #0d2b4d;
+            text-decoration: underline;
+        }
+
+    /* Geri dön butonu hover */
+    a.text-muted:hover {
+        color: #ffc800 !important;
+    }
+</style>

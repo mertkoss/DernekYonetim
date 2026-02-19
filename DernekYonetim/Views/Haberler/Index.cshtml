@@ -2,76 +2,151 @@
 @{
     ViewData["Title"] = "Haber Yönetimi";
     Layout = "_Layout";
+
+    // Son 3 haberi slider için, kalanları liste için ayırıyoruz
+    var sonUcHaber = Model.OrderByDescending(x => x.YayimTarihi).Take(3).ToList();
+    // Liste kısmında hepsini gösterebilirsin veya son 3'ü atlayabilirsin. Hepsini göstermek daha iyi bir arşiv hissi verir.
+    var tumHaberler = Model.OrderByDescending(x => x.YayimTarihi).ToList();
 }
 
-<section class="page-section bg-light" style="padding-top:120px">
+@if (sonUcHaber.Any())
+{
+    <section class="news-hero-slider" style="margin-top: 80px;">
+        <div id="haberlerCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+
+            <div class="carousel-indicators">
+                @for (int i = 0; i < sonUcHaber.Count; i++)
+                {
+                    <button type="button" data-bs-target="#haberlerCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")"></button>
+                }
+            </div>
+
+            <div class="carousel-inner h-100">
+                @for (int i = 0; i < sonUcHaber.Count; i++)
+                {
+                    var hero = sonUcHaber[i];
+                    <div class="carousel-item h-100 @(i == 0 ? "active" : "")">
+                        <div class="hero-overlay"></div>
+                        <img src="@(string.IsNullOrEmpty(hero.FotografYolu) ? "/img/default-news.jpg" : hero.FotografYolu)" class="d-block w-100 h-100" style="object-fit: cover;" alt="@hero.Baslik">
+                        <div class="carousel-caption text-start">
+                            @if (hero.Kategori != null)
+                            {
+                                <span class="badge bg-gold text-dark mb-3 fs-6 px-3 py-2 shadow-sm">@hero.Kategori.KategoriAdi</span>
+                            }
+                            <h1 class="display-4 fw-bold text-white mb-3 hero-title">@hero.Baslik</h1>
+                            <p class="lead text-light hero-desc d-none d-md-block">@hero.Ozet</p>
+                            <a href="/Haberler/Detay/@hero.Id" class="btn btn-gold btn-lg mt-3 px-4 rounded-pill">Haberi İncele</a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#haberlerCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#haberlerCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+        </div>
+    </section>
+}
+
+<section class="page-section bg-white" style="padding-top:80px; padding-bottom: 100px;">
     <div class="container">
 
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom">
             <div>
-                <h2 class="section-heading text-uppercase mb-0">Haberler</h2>
-                <p class="text-muted">Derneğimizden güncel duyurular ve haberler</p>
+                <h2 class="section-heading text-primary-dark text-uppercase mb-0">Tüm Haberler ve Duyurular</h2>
+                <p class="text-muted mt-2 fs-5">Derneğimizden en güncel gelişmeler ve etkinlikler</p>
             </div>
 
             @if (Context.Session.GetInt32("AdminID") != null)
             {
-                <button class="btn btn-primary btn-lg rounded-pill" data-bs-toggle="modal" data-bs-target="#haberEkleModal">
+                <button class="btn btn-gold btn-lg rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#haberEkleModal">
                     <i class="fas fa-paper-plane me-2"></i>Yeni Haber Paylaş
                 </button>
             }
         </div>
 
-        <div class="row g-4">
-            @foreach (var item in Model)
+        <div class="news-flow-container mt-5">
+            @if (tumHaberler.Any())
             {
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm news-card position-relative">
+                int index = 0;
+                foreach (var item in tumHaberler)
+                {
+                    // Kategoriye özel dinamik renk sınıfı belirleme
+                    int categoryIndex = (item.KategoriId ?? 0) % 5;
+                    string badgeClass = $"cat-color-{categoryIndex}";
 
-                        <div class="position-absolute top-0 start-0 m-3" style="z-index: 2;">
-                            @if (item.Kategori != null)
-                            {
-                                <span class="badge bg-warning text-dark shadow-sm">
-                                    <i class="fas fa-tag me-1"></i> @item.Kategori.KategoriAdi
-                                </span>
-                            }
+                    // Görsel solda mı sağda mı olacak? (Bir sağ, bir sol stili)
+                    bool imageOnLeft = (index % 2 == 0);
+
+                    <div class="row align-items-center mb-5 pb-5 border-bottom news-flow-row">
+
+                        <div class="col-lg-5 @(imageOnLeft ? "order-lg-1" : "order-lg-2") mb-4 mb-lg-0">
+                            <div class="news-flow-img-wrapper shadow-sm">
+                                <img src="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-news.jpg" : item.FotografYolu)" alt="@item.Baslik">
+                            </div>
                         </div>
 
-                        <div class="position-relative overflow-hidden">
-                            <img src="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-news.jpg" : item.FotografYolu)"
-                                 class="card-img-top news-img" alt="@item.Baslik" style="height: 220px; object-fit: cover;">
-                        </div>
+                        <div class="col-lg-7 @(imageOnLeft ? "order-lg-2 ps-lg-5" : "order-lg-1 pe-lg-5")">
 
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <small class="text-muted">
-                                    <i class="far fa-calendar-alt me-1"></i> @item.YayimTarihi?.ToString("dd.MM.yyyy")
-                                </small>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    @if (item.Kategori != null)
+                                    {
+                                        <span class="badge @badgeClass py-2 px-3 fs-6 shadow-sm">
+                                            <i class="fas fa-bookmark me-1 d-none d-sm-inline"></i> @item.Kategori.KategoriAdi
+                                        </span>
+                                    }
+                                </div>
+                                <div class="text-muted small fw-bold">
+                                    <i class="far fa-calendar-alt text-warning me-1"></i> @item.YayimTarihi?.ToString("dd MMMM yyyy")
+                                </div>
+                            </div>
+
+                            <h3 class="news-flow-title text-primary-dark mb-3 fw-bold">@item.Baslik</h3>
+                            <div class="title-divider mb-4"></div>
+
+                            <p class="text-muted news-flow-desc mb-4 fs-5" style="line-height: 1.7;">
+                                @item.Ozet
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="/Haberler/Detay/@item.Id" class="btn btn-outline-primary-dark rounded-pill px-4 py-2 fw-bold">
+                                    Devamını Oku <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
 
                                 @if (Context.Session.GetInt32("AdminID") != null)
                                 {
-                                    <div class="admin-btns">
-                                        <button class="btn btn-link text-warning p-0 me-2"
-                                                onclick="haberDuzenle(@item.Id,
-                                                                            '@Html.Raw(item.Baslik?.Replace("'", "\\'"))',
-                                                                            '@Html.Raw(item.Ozet?.Replace("'", "\\'"))',
-                                                                            '@Html.Raw(item.Icerik?.Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " "))',
-                                                                            '@item.KategoriId')">
-                                            <i class="fas fa-edit"></i>
+                                    <div class="admin-controls-flow bg-light p-2 rounded-pill border">
+                                        <button class="btn btn-sm btn-link text-warning p-0 mx-2 text-decoration-none"
+                                                title="Düzenle"
+                                                data-id="@item.Id"
+                                                data-baslik="@item.Baslik"
+                                                data-ozet="@item.Ozet"
+                                                data-icerik="@item.Icerik"
+                                                data-kategori="@item.KategoriId"
+                                                onclick="haberDuzenle(this)">
+                                            <i class="fas fa-edit fs-5"></i>
                                         </button>
-                                        <a href="/Haberler/Sil/@item.Id" class="text-danger" onclick="return confirm('Bu haberi silmek istediğinize emin misiniz?')">
-                                            <i class="fas fa-trash-alt"></i>
+                                        <a href="/Haberler/Sil/@item.Id" class="btn btn-sm btn-link text-danger p-0 mx-2 text-decoration-none"
+                                           title="Sil" onclick="return confirm('Bu haberi silmek istediğinize emin misiniz?')">
+                                            <i class="fas fa-trash-alt fs-5"></i>
                                         </a>
                                     </div>
                                 }
                             </div>
-                            <h5 class="card-title fw-bold">@item.Baslik</h5>
-                            <p class="card-text text-muted small">@item.Ozet</p>
-                        </div>
-
-                        <div class="card-footer bg-white border-0 pb-4">
-                            <a href="/Haberler/Detay/@item.Id" class="btn btn-outline-dark btn-sm w-100 rounded-pill">Detayları Gör</a>
                         </div>
                     </div>
+                    index++;
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="far fa-newspaper fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Henüz yayınlanmış bir haber bulunmuyor.</h4>
                 </div>
             }
         </div>
@@ -82,23 +157,22 @@
 {
     <div class="modal fade" id="haberDuzenleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0 shadow-lg">
                 <form action="/Haberler/HaberGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
                     <input type="hidden" name="Id" id="editHaberId" />
-
-                    <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
+                    <div class="modal-header bg-warning text-dark border-0">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body p-4">
+                    <div class="modal-body p-4 bg-light">
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Haber Başlığı</label>
-                                <input type="text" name="Baslik" id="editBaslik" class="form-control" required />
+                                <label class="form-label fw-bold text-primary-dark">Haber Başlığı</label>
+                                <input type="text" name="Baslik" id="editBaslik" class="form-control border-0 shadow-sm" required />
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Kategori</label>
-                                <select name="KategoriId" id="editKategoriId" class="form-select" required>
+                                <label class="form-label fw-bold text-primary-dark">Kategori</label>
+                                <select name="KategoriId" id="editKategoriId" class="form-select border-0 shadow-sm" required>
                                     <option value="">Seçiniz...</option>
                                     @if (ViewBag.KategoriListesi != null)
                                     {
@@ -110,22 +184,22 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fotoğrafı Değiştir (İsteğe Bağlı)</label>
-                                <input type="file" name="Fotograf" class="form-control" accept="image/*" />
+                                <label class="form-label fw-bold text-primary-dark">Fotoğrafı Değiştir</label>
+                                <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*" />
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Kısa Özet</label>
-                                <textarea name="Ozet" id="editOzet" class="form-control" rows="2" required></textarea>
+                                <label class="form-label fw-bold text-primary-dark">Kısa Özet</label>
+                                <textarea name="Ozet" id="editOzet" class="form-control border-0 shadow-sm" rows="2" required></textarea>
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Haber İçeriği</label>
-                                <textarea name="Icerik" id="editIcerik" class="form-control" rows="4"></textarea>
+                                <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
+                                <textarea name="Icerik" id="editIcerik" class="form-control border-0 shadow-sm" rows="4"></textarea>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                        <button type="submit" class="btn btn-warning px-5">Değişiklikleri Kaydet</button>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-5">Değişiklikleri Kaydet</button>
                     </div>
                 </form>
             </div>
@@ -134,18 +208,21 @@
 
     <div class="modal fade" id="haberEkleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0">
+            <div class="modal-content border-0 shadow-lg">
                 <form action="/Haberler/HaberKaydet" method="post" enctype="multipart/form-data">
-                    <div class="modal-body p-4">
+                    <div class="modal-header text-white border-0" style="background-color: #0d2b4d;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-paper-plane text-warning me-2"></i>Yeni Haber Paylaş</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 bg-light">
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Haber Başlığı</label>
-                                <input type="text" name="Baslik" class="form-control" required />
+                                <label class="form-label fw-bold text-primary-dark">Haber Başlığı</label>
+                                <input type="text" name="Baslik" class="form-control border-0 shadow-sm" required />
                             </div>
-
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Kategori</label>
-                                <select name="KategoriId" class="form-select" required>
+                                <label class="form-label fw-bold text-primary-dark">Kategori</label>
+                                <select name="KategoriId" class="form-select border-0 shadow-sm" required>
                                     <option value="">Seçiniz...</option>
                                     @if (ViewBag.KategoriListesi != null)
                                     {
@@ -156,26 +233,23 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Kapak Fotoğrafı</label>
-                                <input type="file" name="Fotograf" class="form-control" accept="image/*" />
+                                <label class="form-label fw-bold text-primary-dark">Kapak Fotoğrafı</label>
+                                <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*" />
                             </div>
-
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Kısa Özet</label>
-                                <textarea name="Ozet" class="form-control" rows="2" required></textarea>
+                                <label class="form-label fw-bold text-primary-dark">Kısa Özet</label>
+                                <textarea name="Ozet" class="form-control border-0 shadow-sm" rows="2" required></textarea>
                             </div>
-
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Haber İçeriği</label>
-                                <textarea name="Icerik" class="form-control" rows="4"></textarea>
+                                <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
+                                <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="4"></textarea>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                        <button type="submit" class="btn btn-success px-5">Haberi Yayınla</button>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-5">Haberi Yayınla</button>
                     </div>
                 </form>
             </div>
@@ -184,39 +258,178 @@
 }
 
 <style>
-    /* CSS kodların aynen korunuyor */
-    .news-card {
-        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    /* Renk Paleti ve Temel Stiller */
+    .text-primary-dark {
+        color: #0d2b4d !important;
     }
 
-        .news-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    .bg-primary-dark {
+        background-color: #0d2b4d !important;
+    }
+
+    .btn-gold {
+        background-color: #ffc800;
+        border-color: #ffc800;
+        color: #0d2b4d;
+        font-weight: 700;
+    }
+
+        .btn-gold:hover {
+            background-color: #e6b400;
+            border-color: #e6b400;
+            color: #000;
         }
 
-    .news-img {
-        height: 220px;
-        object-fit: cover;
-        transition: transform 0.5s ease;
+    .btn-outline-primary-dark {
+        color: #0d2b4d;
+        border: 2px solid #0d2b4d;
+        background: transparent;
     }
 
-    .news-card:hover .news-img {
-        transform: scale(1.1);
-    }
-
-    .admin-btns a, .admin-btns button {
-        opacity: 0.6;
-        transition: 0.3s;
-        text-decoration: none; /* Link alt çizgisini kaldırdık */
-    }
-
-        .admin-btns a:hover, .admin-btns button:hover {
-            opacity: 1;
+        .btn-outline-primary-dark:hover {
+            background: #0d2b4d;
+            color: #fff;
         }
+
+    /* Kategori Renk Skalası (Lacivertten Maviye) */
+    .cat-color-0 {
+        background-color: #0d2b4d;
+        color: #fff;
+    }
+    /* Koyu Lacivert */
+    .cat-color-1 {
+        background-color: #1b4965;
+        color: #fff;
+    }
+    /* Deniz Mavisi */
+    .cat-color-2 {
+        background-color: #62b6cb;
+        color: #000;
+    }
+    /* Turkuaz */
+    .cat-color-3 {
+        background-color: #5fa8d3;
+        color: #000;
+    }
+    /* Gök Mavisi */
+    .cat-color-4 {
+        background-color: #ffc800;
+        color: #0d2b4d;
+    }
+    /* Altın Sarısı */
+
+    /* SLIDER STİLLERİ */
+    .news-hero-slider {
+        height: 60vh;
+        min-height: 400px;
+        max-height: 600px;
+    }
+
+        .news-hero-slider .carousel {
+            height: 100%;
+        }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(13, 43, 77, 0.9) 0%, rgba(13, 43, 77, 0.2) 100%);
+        z-index: 1;
+    }
+
+    .carousel-caption {
+        bottom: 10%;
+        z-index: 2;
+        padding-right: 15%;
+    }
+
+    .hero-title {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .hero-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* LİSTE (AKIŞ) STİLLERİ - ODTÜ TTO Benzeri */
+    .news-flow-row {
+        transition: transform 0.3s ease;
+    }
+
+        .news-flow-row:hover {
+            transform: translateX(5px);
+        }
+
+    .news-flow-img-wrapper {
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        height: 280px;
+        width: 100%;
+    }
+
+        .news-flow-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+    .news-flow-row:hover .news-flow-img-wrapper img {
+        transform: scale(1.05);
+    }
+
+    .title-divider {
+        height: 3px;
+        width: 60px;
+        background-color: #ffc800;
+        border-radius: 2px;
+    }
+
+    .news-flow-title {
+        line-height: 1.4;
+    }
+
+    .admin-controls-flow {
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+
+    .news-flow-row:hover .admin-controls-flow {
+        opacity: 1;
+    }
+
+    /* Mobil Düzenleme */
+    @@media (max-width: 991px) {
+        .news-flow-img-wrapper {
+            height: 220px;
+        }
+
+        .carousel-caption {
+            padding-right: 0;
+            bottom: 5%;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+    }
 </style>
 
 <script>
-    function haberDuzenle(id, baslik, ozet, icerik, kategoriId) {
+    // JS'de tırnak hatasını önlemek için verileri butonun data özelliklerinden alıyoruz
+    function haberDuzenle(btn) {
+        var id = btn.getAttribute('data-id');
+        var baslik = btn.getAttribute('data-baslik');
+        var ozet = btn.getAttribute('data-ozet');
+        var icerik = btn.getAttribute('data-icerik');
+        var kategoriId = btn.getAttribute('data-kategori');
+
         document.getElementById('editHaberId').value = id;
         document.getElementById('editBaslik').value = baslik;
         document.getElementById('editOzet').value = ozet;

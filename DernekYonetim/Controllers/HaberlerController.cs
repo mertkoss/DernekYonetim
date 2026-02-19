@@ -112,4 +112,51 @@ public class HaberlerController : Controller
 
         return RedirectToAction("Index");
     }
+    // HABER DETAY SAYFASI
+    public async Task<IActionResult> Detay(int id)
+    {
+        // Haberi kategorisiyle birlikte çekiyoruz
+        var haber = await _context.Haberlers
+            .Include(h => h.Kategori)
+            .FirstOrDefaultAsync(h => h.Id == id);
+
+        if (haber == null)
+        {
+            return NotFound(); // Haber bulunamazsa 404 sayfasına atar
+        }
+
+        return View(haber);
+    }
+    // HABER SİLME İŞLEMİ
+    public async Task<IActionResult> Sil(int id)
+    {
+        // 1. Yetki Kontrolü (Sadece Adminler Silebilir)
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        // 2. Veritabanından silinecek haberi bul
+        var silinecekHaber = await _context.Haberlers.FindAsync(id);
+
+        if (silinecekHaber != null)
+        {
+            // 3. Haberin sunucudaki fiziksel fotoğrafını da sil (Gereksiz yer kaplamasın)
+            if (!string.IsNullOrEmpty(silinecekHaber.FotografYolu))
+            {
+                var dosyaYolu = Path.Combine(_hostEnvironment.WebRootPath, silinecekHaber.FotografYolu.TrimStart('/'));
+                if (System.IO.File.Exists(dosyaYolu))
+                {
+                    System.IO.File.Delete(dosyaYolu);
+                }
+            }
+
+            // 4. Haberi veritabanından tamamen kaldır
+            _context.Haberlers.Remove(silinecekHaber);
+            await _context.SaveChangesAsync();
+        }
+
+        // 5. Silme işlemi bitince ana haberler sayfasına geri yönlendir
+        return RedirectToAction("Index");
+    }
 }
