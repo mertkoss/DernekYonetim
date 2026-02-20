@@ -1,0 +1,16 @@
+﻿@model DernekYonetim.Models.Iletisim
+
+<ul class="mt-4">
+    <li class="d-flex align-items-start gap-2">
+        <i class="fas fa-map-marker-alt" style="color:var(--renk-altin); margin-top:5px;"></i>
+        <span>@(Model?.Adres ?? "Adres Bilgisi Bulunamadı")</span>
+    </li>
+    <li class="d-flex align-items-center gap-2">
+        <i class="fas fa-phone" style="color:var(--renk-altin);"></i>
+        <span>@(Model?.Telefon ?? "Telefon Bilgisi Bulunamadı")</span>
+    </li>
+    <li class="d-flex align-items-center gap-2">
+        <i class="fas fa-envelope" style="color:var(--renk-altin);"></i>
+        <span>@(Model?.Eposta ?? "E-posta Bilgisi Bulunamadı")</span>
+    </li>
+</ul>

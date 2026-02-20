@@ -11,20 +11,8 @@
                     Eğitim meşalesini yarım asırdır gururla taşıyoruz. Amacımız, çağdaş uygarlık seviyesine ulaşmış bir Türkiye için çalışmaktır.
                 </p>
 
-                <ul class="mt-4">
-                    <li class="d-flex align-items-start gap-2">
-                        <i class="fas fa-map-marker-alt" style="color:var(--renk-altin); margin-top:5px;"></i>
-                        <span>Mustafa Kemal Mah. 2120. Cad. No:5 Çankaya/ANKARA</span>
-                    </li>
-                    <li class="d-flex align-items-center gap-2">
-                        <i class="fas fa-phone" style="color:var(--renk-altin);"></i>
-                        <span>+90 (312) 444 0 000</span>
-                    </li>
-                    <li class="d-flex align-items-center gap-2">
-                        <i class="fas fa-envelope" style="color:var(--renk-altin);"></i>
-                        <span>info@aod.org.tr</span>
-                    </li>
-                </ul>
+                @* DB'DEN GELEN İLETİŞİM BİLGİLERİ BURADA ÇAĞRILIYOR *@
+                @await Component.InvokeAsync("FooterContact")
             </div>
 
             <div class="col-lg-4 mb-4">
@@ -40,8 +28,8 @@
                     </div>
                     <div class="col-6">
                         <ul>
-                            <li><a href="#">Okullarımız</a></li>
-                            <li><a href="#">Burs Başvurusu</a></li>
+                            <li><a href="/Galeri">Galeri</a></li>
+                            <li><a href="/Kayiplar/Index">Kaybettiklerimiz</a></li>
                             <li><a href="/Haberler/Index">Haberler</a></li>
                             <li><a href="/Iletisim/Index">İletişim</a></li>
                         </ul>
@@ -50,18 +38,6 @@
             </div>
 
             <div class="col-lg-4 mb-4">
-                <h5>Çalışma Saatleri</h5>
-                <ul class="mb-4">
-                    <li class="d-flex justify-content-between border-bottom border-secondary pb-2 mb-2" style="border-color:rgba(255,255,255,0.1)!important;">
-                        <span>Pazartesi - Cuma</span>
-                        <span style="color:var(--renk-altin)">09:00 - 18:00</span>
-                    </li>
-                    <li class="d-flex justify-content-between">
-                        <span>Hafta Sonu</span>
-                        <span style="color:var(--renk-altin)">Kapalı</span>
-                    </li>
-                </ul>
-
                 <h5>Bizi Takip Edin</h5>
                 <div class="social-icons">
                     <a href="#"><i class="fab fa-facebook-f"></i></a>
