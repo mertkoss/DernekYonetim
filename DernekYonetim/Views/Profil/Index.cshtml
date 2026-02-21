@@ -154,22 +154,25 @@
     }
 
     // 3. İkonu ekrana basan ve butonları aktifleştiren yardımcı fonksiyon
-    function applyIcon(iconClass) {
-        // Ana profil ikonunu güncelle
-        const mainIcon = document.getElementById('mainProfileIcon');
-        mainIcon.className = `fas ${iconClass} fa-4x text-primary-dark`;
+     function applyIcon(iconClass) {
+         // Ana profil ikonunu güncelle (Profil sayfası ortasındaki büyük ikon)
+         const mainIcon = document.getElementById('mainProfileIcon');
+         if(mainIcon) mainIcon.className = `fas ${iconClass} fa-4x text-primary-dark`;
 
-        // Navbar'daki küçük ikonu da anında güncellemek istersen (Opsiyonel):
-        // (Eğer _Layout.cshtml'de navbar'daki ikona id="navProfileIcon" verirsen bu da anında değişir)
-        const navIcon = document.getElementById('navProfileIcon');
-        if(navIcon) navIcon.className = `fas ${iconClass} fs-5 me-1 text-warning align-middle`;
+         // Navbar'daki ismin yanındaki küçük ikonu ANINDA güncelle
+         const navIcon = document.getElementById('navProfileIcon');
+         if(navIcon) navIcon.className = `fas ${iconClass} fs-5 me-1 text-warning align-middle`;
 
-        // Seçili butonun rengini koyulaştır (active-icon sınıfı ekle)
-        document.querySelectorAll('.icon-btn').forEach(btn => {
-            btn.classList.remove('active-icon');
-            if(btn.innerHTML.includes(iconClass)) {
-                btn.classList.add('active-icon');
-            }
-        });
-    }
+         // Dropdown içindeki büyük ikonu ANINDA güncelle
+         const dropIcon = document.getElementById('dropdownProfileIcon');
+         if(dropIcon) dropIcon.className = `fas ${iconClass} fa-2x text-muted mb-2`;
+
+         // Seçili butonun rengini koyulaştır (active-icon sınıfı ekle)
+         document.querySelectorAll('.icon-btn').forEach(btn => {
+             btn.classList.remove('active-icon');
+             if(btn.innerHTML.includes(iconClass)) {
+                 btn.classList.add('active-icon');
+             }
+         });
+     }
 </script>

@@ -36,3 +36,22 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // LocalStorage'dan ikonu al, eğer yoksa varsayılan olarak 'fa-user-circle' yap
+        const savedIcon = localStorage.getItem('userProfileIcon') || 'fa-user-circle';
+
+        // Navbar'daki ismin yanındaki küçük ikonu bul ve değiştir
+        const navIcon = document.getElementById('navProfileIcon');
+        if (navIcon) {
+            navIcon.className = `fas ${savedIcon} fs-5 me-1 text-warning align-middle`;
+        }
+
+        // Dropdown içindeki büyük ikonu bul ve değiştir
+        const dropIcon = document.getElementById('dropdownProfileIcon');
+        if (dropIcon) {
+            dropIcon.className = `fas ${savedIcon} fa-2x text-muted mb-2`;
+        }
+    });
+</script>

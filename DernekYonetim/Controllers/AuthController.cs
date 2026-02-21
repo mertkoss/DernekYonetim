@@ -56,9 +56,16 @@ namespace DernekYonetim.Controllers
         }
 
         // --- REGISTER BÖLÜMÜ ---
+
         [HttpGet]
         public IActionResult Register()
         {
+            // 1. GÜVENLİK KİLİDİ: Giriş yapmayan kişi sayfayı (URL'den yazsa bile) açamaz
+            if (HttpContext.Session.GetInt32("AdminID") == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             // Sayfa ilk açıldığında tabloyu doldurmak için listeyi çekiyoruz
             ViewBag.Adminler = _context.AdminKullanicilars
                                        .OrderByDescending(x => x.AdminId) // En son eklenen en üstte
@@ -70,6 +77,12 @@ namespace DernekYonetim.Controllers
         [HttpPost]
         public IActionResult Register(AdminKullanicilar model)
         {
+            // 2. GÜVENLİK KİLİDİ: Giriş yapmayan kişi post isteği (kayıt) gönderemez
+            if (HttpContext.Session.GetInt32("AdminID") == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             // 1. Validasyon Kontrolü
             if (!ModelState.IsValid)
             {
@@ -94,12 +107,11 @@ namespace DernekYonetim.Controllers
             _context.SaveChanges();
 
             // --- PROFESYONEL YÖNLENDİRME ---
-            // Başarılı bilgisini TempData ile taşıyoruz
             TempData["KayitBasarili"] = true;
 
-            // Sayfada kalıp tabloyu güncellemek yerine, 
-            // kullanıcıyı bilgilendirip Login'e atmak en sağlıklı kullanıcı deneyimidir.
-            return View(model);
+            // BURASI ÖNEMLİ: Artık Login'e gitmiyoruz. 
+            // Mevcut admin başka bir admin eklediği için aynı sayfayı yeniliyoruz.
+            return RedirectToAction("Register");
         }
 
 

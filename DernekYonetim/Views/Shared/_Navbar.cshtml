@@ -46,25 +46,32 @@
                 {
                     <li class="nav-item dropdown ms-lg-3">
                         <a class="nav-link dropdown-toggle fw-bold text-primary-dark" href="#" id="userProfileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle fs-5 me-1 text-warning align-middle"></i>
+                            <i id="navProfileIcon" class="fas fa-user-circle fs-5 me-1 text-warning align-middle"></i>
                             @Context.Session.GetString("AdminAd")
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" aria-labelledby="userProfileDropdown" style="min-width: 220px;">
 
                             <li class="px-3 py-2 text-center border-bottom mb-2 bg-light">
-                                <i class="fas fa-user-shield fa-2x text-muted mb-2"></i>
+                                <i id="dropdownProfileIcon" class="fas fa-user-shield fa-2x text-muted mb-2"></i>
                                 <h6 class="mb-0 fw-bold">@Context.Session.GetString("AdminAd")</h6>
                                 <small class="text-muted">Sistem Yöneticisi</small>
                             </li>
 
                             <li>
-                                <a class="dropdown-item py-2" href="/Profil/Index">
-                                    <i class="fas fa-user-edit me-2 text-muted w-15px"></i> Profilimi Güncelle
+                                <a class="dropdown-item py-2" href="/Auth/Register">
+                                    <i class="fas fa-user-plus me-2 w-15px"></i> Yönetici Ekle
                                 </a>
                             </li>
+
+                            <li>
+                                <a class="dropdown-item py-2" href="/Profil/Index">
+                                    <i class="fas fa-user-edit me-2 w-15px"></i> Profilimi Güncelle
+                                </a>
+                            </li>
+
                             <li>
                                 <a class="dropdown-item py-2" href="/Profil/SifreDegistir">
-                                    <i class="fas fa-key me-2 text-muted w-15px"></i> Şifre Değiştir
+                                    <i class="fas fa-key me-2 w-15px"></i> Şifre Değiştir
                                 </a>
                             </li>
 
@@ -85,7 +92,7 @@
                     // 1. Tasarımın orijinal "Üye Girişi" stili
                     <li class="nav-item ms-lg-2">
                         <a class="nav-link btn btn-outline-warning rounded-pill px-4 text-dark fw-bold" href="/Auth/Login">
-                            <i class="fa fa-user me-1"></i> Üye Girişi
+                            <i class="fa fa-user me-1"></i>
                         </a>
                     </li>
                 }

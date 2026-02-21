@@ -4,9 +4,9 @@
 @model DernekYonetim.Models.AdminKullanicilar
 
 @{
-    ViewData["Title"] = "Üye Ol";
-    // Eğer projen layout kullanıyorsa ve çift <html> problemi oluyorsa aç:
-    // Layout = null;
+    ViewData["Title"] = "Yönetici Ekle";
+    // Eğer admin paneli için _Layout kullanıyorsan aşağıdaki satırı aç ve en dıştaki html/body etiketlerini sil:
+    // Layout = "_Layout";
 }
 
 <!doctype html>
@@ -16,11 +16,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -42,33 +39,30 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* İçerik uzayabileceği için center yerine start */
+            justify-content: flex-start;
             position: relative;
-            padding-bottom: 50px; /* Alt boşluk */
+            padding-bottom: 50px;
         }
 
-        /* Arka Plan Dekoru (Login ile aynı) */
         .arkaplan-dekor {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 400px; /* Sabit yükseklik */
+            height: 400px;
             background-color: var(--renk-lacivert);
             border-bottom-left-radius: 50px;
             border-bottom-right-radius: 50px;
             z-index: 0;
         }
 
-        /* Ana Container */
         .sayfa-icerik {
             width: 100%;
-            max-width: 500px; /* Biraz daha geniş çünkü form uzun */
+            max-width: 500px;
             z-index: 10;
             margin-top: 40px;
         }
 
-        /* Kart Stili (Login ile aynı temel yapı) */
         .ozel-kart {
             background-color: #ffffff;
             border-radius: 20px;
@@ -116,7 +110,6 @@
             padding: 20px 40px 40px 40px;
         }
 
-        /* Form Elemanları (Login ile aynı) */
         .form-grup {
             margin-bottom: 20px;
             position: relative;
@@ -209,25 +202,6 @@
                 background-color: #051030;
             }
 
-        .alt-gecis {
-            text-align: center;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .btn-text {
-            color: var(--renk-lacivert);
-            font-weight: 700;
-            font-size: 14px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-            .btn-text:hover {
-                text-decoration: underline;
-            }
-
         .hata-kutusu {
             background-color: #fee2e2;
             color: #991b1b;
@@ -240,53 +214,6 @@
             align-items: center;
             gap: 10px;
         }
-
-        /* --- TABLO STİLLERİ (Login tasarımına uygun) --- */
-        .tablo-baslik {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--renk-lacivert);
-            margin-bottom: 15px;
-            padding-left: 10px;
-            border-left: 4px solid var(--renk-altin);
-        }
-
-        .table-custom {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 14px;
-        }
-
-            .table-custom th {
-                background-color: var(--renk-lacivert);
-                color: #fff;
-                padding: 12px 15px;
-                font-weight: 600;
-                text-align: left;
-            }
-
-                .table-custom th:first-child {
-                    border-top-left-radius: 10px;
-                }
-
-                .table-custom th:last-child {
-                    border-top-right-radius: 10px;
-                }
-
-            .table-custom td {
-                padding: 12px 15px;
-                border-bottom: 1px solid #e2e8f0;
-                color: var(--renk-yazi);
-            }
-
-            .table-custom tr:last-child td {
-                border-bottom: none;
-            }
-
-            .table-custom tr:hover td {
-                background-color: #f1f5f9;
-            }
 
         .footer {
             text-align: center;
@@ -303,34 +230,17 @@
     <div class="arkaplan-dekor"></div>
 
     <div class="sayfa-icerik">
-
-        <!-- KAYIT KARTI -->
         <div class="ozel-kart">
             <div class="kart-baslik">
-                <div class="logo-kutu" style="
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        overflow: hidden;
-        background-color: #fff;
-        border: 1px solid #e2e8f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 15px; /* Logonun kenarlara yapışmasını önleyen boşluk */
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-
-                    <img src="~/lib/img/logos/logo.jpeg"
-                         style="width: 100%; height: 100%; object-fit: contain;"
-                         alt="Logo"
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold; font-size:24px;\'>AÖD</span>'">
+                <div class="logo-kutu" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; background-color: #fff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <img src="~/lib/img/logos/logo.jpeg" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#0a1a5c; font-weight:bold; font-size:24px;\'>AÖD</span>'">
                 </div>
-                <h2 class="baslik-yazi">Yeni Üye Kaydı</h2>
-                <div class="alt-baslik">Yönetim Paneli Erişimi</div>
+
+                <h2 class="baslik-yazi">Sisteme Yönetici Ekle</h2>
+                <div class="alt-baslik">Yetkili Kullanıcı Oluşturma Ekranı</div>
             </div>
 
             <div class="kart-icerik">
-
                 @if (ViewBag.Hata != null)
                 {
                     <div class="hata-kutusu">
@@ -340,40 +250,35 @@
                 }
 
                 <form asp-action="Register" asp-controller="Auth" method="post" autocomplete="off">
-
-                    <!-- Kullanıcı Adı -->
                     <div class="form-grup">
                         <label class="etiket" for="KullaniciAdi">Kullanıcı Adı</label>
                         <div class="input-kapsayici">
-                            <input asp-for="KullaniciAdi" type="text" class="ozel-input" placeholder="admin_kullanici" required />
+                            <input asp-for="KullaniciAdi" type="text" class="ozel-input" placeholder="yeni_yonetici" required />
                             <i class="fas fa-user ikon-sol"></i>
                         </div>
                         <span asp-validation-for="KullaniciAdi" class="text-danger" style="font-size:12px;"></span>
                     </div>
 
-                    <!-- Ad Soyad -->
                     <div class="form-grup">
                         <label class="etiket" for="AdSoyad">Ad Soyad</label>
                         <div class="input-kapsayici">
-                            <input asp-for="AdSoyad" type="text" class="ozel-input" placeholder="Adınız Soyadınız" required />
+                            <input asp-for="AdSoyad" type="text" class="ozel-input" placeholder="Yöneticinin Adı Soyadı" required />
                             <i class="fas fa-id-card ikon-sol"></i>
                         </div>
                         <span asp-validation-for="AdSoyad" class="text-danger" style="font-size:12px;"></span>
                     </div>
 
-                    <!-- Email -->
                     <div class="form-grup">
                         <label class="etiket" for="Email">E-Posta Adresi</label>
                         <div class="input-kapsayici">
-                            <input asp-for="Email" type="email" class="ozel-input" placeholder="ornek@aod.org.tr" required />
+                            <input asp-for="Email" type="email" class="ozel-input" placeholder="yonetici@aod.org.tr" required />
                             <i class="fas fa-envelope ikon-sol"></i>
                         </div>
                         <span asp-validation-for="Email" class="text-danger" style="font-size:12px;"></span>
                     </div>
 
-                    <!-- Şifre -->
                     <div class="form-grup">
-                        <label class="etiket" for="SifreHash">Şifre</label>
+                        <label class="etiket" for="SifreHash">Geçici Şifre</label>
                         <div class="input-kapsayici">
                             <input asp-for="SifreHash" id="sifreInput" type="password" class="ozel-input" placeholder="••••••••" required />
                             <i class="fas fa-lock ikon-sol"></i>
@@ -382,35 +287,25 @@
                         <span asp-validation-for="SifreHash" class="text-danger" style="font-size:12px;"></span>
                     </div>
 
-                    <!-- Kayıt Butonu -->
                     <button type="submit" class="btn-lacivert">
-                        Hesabı Oluştur <i class="fas fa-user-plus"></i>
+                        Yöneticiyi Kaydet <i class="fas fa-user-check"></i>
                     </button>
 
-                    <!-- Giriş Linki -->
-                    <div class="alt-gecis">
-                        <span style="font-size:14px; color:#64748b;">Zaten hesabınız var mı?</span>
-                        <a href="/Auth/Login" class="btn-text">
-                            Giriş Yap
+                    <div class="alt-gecis mt-3">
+                        <a href="/Anasayfa/Index" class="btn-text" style="display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b; text-decoration: none; transition: 0.3s;">
+                            <i class="fas fa-arrow-left"></i> Yönetim Paneline Dön
                         </a>
                     </div>
-
                 </form>
             </div>
 
             <div class="footer">
-                &copy; @DateTime.Now.Year Ankara Öğretim Derneği
+                &copy; @DateTime.Now.Year Ankara Öğretim Derneği Yönetim Paneli
             </div>
         </div>
-
-
     </div>
-    </section>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Scriptler -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         function sifreGoster() {
@@ -432,8 +327,8 @@
         {
                 <text>
                 Swal.fire({
-                    title: 'Kayıt Başarılı!',
-                    text: 'Hesabınız başarıyla oluşturuldu. Giriş ekranına yönlendiriliyorsunuz.',
+                    title: 'İşlem Başarılı!',
+                    text: 'Yeni yönetici sisteme başarıyla eklendi.',
                     icon: 'success',
                     timer: 3000,
                     timerProgressBar: true,
@@ -442,12 +337,12 @@
                     color: '#0a1a5c',
                     iconColor: '#b8860b',
                     didClose: () => {
-                        window.location.href = '/Auth/Login';
+                        // Kayıt sonrası Login'e değil, formu temizlemek için aynı sayfaya yönlendiriyoruz
+                        window.location.href = '/Auth/Register';
                     }
                 });
                 </text>
         }
     </script>
-
 </body>
 </html>
