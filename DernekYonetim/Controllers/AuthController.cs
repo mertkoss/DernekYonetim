@@ -262,7 +262,6 @@ namespace DernekYonetim.Controllers
                 mail.IsBodyHtml = true;
 
                 // --- PROFESYONEL HTML TASARIM ---
-                // Lacivert (#0a1a5c) ve Altın (#b8860b) renklerini kullandık.
                 string htmlBody = $@"
         <!DOCTYPE html>
         <html>
