@@ -1,13 +1,35 @@
-﻿<footer class="mt-4">
+﻿@using System.IO
+@using System.Text.Json
+@{
+    // --- VERİTABANI YERİNE JSON DOSYASINDAN OKUMA MANTIĞI ---
+    string jsonPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "social.json");
+    string fb = "", tw = "", ig = "", ln = "", yt = "";
+
+    if (System.IO.File.Exists(jsonPath))
+    {
+        string jsonString = System.IO.File.ReadAllText(jsonPath);
+        var socialData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
+        if (socialData != null)
+        {
+            socialData.TryGetValue("facebook", out fb);
+            socialData.TryGetValue("twitter", out tw);
+            socialData.TryGetValue("instagram", out ig);
+            socialData.TryGetValue("linkedin", out ln);
+            socialData.TryGetValue("youtube", out yt);
+        }
+    }
+}
+
+<footer class="mt-4 pb-3 pt-5" style="background-color: var(--renk-lacivert);">
     <div class="container">
         <div class="row">
             <div class="col-lg-4 mb-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <div style="width:30px; height:30px; background:var(--renk-altin); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:bold;">AÖD</div>
-                    <h5 class="m-0">Ankara Öğretim Derneği</h5>
+                    <div style="width:30px; height:30px; background:var(--renk-altin); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#0a1a5c; font-size:12px; font-weight:bold;">AÖD</div>
+                    <h5 class="m-0 fw-bold" style="color: var(--renk-altin);">Ankara Öğretim Derneği</h5>
                 </div>
 
-                <p style="opacity:0.8; line-height:1.6;">
+                <p style="color: #cbd5e1; line-height:1.6; font-size: 0.95rem;">
                     Eğitim meşalesini yarım asırdır gururla taşıyoruz. Amacımız, çağdaş uygarlık seviyesine ulaşmış bir Türkiye için çalışmaktır.
                 </p>
 
@@ -16,49 +38,146 @@
             </div>
 
             <div class="col-lg-4 mb-4">
-                <h5>Hızlı Linkler</h5>
+                <h5 class="fw-bold mb-3" style="color: var(--renk-altin);">Hızlı Linkler</h5>
                 <div class="row">
                     <div class="col-6">
-                        <ul>
-                            <li><a href="/">Anasayfa</a></li>
-                            <li><a href="/Dernek/Hakkinda/tarihce">Hakkımızda</a></li>
-                            <li><a href="/Dernek/Hakkinda/yonetim-kurulu">Yönetim Kurulu</a></li>
-                            <li><a href="/Dernek/Hakkinda/tuzuk">Tüzük</a></li>
+                        <ul class="list-unstyled footer-links">
+                            <li class="mb-2"><a href="/" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Anasayfa</a></li>
+                            <li class="mb-2"><a href="/Dernek/Hakkinda/tarihce" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Hakkımızda</a></li>
+                            <li class="mb-2"><a href="/Dernek/Hakkinda/yonetim-kurulu" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Yönetim Kurulu</a></li>
+                            <li class="mb-2"><a href="/Dernek/Hakkinda/tuzuk" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Tüzük</a></li>
                         </ul>
                     </div>
                     <div class="col-6">
-                        <ul>
-                            <li><a href="/Galeri">Galeri</a></li>
-                            <li><a href="/Kayiplar/Index">Kaybettiklerimiz</a></li>
-                            <li><a href="/Haberler/Index">Haberler</a></li>
-                            <li><a href="/Iletisim/Index">İletişim</a></li>
+                        <ul class="list-unstyled footer-links">
+                            <li class="mb-2"><a href="/Galeri" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Galeri</a></li>
+                            <li class="mb-2"><a href="/Kayiplar/Index" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Kaybettiklerimiz</a></li>
+                            <li class="mb-2"><a href="/Haberler/Index" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Haberler</a></li>
+                            <li class="mb-2"><a href="/Iletisim/Index" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> İletişim</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 mb-4">
-                <h5>Bizi Takip Edin</h5>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
+                <h5 class="fw-bold mb-3" style="color: var(--renk-altin);">Bizi Takip Edin</h5>
+
+                <div class="social-icons d-flex flex-wrap gap-2">
+                    @if (!string.IsNullOrWhiteSpace(fb))
+                    {
+                        <a href="@fb" target="_blank" class="social-btn shadow-sm"><i class="fab fa-facebook-f"></i></a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(tw))
+                    {
+                        <a href="@tw" target="_blank" class="social-btn shadow-sm"><i class="fab fa-twitter"></i></a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(ig))
+                    {
+                        <a href="@ig" target="_blank" class="social-btn shadow-sm"><i class="fab fa-instagram"></i></a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(ln))
+                    {
+                        <a href="@ln" target="_blank" class="social-btn shadow-sm"><i class="fab fa-linkedin-in"></i></a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(yt))
+                    {
+                        <a href="@yt" target="_blank" class="social-btn shadow-sm"><i class="fab fa-youtube"></i></a>
+                    }
                 </div>
+
+                @if (Context.Session.GetInt32("AdminID") != null)
+                {
+                    <button class="btn btn-sm btn-outline-warning mt-3 fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#socialSettingsModal">
+                        <i class="fas fa-cog me-1"></i> Sosyal Medya Ayarları
+                    </button>
+                }
             </div>
         </div>
 
-        <div class="copyright">
-            <div class="row">
+        <div class="copyright pt-3 mt-2 border-top border-secondary">
+            <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    &copy; @DateTime.Now.Year Ankara Öğretim Derneği. Tüm hakları saklıdır.
+                    <span class="small" style="color: #94a3b8;">&copy; @DateTime.Now.Year Ankara Öğretim Derneği. Tüm hakları saklıdır.</span>
                 </div>
                 <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
-                    <a href="/Dernek/Hakkinda/cerez-politikasi" style="color:#64748b; text-decoration:none; margin-left:15px; font-size:12px;">Çerez Politikası</a>
-                    <a href="#" style="color:#64748b; text-decoration:none; margin-left:15px; font-size:12px;">Gizlilik ve KVKK</a>
+                    <a href="/Dernek/Hakkinda/cerez-politikasi" class="text-decoration-none small hover-gold" style="color: #94a3b8;">Çerez Politikası</a>
+                    <span class="mx-2" style="color: #94a3b8;">|</span>
+                    <a href="#" class="text-decoration-none small hover-gold" style="color: #94a3b8;">Gizlilik ve KVKK</a>
                 </div>
             </div>
         </div>
     </div>
 </footer>
+
+@if (Context.Session.GetInt32("AdminID") != null)
+{
+    <div class="modal fade" id="socialSettingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <form action="/Anasayfa/SosyalMedyaKaydet" method="post">
+                    <div class="modal-header text-white border-0" style="background-color: var(--renk-lacivert);">
+                        <h5 class="modal-title fw-bold" style="color: var(--renk-altin) !important;"><i class="fas fa-share-alt me-2"></i>Sosyal Medya Yönetimi</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body bg-light p-4">
+                        <p class="text-muted small mb-4">İstediğiniz platformun bağlantı adresini (URL) girin. Görünmesini İSTEMEDİĞİNİZ platformun kutusunu boş bırakın.</p>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="fab fa-facebook-f text-primary"></i></span>
+                            <input type="text" name="facebook" class="form-control" value="@fb" placeholder="Facebook Linki">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="fab fa-twitter text-info"></i></span>
+                            <input type="text" name="twitter" class="form-control" value="@tw" placeholder="Twitter Linki">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="fab fa-instagram text-danger"></i></span>
+                            <input type="text" name="instagram" class="form-control" value="@ig" placeholder="Instagram Linki">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="fab fa-linkedin-in text-primary"></i></span>
+                            <input type="text" name="linkedin" class="form-control" value="@ln" placeholder="LinkedIn Linki">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="fab fa-youtube text-danger"></i></span>
+                            <input type="text" name="youtube" class="form-control" value="@yt" placeholder="YouTube Linki">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-white">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-warning fw-bold rounded-pill px-5 text-dark">Ayarları Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .hover-gold {
+        transition: color 0.3s ease;
+    }
+
+        .hover-gold:hover {
+            color: var(--renk-altin) !important;
+        }
+
+    .social-btn {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .social-btn:hover {
+            background-color: var(--renk-altin);
+            color: #0a1a5c;
+            transform: translateY(-3px);
+        }
+</style>

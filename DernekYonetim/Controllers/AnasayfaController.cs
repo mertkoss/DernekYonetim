@@ -85,5 +85,31 @@ namespace DernekYonetim.Controllers
             ViewBag.AdminSayisi = sayi;
             return View();
         }
+
+        [HttpPost]
+        public IActionResult SosyalMedyaKaydet(string facebook, string twitter, string instagram, string linkedin, string youtube)
+        {
+            // Admin değilse at
+            if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+            // Formdan gelen verileri bir sözlükte (Dictionary) topla
+            var data = new Dictionary<string, string>
+    {
+        { "facebook", facebook ?? "" },
+        { "twitter", twitter ?? "" },
+        { "instagram", instagram ?? "" },
+        { "linkedin", linkedin ?? "" },
+        { "youtube", youtube ?? "" }
+    };
+
+            // wwwroot klasörünün içine social.json adında bir dosyaya kaydet
+            string jsonPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "social.json");
+            string jsonString = System.Text.Json.JsonSerializer.Serialize(data);
+            System.IO.File.WriteAllText(jsonPath, jsonString);
+
+            // Kayıt bitince, kullanıcının tıklamayı yaptığı sayfaya geri dönmesini sağlar
+            string referer = Request.Headers["Referer"].ToString();
+            return Redirect(string.IsNullOrEmpty(referer) ? "/" : referer);
+        }
     }
 }
