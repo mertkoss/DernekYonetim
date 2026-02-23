@@ -84,7 +84,7 @@ public class IletisimController : Controller
                                 <tr>
                                     <td align='center' style='background-color:#0a1a5c; padding:30px;'>
                                         <h1 style='color:#ffffff; margin:0; font-size:24px; font-weight:700; letter-spacing: 1px;'>AÖD</h1>
-                                        <p style='color:#b8860b; margin:5px 0 0 0; font-size:12px; font-weight:600; text-transform:uppercase;'>İletişim Formu Bildirimi</p>
+                                        <p style='color:#b8860b; margin:5px 0 0 0; font-size:12px; font-weight:600; text-transform:uppercase;'>İLETİŞİM FORMU BİLDİRİMİ</p>
                                     </td>
                                 </tr>
 
