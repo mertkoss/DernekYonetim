@@ -13,10 +13,9 @@ namespace DernekYonetim.Models
         public Uyeler? UyeDetay { get; set; }
         public List<Galeri> Galeri { get; internal set; }
 
-        // YENİ EKLEME:
-        // Excel tablosu gibi olan özel listeyi burada tutabiliriz.
-        // Böylece sayfaya hem bu listeyi hem de diğer verileri aynı anda gönderebilirsin.
         public List<UyeListesiViewModel> OzelUyeListesi { get; set; }
+
+        public List<Haberler> SonHaberler { get; set; }
     }
 
     // Tablo için özel oluşturduğumuz model

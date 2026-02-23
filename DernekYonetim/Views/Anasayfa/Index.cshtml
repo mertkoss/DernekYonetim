@@ -173,6 +173,69 @@
             padding: 30px 20px;
         }
     }
+
+    /* ANA SAYFA HABERLER BÖLÜMÜ ÖZEL STİLLERİ */
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    /* Manşet Haberi Efektleri */
+    .main-featured-news {
+        min-height: 450px;
+    }
+
+    .main-news-img {
+        transition: transform 0.6s ease;
+    }
+
+    .news-gradient-overlay {
+        background: linear-gradient(to top, rgba(10, 26, 92, 0.95) 0%, rgba(10, 26, 92, 0.4) 50%, rgba(0, 0, 0, 0) 100%);
+        transition: background 0.4s ease;
+    }
+
+    .main-featured-news:hover .main-news-img {
+        transform: scale(1.05); /* Üzerine gelince resim hafifçe büyür */
+    }
+
+    .main-featured-news:hover .news-gradient-overlay {
+        background: linear-gradient(to top, rgba(10, 26, 92, 0.95) 0%, rgba(10, 26, 92, 0.6) 60%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    .main-news-content h3 {
+        transition: color 0.3s;
+    }
+
+    .main-featured-news:hover .main-news-content h3 {
+        color: var(--renk-altin) !important; /* Üzerine gelince başlık sarı olur */
+    }
+
+    /* Yan Akış Haberi Efektleri */
+    .transition-all {
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .side-news-card:hover {
+        transform: translateY(-5px); /* Kart hafifçe yukarı kalkar */
+        border-color: rgba(184, 134, 11, 0.3); /* Kenarlık hafif sarımsı olur */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+
+    .side-news-img-wrapper img {
+        transition: transform 0.5s ease;
+    }
+
+    .side-news-card:hover .side-news-img-wrapper img {
+        transform: scale(1.1);
+    }
+    
+    .side-news-card h6 {
+        transition: color 0.3s;
+    }
+
+    .side-news-card:hover h6 {
+        color: var(--renk-altin) !important;
+    }
 </style>
 
 <header class="hero-section">
@@ -301,6 +364,78 @@
     </div>
 </section>
 
+@if (Model.SonHaberler != null && Model.SonHaberler.Any())
+{
+    // İlk haberi "Manşet", geri kalanları (varsa) "Yan Akış" olarak ayırıyoruz
+    var mansetHaber = Model.SonHaberler.First();
+    var yanHaberler = Model.SonHaberler.Skip(1).ToList();
+
+    <section class="home-news-section bg-light" style="padding: 100px 0;">
+        <div class="container">
+            
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5 border-bottom pb-3">
+                <div>
+                    <h6 class="text-gold-header text-uppercase fw-bold mb-2" style="color: var(--renk-altin); letter-spacing: 2px; font-size: 0.9rem;">Güncel Gelişmeler</h6>
+                    <h2 class="fw-bold mb-0 text-navy-header" style="color: var(--renk-lacivert); font-family: 'Playfair Display', serif; font-size: 2.5rem;">Haberler & Duyurular</h2>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="/Haberler/Index" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold" style="border-color: var(--renk-lacivert); color: var(--renk-lacivert);">
+                        Tüm Arşivi Gör <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <a href="/Haberler/Detay/@mansetHaber.Id" class="text-decoration-none">
+                        <div class="main-featured-news h-100 position-relative rounded-4 overflow-hidden shadow-sm">
+                            <img src="@(string.IsNullOrEmpty(mansetHaber.FotografYolu) ? "/img/default-news.jpg" : mansetHaber.FotografYolu)" alt="@mansetHaber.Baslik" class="img-fluid w-100 h-100 object-fit-cover main-news-img">
+                            
+                            <div class="news-gradient-overlay position-absolute bottom-0 start-0 w-100 h-100"></div>
+
+                            <div class="main-news-content position-absolute bottom-0 start-0 w-100 p-4 p-md-5 z-2 text-white">
+                                @if(mansetHaber.Kategori != null)
+                                {
+                                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 fs-6 shadow">@mansetHaber.Kategori.KategoriAdi</span>
+                                }
+                                <h3 class="fw-bold mb-3" style="font-family: 'Playfair Display', serif; font-size: 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                    @mansetHaber.Baslik
+                                </h3>
+                                <p class="d-none d-md-block text-light mb-0" style="opacity: 0.9;">
+                                    @(mansetHaber.Ozet.Length > 120 ? mansetHaber.Ozet.Substring(0, 120) + "..." : mansetHaber.Ozet)
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="d-flex flex-column gap-4 h-100 justify-content-between">
+                        
+                        @foreach (var yanHaber in yanHaberler)
+                        {
+                            <a href="/Haberler/Detay/@yanHaber.Id" class="side-news-card text-decoration-none d-flex align-items-center bg-white rounded-4 p-3 shadow-sm transition-all">
+                                <div class="side-news-img-wrapper rounded-3 overflow-hidden flex-shrink-0" style="width: 120px; height: 120px;">
+                                    <img src="@(string.IsNullOrEmpty(yanHaber.FotografYolu) ? "/img/default-news.jpg" : yanHaber.FotografYolu)" class="w-100 h-100 object-fit-cover" alt="@yanHaber.Baslik">
+                                </div>
+                                <div class="ms-4">
+                                    <div class="text-muted small mb-1 fw-bold">
+                                        <i class="far fa-calendar-alt text-warning me-1"></i> @(yanHaber.YayimTarihi?.ToString("dd MMMM yyyy") ?? DateTime.Now.ToString("dd MMMM yyyy"))
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: var(--renk-lacivert); line-height: 1.4;">
+                                        @(yanHaber.Baslik.Length > 65 ? yanHaber.Baslik.Substring(0, 65) + "..." : yanHaber.Baslik)
+                                    </h6>
+                                </div>
+                            </a>
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+}
 
 
 <section class="heritage-section pt-5 pb-5" style="background-color: var(--renk-gri);">

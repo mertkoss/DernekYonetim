@@ -14,14 +14,11 @@ namespace DernekYonetim.Controllers
             _context = context;
         }
 
-        // Üye Listesi
-        // Üye Listesi (ve Ziyaretçi Sayacı)
-        public IActionResult Index()
+        // Ana Sayfa (Ziyaretçi Sayacı, Hakkımızda, Üyeler ve Son Haberler)
+        public async Task<IActionResult> Index()
         {
             // --- 1. ZİYARETÇİ SAYACI İŞLEMLERİ ---
-
-            // Veritabanındaki sayaç tablosunu çağırıyoruz (DbSet adınız ZiyaretciSayacis olabilir, kontrol edin)
-            var sayac = _context.ZiyaretciSayacis.FirstOrDefault();
+            var sayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
 
             if (sayac == null)
             {
@@ -31,27 +28,33 @@ namespace DernekYonetim.Controllers
             }
             else
             {
-                // Kayıt varsa sayıyı 1 artırıyoruz (Her F5 yapıldığında artar)
+                // Kayıt varsa sayıyı 1 artırıyoruz
                 sayac.ToplamZiyaretci++;
             }
 
             // Değişikliği veritabanına kaydediyoruz
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             // Güncel sayıyı View tarafına gönderiyoruz
             ViewBag.ZiyaretciSayisi = sayac.ToplamZiyaretci;
 
 
-            // --- 2. MEVCUT ÜYE LİSTESİ İŞLEMLERİ ---
             var model = new HomeViewModel
             {
-                Uyeler = _context.Uyelers.ToList()
+                Uyeler = await _context.Uyelers.ToListAsync(),
+
+                About = await _context.DernekHakkindaBolumleris.FirstOrDefaultAsync(),
+
+                // Son 4 Haber
+                SonHaberler = await _context.Haberlers
+                     .Include(h => h.Kategori)
+                     .OrderByDescending(h => h.YayimTarihi)
+                     .Take(4)
+                     .ToListAsync()
             };
 
             return View(model);
         }
-
-
 
         // Üye Detay
         public IActionResult Detay(int id)
@@ -94,13 +97,13 @@ namespace DernekYonetim.Controllers
 
             // Formdan gelen verileri bir sözlükte (Dictionary) topla
             var data = new Dictionary<string, string>
-    {
-        { "facebook", facebook ?? "" },
-        { "twitter", twitter ?? "" },
-        { "instagram", instagram ?? "" },
-        { "linkedin", linkedin ?? "" },
-        { "youtube", youtube ?? "" }
-    };
+            {
+                { "facebook", facebook ?? "" },
+                { "twitter", twitter ?? "" },
+                { "instagram", instagram ?? "" },
+                { "linkedin", linkedin ?? "" },
+                { "youtube", youtube ?? "" }
+            };
 
             // wwwroot klasörünün içine social.json adında bir dosyaya kaydet
             string jsonPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "social.json");
