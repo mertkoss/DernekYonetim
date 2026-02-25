@@ -39,39 +39,84 @@ public class HaberlerController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        if (!string.IsNullOrEmpty(haber.Ozet) && haber.Ozet.Length > 255)
+        try
         {
-            TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz!";
+            // 1. BOŞLUK (SPACE) VE NULL KONTROLÜ
+            if (string.IsNullOrWhiteSpace(haber.Baslik) || string.IsNullOrWhiteSpace(haber.Ozet))
+            {
+                TempData["Hata"] = "Başlık ve Özet alanları sadece boşluklardan oluşamaz veya boş bırakılamaz.";
+                return RedirectToAction("Index");
+            }
+
+            // 2. KATEGORİ SEÇİM KONTROLÜ
+            if (haber.KategoriId == null || haber.KategoriId <= 0)
+            {
+                TempData["Hata"] = "Lütfen geçerli bir kategori seçiniz.";
+                return RedirectToAction("Index");
+            }
+
+            // 3. UZUNLUK KONTROLLERİ (Hem Özet hem Başlık için)
+            if (haber.Baslik.Length > 150)
+            {
+                TempData["Hata"] = "Haber başlığı 150 karakterden uzun olamaz.";
+                return RedirectToAction("Index");
+            }
+
+            if (haber.Ozet.Length > 255)
+            {
+                TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz.";
+                return RedirectToAction("Index");
+            }
+
+            // 4. DOSYA GÜVENLİK KONTROLLERİ
+            if (Fotograf != null && Fotograf.Length > 0)
+            {
+                // A. Boyut Kontrolü (Maksimum 3 MB - 3 * 1024 * 1024 byte)
+                if (Fotograf.Length > 3 * 1024 * 1024)
+                {
+                    TempData["Hata"] = "Yüklediğiniz fotoğrafın boyutu 3 MB'ı geçemez.";
+                    return RedirectToAction("Index");
+                }
+
+                // B. Uzantı Kontrolü (Sadece Resim Formatlarına İzin Ver)
+                var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                var uzanti = Path.GetExtension(Fotograf.FileName).ToLowerInvariant();
+
+                if (!izinVerilenUzantilar.Contains(uzanti))
+                {
+                    TempData["Hata"] = "Sadece .jpg, .jpeg, .png veya .webp formatında görsel yükleyebilirsiniz.";
+                    return RedirectToAction("Index");
+                }
+
+                // Her şey tamamsa dosyayı kaydet
+                string dosyaAdi = Guid.NewGuid().ToString() + uzanti;
+                string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler");
+
+                if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
+
+                string tamYol = Path.Combine(yol, dosyaAdi);
+                using (var stream = new FileStream(tamYol, FileMode.Create))
+                {
+                    await Fotograf.CopyToAsync(stream);
+                }
+                haber.FotografYolu = "/img/haberler/" + dosyaAdi;
+            }
+
+            // Zaman atamaları
+            haber.YayimTarihi = DateTime.Now;
+            if (haber.BitisTarihi == null) haber.BitisTarihi = DateTime.Now.AddMonths(1);
+
+            _context.Haberlers.Add(haber);
+            await _context.SaveChangesAsync();
+
+            TempData["Basari"] = "Haber başarıyla yayınlandı.";
             return RedirectToAction("Index");
         }
-        // 1. Dosya işlemi
-        if (Fotograf != null && Fotograf.Length > 0)
+        catch (Exception ex)
         {
-            string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
-            string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler");
-
-            if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
-
-            string tamYol = Path.Combine(yol, dosyaAdi);
-            using (var stream = new FileStream(tamYol, FileMode.Create))
-            {
-                await Fotograf.CopyToAsync(stream);
-            }
-            haber.FotografYolu = "/img/haberler/" + dosyaAdi;
+            TempData["Hata"] = "Haber kaydedilirken sistemsel bir sorun oluştu: " + ex.Message;
+            return RedirectToAction("Index");
         }
-
-        // 2. Zorunlu alanları elle doldur (Modeldeki property isimlerinle birebir aynı)
-        haber.YayimTarihi = DateTime.Now;
-
-        // Veritabanında boş olamaz hatası almamak için geçici bir tarih
-        if (haber.BitisTarihi == null) haber.BitisTarihi = DateTime.Now.AddMonths(1);
-
-        // 3. Veritabanına Ekleme
-        _context.Haberlers.Add(haber);
-        await _context.SaveChangesAsync();
-
-        // 4. Sayfayı yenile
-        return RedirectToAction("Index");
     }
 
     [HttpPost]
@@ -82,46 +127,91 @@ public class HaberlerController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        if (!string.IsNullOrEmpty(gelenHaber.Ozet) && gelenHaber.Ozet.Length > 255)
+        try
         {
-            TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz!";
+            // 1. BOŞLUK KONTROLÜ
+            if (string.IsNullOrWhiteSpace(gelenHaber.Baslik) || string.IsNullOrWhiteSpace(gelenHaber.Ozet))
+            {
+                TempData["Hata"] = "Başlık ve Özet alanları boş bırakılamaz.";
+                // Not: İstersen hata olunca Detay sayfasına döndürebilirsin: return RedirectToAction("Detay", new { id = gelenHaber.Id });
+                return RedirectToAction("Index");
+            }
+
+            // 2. UZUNLUK KONTROLLERİ
+            if (gelenHaber.Baslik.Length > 150)
+            {
+                TempData["Hata"] = "Haber başlığı 150 karakterden uzun olamaz.";
+                return RedirectToAction("Index");
+            }
+
+            if (gelenHaber.Ozet.Length > 255)
+            {
+                TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz.";
+                return RedirectToAction("Index");
+            }
+
+            var mevcutHaber = await _context.Haberlers.FindAsync(gelenHaber.Id);
+            if (mevcutHaber == null)
+            {
+                TempData["Hata"] = "Güncellenmek istenen haber bulunamadı.";
+                return RedirectToAction("Index");
+            }
+
+            // Verileri güncelle
+            mevcutHaber.Baslik = gelenHaber.Baslik;
+            mevcutHaber.Ozet = gelenHaber.Ozet;
+            mevcutHaber.Icerik = gelenHaber.Icerik;
+            mevcutHaber.KategoriId = gelenHaber.KategoriId;
+
+            // 3. DOSYA GÜVENLİK KONTROLLERİ
+            if (Fotograf != null && Fotograf.Length > 0)
+            {
+                // A. Boyut Kontrolü (Maks 3 MB)
+                if (Fotograf.Length > 3 * 1024 * 1024)
+                {
+                    TempData["Hata"] = "Yüklediğiniz fotoğrafın boyutu 3 MB'ı geçemez.";
+                    return RedirectToAction("Index");
+                }
+
+                // B. Uzantı Kontrolü
+                var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                var uzanti = Path.GetExtension(Fotograf.FileName).ToLowerInvariant();
+
+                if (!izinVerilenUzantilar.Contains(uzanti))
+                {
+                    TempData["Hata"] = "Sadece .jpg, .jpeg, .png veya .webp formatında görsel yükleyebilirsiniz.";
+                    return RedirectToAction("Index");
+                }
+
+                // Eski fotoğrafı sil (fiziksel dosya)
+                if (!string.IsNullOrEmpty(mevcutHaber.FotografYolu))
+                {
+                    var eskiYol = Path.Combine(_hostEnvironment.WebRootPath, mevcutHaber.FotografYolu.TrimStart('/'));
+                    if (System.IO.File.Exists(eskiYol)) System.IO.File.Delete(eskiYol);
+                }
+
+                // Yeni fotoğrafı kaydet
+                string dosyaAdi = Guid.NewGuid().ToString() + uzanti;
+                string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler", dosyaAdi);
+
+                using (var stream = new FileStream(yol, FileMode.Create))
+                {
+                    await Fotograf.CopyToAsync(stream);
+                }
+                mevcutHaber.FotografYolu = "/img/haberler/" + dosyaAdi;
+            }
+
+            _context.Haberlers.Update(mevcutHaber);
+            await _context.SaveChangesAsync();
+
+            TempData["Basari"] = "Haber başarıyla güncellendi.";
             return RedirectToAction("Index");
         }
-        // DB'deki mevcut kaydı bulalım
-        var mevcutHaber = await _context.Haberlers.FindAsync(gelenHaber.Id);
-        if (mevcutHaber == null) return NotFound();
-
-        // Verileri güncelleyelim
-        mevcutHaber.Baslik = gelenHaber.Baslik;
-        mevcutHaber.Ozet = gelenHaber.Ozet;
-        mevcutHaber.Icerik = gelenHaber.Icerik;
-        mevcutHaber.KategoriId = gelenHaber.KategoriId;
-
-        // Fotoğraf yüklenmişse eskisini silip yenisini kaydedelim
-        if (Fotograf != null && Fotograf.Length > 0)
+        catch (Exception)
         {
-            // Eski fotoğrafı sil (fiziksel dosya)
-            if (!string.IsNullOrEmpty(mevcutHaber.FotografYolu))
-            {
-                var eskiYol = Path.Combine(_hostEnvironment.WebRootPath, mevcutHaber.FotografYolu.TrimStart('/'));
-                if (System.IO.File.Exists(eskiYol)) System.IO.File.Delete(eskiYol);
-            }
-
-            // Yeni fotoğrafı kaydet
-            string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
-            string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler", dosyaAdi);
-
-            using (var stream = new FileStream(yol, FileMode.Create))
-            {
-                await Fotograf.CopyToAsync(stream);
-            }
-            mevcutHaber.FotografYolu = "/img/haberler/" + dosyaAdi;
+            TempData["Hata"] = "Haber güncellenirken beklenmedik bir hata oluştu.";
+            return RedirectToAction("Index");
         }
-
-        _context.Haberlers.Update(mevcutHaber);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("Index");
     }
     // HABER DETAY SAYFASI
     public async Task<IActionResult> Detay(int id)
