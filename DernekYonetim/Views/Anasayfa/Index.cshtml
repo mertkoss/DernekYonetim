@@ -15,15 +15,13 @@
         --renk-gri: #f8fafc;
     }
 
-    /* SLIDER AYARLARI (ZORUNLU) */
+   /* YENİ PROFESYONEL SLIDER AYARLARI */
     .hero-section {
         position: relative;
         width: 100%;
-        height: 85vh !important; /* Ekranın %85'i */
-        min-height: 600px;
+        height: 85vh !important;
+        min-height: 650px;
         overflow: hidden;
-        padding: 0;
-        margin: 0;
     }
 
     .carousel, .carousel-inner, .carousel-item {
@@ -31,38 +29,151 @@
     }
 
     .carousel-item {
-        width: 100%;
         background-size: cover !important;
         background-position: center center !important;
         background-repeat: no-repeat !important;
+        transition: transform 6s ease, opacity 1s ease-in-out !important; 
     }
 
-    /* Görselin üzerine gelen koyu perde */
+    .carousel-item.active {
+        transform: scale(1.05);
+    }
+
     .overlay {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(to right, rgba(10, 26, 92, 0.9) 0%, rgba(10, 26, 92, 0.6) 50%, rgba(10, 26, 92, 0.2) 100%);
-        display: flex;
-        align-items: center;
+        background: linear-gradient(90deg, rgba(10, 26, 92, 0.95) 0%, rgba(10, 26, 92, 0.7) 40%, rgba(10, 26, 92, 0.1) 100%);
         z-index: 1;
     }
 
+    /* Yazı içeriği artık sola yapışmayacak */
     .hero-content {
         position: relative;
         z-index: 2;
         color: white;
-        padding-left: 5%;
+        opacity: 0; 
+        transform: translateY(30px); 
+        animation: fadeUp 1s ease-out forwards;
+        animation-delay: 0.5s; 
     }
 
-        .hero-content h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1.2;
+    @@keyframes fadeUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
+
+    .carousel-item.active .hero-content {
+        animation: fadeUp 1s ease-out forwards;
+        animation-delay: 0.3s;
+    }
+
+    .hero-content .badge {
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+        background-color: var(--renk-altin);
+        color: var(--renk-lacivert);
+        padding: 8px 15px;
+    }
+
+    .hero-content h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 4.5rem; /* Biraz daha büyüttük */
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .hero-content p {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        opacity: 0.9;
+        margin-bottom: 35px;
+        border-left: 4px solid var(--renk-altin);
+        padding-left: 20px; /* Çizgi ile yazı arasına nefes payı */
+    }
+
+    .btn-hero {
+        background-color: var(--renk-altin);
+        color: var(--renk-lacivert);
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 12px 35px;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        border: 2px solid var(--renk-altin);
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+    .btn-hero:hover {
+        background-color: transparent;
+        color: var(--renk-altin);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(184, 134, 11, 0.3);
+    }
+
+    /* ---- YENİ PROFESYONEL İNDİKATÖR (KAPSÜL NOKTALAR) ---- */
+    .carousel-indicators {
+        margin-bottom: 2.5rem;
+        gap: 8px; /* Noktalar arası mesafe */
+    }
+
+    .carousel-indicators button {
+        width: 10px !important;
+        height: 10px !important;
+        border-radius: 50% !important; /* Yuvarlak nokta */
+        background-color: rgba(255, 255, 255, 0.4) !important;
+        border: none !important;
+        margin: 0 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .carousel-indicators button.active {
+        width: 35px !important; /* Aktif olunca uzar (kapsül) */
+        border-radius: 10px !important;
+        background-color: var(--renk-altin) !important;
+    }
+
+    /* ---- OKLARIN KONUMU DÜZELTİLDİ ---- */
+    .carousel-control-prev, .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: all 0.3s ease;
+        opacity: 0;
+    }
+
+    /* Ekranın en sağına ve soluna sabitlendi */
+    .carousel-control-prev { left: 2%; }
+    .carousel-control-next { right: 2%; }
+
+    .hero-section:hover .carousel-control-prev, 
+    .hero-section:hover .carousel-control-next {
+        opacity: 1;
+    }
+
+    .carousel-control-prev:hover, .carousel-control-next:hover {
+        background-color: var(--renk-altin);
+        border-color: var(--renk-altin);
+        color: var(--renk-lacivert);
+    }
+
+    @@media (max-width: 991px) {
+        .hero-content h1 { font-size: 3rem; }
+        .carousel-control-prev, .carousel-control-next { display: none; }
+        .overlay { background: linear-gradient(to top, rgba(10, 26, 92, 0.95) 0%, rgba(10, 26, 92, 0.6) 60%, rgba(10, 26, 92, 0.2) 100%); }
+    }
 
     /* İSTATİSTİK BÖLÜMÜ */
     .stats-section {
@@ -239,9 +350,23 @@
 </style>
 
 <header class="hero-section">
-    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
-        <div class="carousel-inner">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
+        
+        <div class="carousel-indicators">
+            @if (Model.SliderHaberler != null && Model.SliderHaberler.Any())
+            {
+                for (int i = 0; i < Model.SliderHaberler.Count; i++)
+                {
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+                }
+            }
+            else
+            {
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            }
+        </div>
 
+        <div class="carousel-inner">
             @if (Model.SliderHaberler != null && Model.SliderHaberler.Any())
             {
                 var isFirst = true;
@@ -249,13 +374,40 @@
                 {
                     <div class="carousel-item @(isFirst ? "active" : "")" style="background-image: url('@(string.IsNullOrEmpty(sliderItem.FotografYolu) ? "/img/default-news.jpg" : sliderItem.FotografYolu)');">
                         <div class="overlay">
-                            <div class="container">
-                                <div class="hero-content">
-                                    <h1 style="color:var(--renk-altin);">@sliderItem.Baslik</h1>
-                                    <p class="mt-3 fs-5" style="max-width: 600px; opacity:0.9;">
-                                        @(sliderItem.Ozet.Length > 120 ? sliderItem.Ozet.Substring(0, 120) + "..." : sliderItem.Ozet)
-                                    </p>
-                                    <a href="/Haberler/Detay/@sliderItem.Id" class="btn btn-light btn-lg rounded-pill px-4 fw-bold mt-4" style="color:var(--renk-lacivert);">Haberi İncele</a>
+                            <div class="container h-100">
+                                <div class="row h-100 align-items-center">
+                                    <div class="col-12 col-md-10 col-lg-8 offset-lg-1 px-4 px-md-0">
+                                        
+                                        <div class="hero-content">
+                                            <span class="badge text-uppercase rounded-pill shadow-sm">
+                                                <i class="fas fa-bullhorn me-1"></i> GÜNCEL GELİŞME
+                                            </span>
+                                            <h1>
+                                                @if(sliderItem.Baslik.Length > 40)
+                                                {
+                                                    @sliderItem.Baslik.Substring(0, 40)<span style="color:var(--renk-altin);">...</span>
+                                                }
+                                                else
+                                                {
+                                                    var kelimeler = sliderItem.Baslik.Split(' ');
+                                                    if(kelimeler.Length > 1) {
+                                                        var sonKelime = kelimeler[kelimeler.Length - 1];
+                                                        var digerKelimeler = string.Join(" ", kelimeler.Take(kelimeler.Length - 1));
+                                                        @digerKelimeler <span style="color:var(--renk-altin);">@sonKelime</span>
+                                                    } else {
+                                                        @sliderItem.Baslik
+                                                    }
+                                                }
+                                            </h1>
+                                            <p>
+                                                @(sliderItem.Ozet.Length > 150 ? sliderItem.Ozet.Substring(0, 150) + "..." : sliderItem.Ozet)
+                                            </p>
+                                            <a href="/Haberler/Detay/@sliderItem.Id" class="btn btn-hero">
+                                                Haberi İncele <i class="fas fa-arrow-right ms-2"></i>
+                                            </a>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -267,24 +419,36 @@
             {
                 <div class="carousel-item active" style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');">
                     <div class="overlay">
-                        <div class="container">
-                            <div class="hero-content">
-                                <h1>Eğitimde <span style="color:var(--renk-altin);">Fırsat Eşitliği</span></h1>
-                                <p class="mt-3 fs-5" style="max-width: 600px; opacity:0.9;">Yarım asırdır aydınlık nesiller yetiştirmek için çalışıyoruz. Geleceğe atılan her adımda yanınızdayız.</p>
-                                <a href="#" class="btn btn-light btn-lg rounded-pill px-4 fw-bold mt-4" style="color:var(--renk-lacivert);">Daha Fazla Bilgi</a>
+                        <div class="container h-100">
+                            <div class="row h-100 align-items-center">
+                                <div class="col-12 col-md-10 col-lg-8 offset-lg-1 px-4 px-md-0">
+                                    
+                                    <div class="hero-content">
+                                        <span class="badge text-uppercase rounded-pill shadow-sm">
+                                            <i class="fas fa-university me-1"></i> ANKARA ÖĞRETİM DERNEĞİ
+                                        </span>
+                                        <h1>Eğitimde <span style="color:var(--renk-altin);">Fırsat Eşitliği</span></h1>
+                                        <p>Yarım asırdır aydınlık nesiller yetiştirmek için çalışıyoruz. Geleceğe atılan her adımda, Atatürk ilke ve inkılaplarının ışığında yanınızdayız.</p>
+                                        <a href="/Dernek/Hakkinda/tarihce" class="btn btn-hero">
+                                            Tarihçemizi Keşfet <i class="fas fa-arrow-right ms-2"></i>
+                                        </a>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             }
-
         </div>
 
         <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
+            <i class="fas fa-chevron-left fs-4"></i>
+            <span class="visually-hidden">Önceki</span>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
+            <i class="fas fa-chevron-right fs-4"></i>
+            <span class="visually-hidden">Sonraki</span>
         </button>
     </div>
 </header>
