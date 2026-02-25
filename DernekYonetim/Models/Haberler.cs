@@ -21,5 +21,7 @@ public partial class Haberler
 
     public int? KategoriId { get; set; }
 
+    public bool SlayttaGoster { get; set; }
+
     public virtual HaberKategorileri? Kategori { get; set; }
 }

@@ -242,29 +242,41 @@
     <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
         <div class="carousel-inner">
 
-            <div class="carousel-item active" style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');">
-                <div class="overlay">
-                    <div class="container">
-                        <div class="hero-content">
-                            <h1>Eğitimde <span style="color:var(--renk-altin);">Fırsat Eşitliği</span></h1>
-                            <p class="mt-3 fs-5" style="max-width: 600px; opacity:0.9;">Yarım asırdır aydınlık nesiller yetiştirmek için çalışıyoruz. Geleceğe atılan her adımda yanınızdayız.</p>
-                            <a href="#" class="btn btn-light btn-lg rounded-pill px-4 fw-bold mt-4" style="color:var(--renk-lacivert);">Daha Fazla Bilgi</a>
+            @if (Model.SliderHaberler != null && Model.SliderHaberler.Any())
+            {
+                var isFirst = true;
+                foreach (var sliderItem in Model.SliderHaberler)
+                {
+                    <div class="carousel-item @(isFirst ? "active" : "")" style="background-image: url('@(string.IsNullOrEmpty(sliderItem.FotografYolu) ? "/img/default-news.jpg" : sliderItem.FotografYolu)');">
+                        <div class="overlay">
+                            <div class="container">
+                                <div class="hero-content">
+                                    <h1 style="color:var(--renk-altin);">@sliderItem.Baslik</h1>
+                                    <p class="mt-3 fs-5" style="max-width: 600px; opacity:0.9;">
+                                        @(sliderItem.Ozet.Length > 120 ? sliderItem.Ozet.Substring(0, 120) + "..." : sliderItem.Ozet)
+                                    </p>
+                                    <a href="/Haberler/Detay/@sliderItem.Id" class="btn btn-light btn-lg rounded-pill px-4 fw-bold mt-4" style="color:var(--renk-lacivert);">Haberi İncele</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    isFirst = false;
+                }
+            }
+            else
+            {
+                <div class="carousel-item active" style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');">
+                    <div class="overlay">
+                        <div class="container">
+                            <div class="hero-content">
+                                <h1>Eğitimde <span style="color:var(--renk-altin);">Fırsat Eşitliği</span></h1>
+                                <p class="mt-3 fs-5" style="max-width: 600px; opacity:0.9;">Yarım asırdır aydınlık nesiller yetiştirmek için çalışıyoruz. Geleceğe atılan her adımda yanınızdayız.</p>
+                                <a href="#" class="btn btn-light btn-lg rounded-pill px-4 fw-bold mt-4" style="color:var(--renk-lacivert);">Daha Fazla Bilgi</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070');">
-                <div class="overlay">
-                    <div class="container">
-                        <div class="hero-content">
-                            <h1>Tevfik Fikret'in <span style="color:var(--renk-altin);">İzinde</span></h1>
-                            <p class="mt-3 fs-5" style="max-width: 600px; opacity:0.9;">Fikri hür, irfanı hür, vicdanı hür nesiller için eğitim meşalesini taşıyoruz.</p>
-                            <a href="#" class="btn btn-light btn-lg rounded-pill px-4 fw-bold mt-4" style="color:var(--renk-lacivert);">Okullarımızı Keşfet</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
 
         </div>
 

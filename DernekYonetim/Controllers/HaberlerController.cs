@@ -162,6 +162,7 @@ public class HaberlerController : Controller
             mevcutHaber.Ozet = gelenHaber.Ozet;
             mevcutHaber.Icerik = gelenHaber.Icerik;
             mevcutHaber.KategoriId = gelenHaber.KategoriId;
+            mevcutHaber.SlayttaGoster = gelenHaber.SlayttaGoster;
 
             // 3. DOSYA GÜVENLİK KONTROLLERİ
             if (Fotograf != null && Fotograf.Length > 0)

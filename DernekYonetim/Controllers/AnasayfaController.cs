@@ -50,6 +50,12 @@ namespace DernekYonetim.Controllers
                      .Include(h => h.Kategori)
                      .OrderByDescending(h => h.YayimTarihi)
                      .Take(4)
+                     .ToListAsync(),
+
+                SliderHaberler = await _context.Haberlers
+                     .Where(h => h.SlayttaGoster)
+                     .OrderByDescending(h => h.YayimTarihi)
+                     .Take(5)
                      .ToListAsync()
             };
 

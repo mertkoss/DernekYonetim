@@ -16,6 +16,8 @@ namespace DernekYonetim.Models
         public List<UyeListesiViewModel> OzelUyeListesi { get; set; }
 
         public List<Haberler> SonHaberler { get; set; }
+
+        public List<Haberler> SliderHaberler { get; set; }
     }
 
     // Tablo için özel oluşturduğumuz model
