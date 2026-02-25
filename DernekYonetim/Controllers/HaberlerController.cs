@@ -38,6 +38,12 @@ public class HaberlerController : Controller
         {
             return RedirectToAction("Login", "Auth");
         }
+
+        if (!string.IsNullOrEmpty(haber.Ozet) && haber.Ozet.Length > 255)
+        {
+            TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz!";
+            return RedirectToAction("Index");
+        }
         // 1. Dosya işlemi
         if (Fotograf != null && Fotograf.Length > 0)
         {
@@ -76,6 +82,11 @@ public class HaberlerController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
+        if (!string.IsNullOrEmpty(gelenHaber.Ozet) && gelenHaber.Ozet.Length > 255)
+        {
+            TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz!";
+            return RedirectToAction("Index");
+        }
         // DB'deki mevcut kaydı bulalım
         var mevcutHaber = await _context.Haberlers.FindAsync(gelenHaber.Id);
         if (mevcutHaber == null) return NotFound();
@@ -124,6 +135,8 @@ public class HaberlerController : Controller
         {
             return NotFound(); // Haber bulunamazsa 404 sayfasına atar
         }
+
+        ViewBag.KategoriListesi = new SelectList(_context.HaberKategorileris.ToList(), "Id", "KategoriAdi");
 
         return View(haber);
     }

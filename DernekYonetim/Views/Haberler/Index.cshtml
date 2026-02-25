@@ -168,7 +168,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber Başlığı</label>
-                                <input type="text" name="Baslik" id="editBaslik" class="form-control border-0 shadow-sm" required />
+                                <input type="text" name="Baslik" id="editBaslik" class="form-control border-0 shadow-sm" maxlength="150" required />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Kategori</label>
@@ -189,7 +189,8 @@
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Kısa Özet</label>
-                                <textarea name="Ozet" id="editOzet" class="form-control border-0 shadow-sm" rows="2" required></textarea>
+    <textarea name="Ozet" id="editOzet" class="form-control border-0 shadow-sm" rows="2" maxlength="255" oninput="karakterSayici(this, 'duzenleOzetSayac')" required></textarea>
+                                <small id="duzenleOzetSayac" class="text-muted float-end mt-1">0 / 255</small>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
@@ -218,7 +219,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber Başlığı</label>
-                                <input type="text" name="Baslik" class="form-control border-0 shadow-sm" required />
+                                <input type="text" name="Baslik" class="form-control border-0 shadow-sm" maxlength="150" required />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Kategori</label>
@@ -239,7 +240,8 @@
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Kısa Özet</label>
-                                <textarea name="Ozet" class="form-control border-0 shadow-sm" rows="2" required></textarea>
+    <textarea name="Ozet" id="ekleOzet" class="form-control border-0 shadow-sm" rows="2" maxlength="255" oninput="karakterSayici(this, 'ekleOzetSayac')" required></textarea>
+                                <small id="ekleOzetSayac" class="text-muted float-end mt-1">0 / 255</small>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
@@ -253,6 +255,16 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+}
+
+@if (TempData["Hata"] != null)
+{
+    <div class="container mt-4">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Hata"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     </div>
 }
@@ -422,7 +434,7 @@
 </style>
 
 <script>
-    // JS'de tırnak hatasını önlemek için verileri butonun data özelliklerinden alıyoruz
+       // JS'de tırnak hatasını önlemek için verileri butonun data özelliklerinden alıyoruz
     function haberDuzenle(btn) {
         var id = btn.getAttribute('data-id');
         var baslik = btn.getAttribute('data-baslik');
@@ -436,7 +448,28 @@
         document.getElementById('editIcerik').value = icerik;
         document.getElementById('editKategoriId').value = kategoriId;
 
+        // Düzenle modalı açıldığında sayacı var olan metne göre güncelle
+        karakterSayici(document.getElementById('editOzet'), 'duzenleOzetSayac');
+
         var myModal = new bootstrap.Modal(document.getElementById('haberDuzenleModal'));
         myModal.show();
+    }
+
+    // Ortak karakter sayacı ve uyarı fonksiyonu
+    function karakterSayici(element, sayacId) {
+        var max = element.getAttribute("maxlength");
+        var mevcut = element.value.length;
+        var sayac = document.getElementById(sayacId);
+
+        sayac.innerText = mevcut + " / " + max;
+
+        // 250'ye ulaşırsa (veya geçerse) kırmızı yapıp görsel uyarı ver
+        if (mevcut >= 250) {
+            sayac.classList.remove("text-muted");
+            sayac.classList.add("text-danger", "fw-bold");
+        } else {
+            sayac.classList.remove("text-danger", "fw-bold");
+            sayac.classList.add("text-muted");
+        }
     }
 </script>
