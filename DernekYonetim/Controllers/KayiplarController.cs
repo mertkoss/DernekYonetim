@@ -13,10 +13,37 @@ public class KayiplarController : Controller
         _hostEnvironment = hostEnvironment;
     }
 
-    public async Task<IActionResult> Index()
+    // GÜNCELLENEN KISIM: Arama ve Sayfalama (Pagination) işlemleri buraya eklendi
+    public async Task<IActionResult> Index(string arama, int sayfa = 1)
     {
-        // Vefat tarihine göre en yeniden en eskiye sıralayalım
-        var liste = await _context.Kaybettiklerimizs.OrderByDescending(x => x.VefatTarihi).ToListAsync();
+        // Sayfada kaç adet kayıt gösterileceğini buradan ayarlayabilirsin
+        int sayfaBoyutu = 5;
+
+        // Temel sorguyu oluştur
+        var query = _context.Kaybettiklerimizs.AsQueryable();
+
+        // Eğer arama kutusuna bir şey yazılmışsa filtrele
+        if (!string.IsNullOrEmpty(arama))
+        {
+            query = query.Where(x => x.AdSoyad.Contains(arama) || x.Aciklama.Contains(arama));
+        }
+
+        // Toplam kayıt ve sayfa sayısını hesapla
+        var toplamKayit = await query.CountAsync();
+        var toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
+
+        // Vefat tarihine göre sırala ve sadece o sayfanın verilerini çek
+        var liste = await query.OrderByDescending(x => x.VefatTarihi)
+                               .Skip((sayfa - 1) * sayfaBoyutu)
+                               .Take(sayfaBoyutu)
+                               .ToListAsync();
+
+        // Sayfalama ve arama verilerini HTML (View) tarafına taşı
+        ViewBag.MevcutSayfa = sayfa;
+        ViewBag.ToplamSayfa = toplamSayfa;
+        ViewBag.AramaKelimesi = arama;
+        ViewBag.ToplamKayit = toplamKayit;
+
         return View(liste);
     }
 
@@ -65,6 +92,7 @@ public class KayiplarController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
+
     [HttpPost]
     public async Task<IActionResult> KayitGuncelle(Kaybettiklerimiz gelenVeri, IFormFile? Fotograf, DateTime VefatTarihiInput, DateTime? DogumTarihiInput)
     {
@@ -86,6 +114,7 @@ public class KayiplarController : Controller
         {
             mevcut.DogumTarihi = DateOnly.FromDateTime(DogumTarihiInput.Value);
         }
+
         if (Fotograf != null && Fotograf.Length > 0)
         {
             // Eski fotoğrafı silme (isteğe bağlı)
