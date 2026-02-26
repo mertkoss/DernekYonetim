@@ -1,5 +1,4 @@
 ﻿@model DernekYonetim.Models.HomeViewModel
-
 @{
     ViewData["Title"] = "Galeri Yönetimi";
     Layout = "_Layout";
@@ -8,7 +7,7 @@
 <section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px;">
     <div class="container">
 
-        <div class="d-flex justify-content-between align-items-center mb-5 border-bottom border-warning pb-3">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-warning pb-3">
             <div>
                 <h2 class="section-heading text-uppercase mb-0 text-primary-dark">Galeri</h2>
                 <h3 class="section-subheading text-muted mt-2">Derneğimizden özel anlar</h3>
@@ -22,78 +21,137 @@
             }
         </div>
 
-        <div class="row g-4">
-            @if (Model.Galeri != null && Model.Galeri.Any())
-            {
-                int index = 0;
-                foreach (var item in Model.Galeri)
-                {
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card h-100 shadow-sm border-0 gallery-card position-relative">
-
-                            @if (Context.Session.GetInt32("AdminID") != null)
-                            {
-                                <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
-                                    <button class="btn btn-light btn-sm shadow rounded-circle me-1"
-                                            title="Düzenle"
-                                            data-id="@item.Id"
-                                            data-baslik="@item.Baslik"
-                                            data-aciklama="@item.Aciklama"
-                                            onclick="editGallery(this); event.stopPropagation();">
-                                        <i class="fas fa-edit text-warning"></i>
-                                    </button>
-                                    <button class="btn btn-light btn-sm shadow rounded-circle" title="Sil"
-                                            onclick="deleteGallery(@item.Id); event.stopPropagation();">
-                                        <i class="fas fa-trash-alt text-danger"></i>
-                                    </button>
-                                </div>
-                            }
-
-                            <div class="img-container" onclick="openLightbox(@index)" style="cursor: pointer;">
-                                <div class="hover-overlay d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-search-plus fa-3x text-white opacity-75"></i>
-                                </div>
-                                <img src="@item.FotografYolu" class="card-img-top" alt="@item.Baslik" loading="lazy" />
-                            </div>
-
-                            <div class="card-body bg-white border-bottom border-warning border-3">
-                                <h5 class="card-title fw-bold text-primary-dark">@item.Baslik</h5>
-                                <p class="card-text text-muted small gallery-desc">@item.Aciklama</p>
-                            </div>
-
-                            <div class="card-footer bg-light border-0 d-flex justify-content-between align-items-center py-3">
-                                <small class="text-muted fw-bold"><i class="far fa-calendar-alt text-warning me-2"></i> @(item.YuklemeTarihi?.ToString("dd.MM.yyyy") ?? "-")</small>
-                            </div>
-                        </div>
+        <div class="row justify-content-center mb-5 mt-2">
+            <div class="col-md-10 col-lg-8">
+                <form action="/Galeri/Index" method="get" class="d-flex shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border" onsubmit="return false;">
+                    <div class="d-flex align-items-center ps-4 text-muted">
+                        <i class="fas fa-search fs-5 opacity-75"></i>
                     </div>
-                    index++;
-                }
-            }
-            else
+                    <input type="text" id="canliAramaKutusu" name="arama" value="@ViewBag.AramaKelimesi" class="form-control border-0 px-3 py-3 shadow-none fs-5 bg-transparent" placeholder="Fotoğraf başlığı ile ara..." style="outline: none;">
+                    <button type="button" class="btn btn-warning px-5 text-dark fw-bold border-0 fs-5" style="border-radius: 0 50rem 50rem 0; cursor: default; transition: all 0.3s ease;">
+                        Ara
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="aramaSonuclariAlani" style="transition: opacity 0.3s ease;">
+
+            @if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi))
             {
-                <div class="col-12 text-center py-5">
-                    <div class="empty-state-icon mb-3">
-                        <i class="fas fa-images fa-4x text-muted"></i>
-                    </div>
-                    <h5 class="text-primary-dark">Henüz galeriye eklenmiş bir içerik yok.</h5>
+                <div class="text-center mb-4 text-muted small">
+                    <strong>"@ViewBag.AramaKelimesi"</strong> için @ViewBag.ToplamKayit fotoğraf bulundu.
+                    <a href="#" onclick="document.getElementById('canliAramaKutusu').value=''; document.getElementById('canliAramaKutusu').dispatchEvent(new Event('input')); return false;" class="text-decoration-none ms-2 text-primary-dark fw-bold"><i class="fas fa-times me-1 text-danger"></i>Temizle</a>
                 </div>
             }
+
+            <div class="row g-4">
+                @if (Model.Galeri != null && Model.Galeri.Any())
+                {
+                    int index = 0;
+                    foreach (var item in Model.Galeri)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 shadow-sm border-0 gallery-card position-relative">
+
+                                @if (Context.Session.GetInt32("AdminID") != null)
+                                {
+                                    <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                                        <button class="btn btn-light btn-sm shadow rounded-circle me-1"
+                                                title="Düzenle"
+                                                data-id="@item.Id"
+                                                data-baslik="@item.Baslik"
+                                                data-aciklama="@item.Aciklama"
+                                                onclick="editGallery(this); event.stopPropagation();">
+                                            <i class="fas fa-edit text-warning"></i>
+                                        </button>
+                                        <button class="btn btn-light btn-sm shadow rounded-circle" title="Sil"
+                                                onclick="deleteGallery(@item.Id); event.stopPropagation();">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </button>
+                                    </div>
+                                }
+
+                                <div class="img-container lightbox-trigger"
+                                     data-src="@item.FotografYolu"
+                                     data-title="@item.Baslik"
+                                     data-desc="@item.Aciklama"
+                                     onclick="openLightbox(@index)" style="cursor: pointer;">
+                                    <div class="hover-overlay d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-search-plus fa-3x text-white opacity-75"></i>
+                                    </div>
+                                    <img src="@item.FotografYolu" class="card-img-top" alt="@item.Baslik" loading="lazy" />
+                                </div>
+
+                                <div class="card-body bg-white border-bottom border-warning border-3">
+                                    <h5 class="card-title fw-bold text-primary-dark">@item.Baslik</h5>
+                                    <p class="card-text text-muted small gallery-desc">@item.Aciklama</p>
+                                </div>
+
+                                <div class="card-footer bg-light border-0 d-flex justify-content-between align-items-center py-3">
+                                    <small class="text-muted fw-bold"><i class="far fa-calendar-alt text-warning me-2"></i> @(item.YuklemeTarihi?.ToString("dd.MM.yyyy") ?? "-")</small>
+                                </div>
+                            </div>
+                        </div>
+                        index++;
+                    }
+
+                    @if (ViewBag.ToplamSayfa > 1)
+                    {
+                        <div class="col-12 mt-5">
+                            <nav aria-label="Sayfa Gezinmesi">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
+                                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                                           href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+
+                                    @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
+                                    {
+                                        <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
+                                            <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")"
+                                               href="/Galeri/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
+                                                @i
+                                            </a>
+                                        </li>
+                                    }
+
+                                    <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
+                                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                                           href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center py-5">
+                        <div class="empty-state-icon mb-3">
+                            <i class="fas fa-images fa-4x text-muted opacity-50"></i>
+                        </div>
+                        <h5 class="text-primary-dark mt-3">Aradığınız kriterlere uygun fotoğraf bulunamadı.</h5>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </section>
 
 <div id="lightbox-modal" class="lightbox-overlay" style="display: none;" onclick="closeLightbox()">
     <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-    
     <button class="lightbox-nav prev-btn" onclick="changeImage(-1); event.stopPropagation();"><i class="fas fa-chevron-left"></i></button>
     <button class="lightbox-nav next-btn" onclick="changeImage(1); event.stopPropagation();"><i class="fas fa-chevron-right"></i></button>
 
     <div class="ig-lightbox-container shadow-lg" onclick="event.stopPropagation();">
-        
         <div class="ig-image-section">
             <img id="lightbox-img" src="" alt="">
         </div>
-
         <div class="ig-text-section">
             <div class="ig-header">
                 <h5 id="lightbox-title" class="text-primary-dark fw-bold mb-0"></h5>
@@ -102,7 +160,6 @@
                 <p id="lightbox-desc" class="text-muted"></p>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -174,10 +231,14 @@
 }
 
 <style>
-    /* Renk Paleti ve Temel Stiller */
-    .text-primary-dark { color: #0d2b4d !important; }
-    .bg-primary-dark { background-color: #0d2b4d !important; }
-    
+    .text-primary-dark {
+        color: #0d2b4d !important;
+    }
+
+    .bg-primary-dark {
+        background-color: #0d2b4d !important;
+    }
+
     .btn-gold {
         background-color: #ffc800;
         border-color: #ffc800;
@@ -185,23 +246,34 @@
         font-weight: 700;
         transition: all 0.3s ease;
     }
-    .btn-gold:hover {
-        background-color: #e6b400;
-        border-color: #e6b400;
-        color: #000;
-        transform: translateY(-2px);
+
+        .btn-gold:hover {
+            background-color: #e6b400;
+            border-color: #e6b400;
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+    /* YENİ ARAMA ÇUBUĞU GÖLGE EFEKTİ */
+    .search-bar-wrapper {
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
     }
 
-    /* Galeri Kart Stilleri */
+        .search-bar-wrapper:focus-within, .search-bar-wrapper:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+            border-color: #ffc800 !important;
+        }
+
     .gallery-card {
         transition: all 0.4s ease;
         border-radius: 12px;
         overflow: hidden;
     }
-    .gallery-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(13, 43, 77, 0.15) !important;
-    }
+
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(13, 43, 77, 0.15) !important;
+        }
 
     .img-container {
         overflow: hidden;
@@ -215,19 +287,23 @@
         object-fit: cover;
         transition: transform 0.6s ease;
     }
+
     .gallery-card:hover img {
         transform: scale(1.08);
     }
 
-    /* Görsel Üzerine Gelince Çıkan Koyu Overlay (Büyüteç) */
     .hover-overlay {
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: rgba(13, 43, 77, 0.5);
         opacity: 0;
         transition: opacity 0.4s ease;
         z-index: 2;
     }
+
     .gallery-card:hover .hover-overlay {
         opacity: 1;
     }
@@ -236,6 +312,7 @@
         opacity: 0;
         transition: opacity 0.3s ease;
     }
+
     .gallery-card:hover .admin-controls {
         opacity: 1;
     }
@@ -248,10 +325,12 @@
     }
 
     /* LIGHTBOX STİLLERİ */
-    /* YENİ LIGHBOX (INSTAGRAM STİLİ) STİLLERİ */
     .lightbox-overlay {
         position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: rgba(10, 20, 35, 0.95);
         z-index: 9999;
         display: flex;
@@ -262,31 +341,33 @@
 
     .lightbox-close {
         position: absolute;
-        top: 15px; right: 25px;
+        top: 15px;
+        right: 25px;
         font-size: 40px;
         color: #ffc800;
         cursor: pointer;
         z-index: 10001;
         transition: color 0.3s ease;
     }
-    .lightbox-close:hover { color: #fff; }
 
-    /* Ana Kapsayıcı Kart */
+        .lightbox-close:hover {
+            color: #fff;
+        }
+
     .ig-lightbox-container {
         display: flex;
-        flex-direction: row; /* Masaüstünde yan yana */
+        flex-direction: row;
         width: 90%;
-        max-width: 1200px; /* Max Büyüklük Sınırı */
-        height: 85vh; /* Yüksekliği ekrana göre sabitle */
+        max-width: 1200px;
+        height: 85vh;
         background: #fff;
         border-radius: 12px;
         overflow: hidden;
         position: relative;
     }
 
-    /* Görsel Kısmı (Siyah arka planlı) */
     .ig-image-section {
-        flex: 1; /* Kalan tüm alanı kapla */
+        flex: 1;
         background: #000;
         display: flex;
         align-items: center;
@@ -298,13 +379,12 @@
     #lightbox-img {
         max-width: 100%;
         max-height: 100%;
-        min-width: 250px; /* Min Büyüklük Sınırı */
-        object-fit: contain; /* Görseli kesmeden ekrana sığdır */
+        min-width: 250px;
+        object-fit: contain;
     }
 
-    /* Metin Kısmı (Beyaz arka planlı) */
     .ig-text-section {
-        width: 380px; /* Masaüstünde sağ panelin sabit genişliği */
+        width: 380px;
         display: flex;
         flex-direction: column;
         background-color: #fff;
@@ -319,26 +399,35 @@
 
     .ig-body {
         padding: 1.5rem;
-        overflow-y: auto; /* Çok uzun yazılarda kaydırma çubuğu çıkar */
+        overflow-y: auto;
         flex: 1;
     }
 
-    /* BURASI ÖNEMLİ: Yazı biçimlendirmesi */
     #lightbox-desc {
-        white-space: pre-wrap; /* Enter tuşu ile yapılan alt satırları korur */
-        word-wrap: break-word; /* Dışarı taşan çok uzun kelimeleri böler */
+        white-space: pre-wrap;
+        word-wrap: break-word;
         line-height: 1.6;
         font-size: 0.95rem;
         color: #4a5568 !important;
     }
 
-    /* Scrollbar (Kaydırma Çubuğu) Özelleştirmesi */
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #ffc800; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #0d2b4d; }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
 
-    /* Yönlendirme Butonları (Görselin dışına veya üstüne yerleşir) */
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #ffc800;
+        border-radius: 4px;
+    }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #0d2b4d;
+        }
+
     .lightbox-nav {
         position: absolute;
         top: 50%;
@@ -348,7 +437,8 @@
         color: #ffc800;
         font-size: 2rem;
         cursor: pointer;
-        width: 50px; height: 50px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         z-index: 10000;
         display: flex;
@@ -356,77 +446,147 @@
         justify-content: center;
         transition: all 0.3s ease;
     }
-    .lightbox-nav:hover { background: #ffc800; color: #0d2b4d; }
-    .prev-btn { left: 2%; }
-    .next-btn { right: 2%; }
 
-    /* Mobil Uyumluluk (Ekran küçülünce üstte resim, altta yazı) */
+        .lightbox-nav:hover {
+            background: #ffc800;
+            color: #0d2b4d;
+        }
+
+    .prev-btn {
+        left: 2%;
+    }
+
+    .next-btn {
+        right: 2%;
+    }
+
+    /* SAYFALAMA AKTİF BUTON */
+    .page-item.active .page-link {
+        z-index: 3;
+        color: #000;
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
     @@media (max-width: 992px) {
         .ig-lightbox-container {
-            flex-direction: column; /* Alt alta diz */
+            flex-direction: column;
             height: 90vh;
         }
+
         .ig-image-section {
             flex: none;
-            height: 60%; /* Mobilde ekranın %60'ı görsel */
+            height: 60%;
         }
+
         .ig-text-section {
-            width: 100%; /* Metin alanı genişliği tam ekran */
+            width: 100%;
             height: 40%;
             border-left: none;
             border-top: 1px solid #e0e0e0;
         }
+
         .lightbox-nav {
-            font-size: 1.5rem; width: 40px; height: 40px;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
         }
     }
 </style>
 
 <script>
-    // Sunucudaki Galeri listesini güvenli bir şekilde JavaScript dizisine aktarıyoruz
-    var galleryItems = @Html.Raw(Model.Galeri != null 
-    ? System.Text.Json.JsonSerializer.Serialize(Model.Galeri.Select(g => new { 
-        src = g.FotografYolu, 
-        title = g.Baslik, 
-        desc = g.Aciklama 
-    })) 
-    : "[]");
-    
+    // -----------------------------------------
+    // 1. DİNAMİK LIGHTBOX VERİ YÖNETİMİ
+    // -----------------------------------------
+    let galleryItems = [];
+    let currentIndex = 0;
 
-    var currentIndex = 0;
+    function buildGalleryItems() {
+        galleryItems = [];
+        const items = document.querySelectorAll('.lightbox-trigger');
+        items.forEach((item, index) => {
+            item.setAttribute('onclick', `openLightbox(${index})`);
+            galleryItems.push({
+                src: item.getAttribute('data-src'),
+                title: item.getAttribute('data-title'),
+                desc: item.getAttribute('data-desc')
+            });
+        });
+    }
 
-    // Lightbox Açma
+    document.addEventListener("DOMContentLoaded", function() {
+        buildGalleryItems();
+    });
+
+    // -----------------------------------------
+    // 2. CANLI ARAMA (LIVE SEARCH) SİSTEMİ
+    // -----------------------------------------
+    const aramaKutusu = document.getElementById('canliAramaKutusu');
+    const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
+    let aramaZamanlayici;
+
+    if(aramaKutusu && sonuclarAlani) {
+        aramaKutusu.addEventListener('input', function() {
+            clearTimeout(aramaZamanlayici);
+            const kelime = this.value;
+
+            sonuclarAlani.style.opacity = '0.5';
+
+            aramaZamanlayici = setTimeout(() => {
+                const url = `/Galeri/Index?arama=${encodeURIComponent(kelime)}`;
+
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+
+                        const yeniIcerik = doc.getElementById('aramaSonuclariAlani').innerHTML;
+                        sonuclarAlani.innerHTML = yeniIcerik;
+
+                        sonuclarAlani.style.opacity = '1';
+                        window.history.pushState({}, '', url);
+
+                        buildGalleryItems();
+                    })
+                    .catch(error => {
+                        console.error("Arama hatası:", error);
+                        sonuclarAlani.style.opacity = '1';
+                    });
+            }, 400);
+        });
+    }
+
+    // -----------------------------------------
+    // 3. LIGHTBOX FONKSİYONLARI
+    // -----------------------------------------
     function openLightbox(index) {
-        if (!galleryItems || galleryItems.length === 0) return;
-        
+        if (!galleryItems || galleryItems.length === 0) buildGalleryItems();
+
         currentIndex = index;
         updateLightboxContent();
-        
+
         document.getElementById('lightbox-modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Arka plan kaydırmayı kapat
+        document.body.style.overflow = 'hidden';
     }
 
-    // Lightbox Kapatma
     function closeLightbox() {
         document.getElementById('lightbox-modal').style.display = 'none';
-        document.body.style.overflow = 'auto'; // Arka plan kaydırmayı aç
+        document.body.style.overflow = 'auto';
     }
 
-    // İleri / Geri Yönlendirme
     function changeImage(direction) {
         currentIndex += direction;
-        
-        // Döngüsel geçiş (Sona gelince başa dön)
+
         if (currentIndex >= galleryItems.length) {
             currentIndex = 0;
         } else if (currentIndex < 0) {
             currentIndex = galleryItems.length - 1;
         }
-        
+
         updateLightboxContent();
     }
 
-    // Lightbox İçeriğini Güncelleme
     function updateLightboxContent() {
         var item = galleryItems[currentIndex];
         document.getElementById('lightbox-img').src = item.src;
@@ -434,7 +594,6 @@
         document.getElementById('lightbox-desc').innerText = item.desc || "";
     }
 
-    // Klavyeden yönlendirme (ESC kapatır, Sağ/Sol oklar fotoğraf değiştirir)
     document.addEventListener('keydown', function(event) {
         var lightbox = document.getElementById('lightbox-modal');
         if (lightbox.style.display === 'flex') {
@@ -444,7 +603,9 @@
         }
     });
 
-    // --- MEVCUT YÖNETİCİ BUTONU İŞLEMLERİ (Aynen korundu) ---
+    // -----------------------------------------
+    // 4. ADMİN İŞLEMLERİ
+    // -----------------------------------------
     function editGallery(btn) {
         var id = btn.getAttribute('data-id');
         var baslik = btn.getAttribute('data-baslik');

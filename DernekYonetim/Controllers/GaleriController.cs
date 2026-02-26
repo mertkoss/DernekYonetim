@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using DernekYonetim.Models; // Modelinizin olduğu namespace
+using Microsoft.EntityFrameworkCore;
+using DernekYonetim.Models;
 using System.IO;
 
 public class GaleriController : Controller
 {
-    private readonly DernekYonetimContext _context; // Veritabanı context isminizi buraya yazın
+    private readonly DernekYonetimContext _context;
     private readonly IWebHostEnvironment _hostEnvironment;
 
     public GaleriController(DernekYonetimContext context, IWebHostEnvironment hostEnvironment)
@@ -13,15 +14,36 @@ public class GaleriController : Controller
         _hostEnvironment = hostEnvironment;
     }
 
-    // Galeri Listeleme
-    public IActionResult Index()
+    public async Task<IActionResult> Index(string arama, int sayfa = 1)
     {
-        var galeriListesi = _context.Galeris.OrderByDescending(x => x.YuklemeTarihi).ToList();
-        var model = new HomeViewModel { Galeri = galeriListesi };
+        int sayfaBoyutu = 6;
+
+        var query = _context.Galeris.AsQueryable();
+
+        // GÜNCELLENEN KISIM: Sadece "Baslik" alanında arama yapıyoruz
+        if (!string.IsNullOrEmpty(arama))
+        {
+            query = query.Where(x => x.Baslik.Contains(arama));
+        }
+
+        var toplamKayit = await query.CountAsync();
+        var toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
+
+        var liste = await query.OrderByDescending(x => x.YuklemeTarihi)
+                               .Skip((sayfa - 1) * sayfaBoyutu)
+                               .Take(sayfaBoyutu)
+                               .ToListAsync();
+
+        var model = new HomeViewModel { Galeri = liste };
+
+        ViewBag.MevcutSayfa = sayfa;
+        ViewBag.ToplamSayfa = toplamSayfa;
+        ViewBag.AramaKelimesi = arama;
+        ViewBag.ToplamKayit = toplamKayit;
+
         return View(model);
     }
 
-    // FOTOĞRAF EKLEME (POST)
     [HttpPost]
     public async Task<IActionResult> Ekle(string Baslik, string Aciklama, IFormFile Fotograf)
     {
@@ -32,11 +54,9 @@ public class GaleriController : Controller
 
         if (Fotograf != null && Fotograf.Length > 0)
         {
-            // 1. Dosya adını benzersiz yapalım
             string dosyaUzantisi = Path.GetExtension(Fotograf.FileName);
             string yeniDosyaAdi = Guid.NewGuid().ToString() + dosyaUzantisi;
 
-            // 2. Klasör yolunu belirleyelim (wwwroot/img/galeri)
             string yuklemeYolu = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri");
 
             if (!Directory.Exists(yuklemeYolu))
@@ -44,31 +64,28 @@ public class GaleriController : Controller
 
             string tamYol = Path.Combine(yuklemeYolu, yeniDosyaAdi);
 
-            // 3. Dosyayı klasöre kaydedelim
             using (var stream = new FileStream(tamYol, FileMode.Create))
             {
                 await Fotograf.CopyToAsync(stream);
             }
 
-            // 4. Veritabanına kaydedelim
             var yeniGaleri = new Galeri
             {
                 Baslik = Baslik,
                 Aciklama = Aciklama,
-                FotografYolu = "/img/galeri/" + yeniDosyaAdi, // Web üzerinden erişilecek yol
+                FotografYolu = "/img/galeri/" + yeniDosyaAdi,
                 YuklemeTarihi = DateTime.Now
             };
 
             _context.Galeris.Add(yeniGaleri);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index"); // İşlem bitince galeriye dön
+            return RedirectToAction("Index");
         }
 
         return BadRequest("Dosya yüklenemedi.");
     }
 
-    // FOTOĞRAF SİLME
     public async Task<IActionResult> Sil(int id)
     {
         if (HttpContext.Session.GetInt32("AdminID") == null)
@@ -79,7 +96,6 @@ public class GaleriController : Controller
         var foto = await _context.Galeris.FindAsync(id);
         if (foto != null)
         {
-            // Fiziksel dosyayı da silelim (Opsiyonel ama tavsiye edilir)
             var dosyaYolu = Path.Combine(_hostEnvironment.WebRootPath, foto.FotografYolu.TrimStart('/'));
             if (System.IO.File.Exists(dosyaYolu))
                 System.IO.File.Delete(dosyaYolu);
@@ -104,17 +120,14 @@ public class GaleriController : Controller
         mevcutKayit.Baslik = Baslik;
         mevcutKayit.Aciklama = Aciklama;
 
-        // Eğer yeni bir fotoğraf dosyası seçildiyse:
         if (Fotograf != null && Fotograf.Length > 0)
         {
-            // 1. Eski dosyayı fiziksel olarak sil (yer kaplamasın)
             if (!string.IsNullOrEmpty(mevcutKayit.FotografYolu))
             {
                 var eskiDosyaYolu = Path.Combine(_hostEnvironment.WebRootPath, mevcutKayit.FotografYolu.TrimStart('/'));
                 if (System.IO.File.Exists(eskiDosyaYolu)) System.IO.File.Delete(eskiDosyaYolu);
             }
 
-            // 2. Yeni dosyayı kaydet
             string yeniDosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
             string tamYol = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri", yeniDosyaAdi);
 
