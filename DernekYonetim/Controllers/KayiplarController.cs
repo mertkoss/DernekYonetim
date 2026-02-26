@@ -21,12 +21,16 @@ public class KayiplarController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> KayitEkle(Kaybettiklerimiz model, IFormFile? Fotograf, DateTime VefatTarihiInput)
+    public async Task<IActionResult> KayitEkle(Kaybettiklerimiz model, IFormFile? Fotograf, DateTime VefatTarihiInput, DateTime? DogumTarihiInput)
     {
-        if (HttpContext.Session.GetInt32("AdminID") == null)
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        if (DogumTarihiInput.HasValue && VefatTarihiInput < DogumTarihiInput.Value)
         {
-            return RedirectToAction("Login", "Auth");
+            TempData["Hata"] = "Vefat tarihi, doğum tarihinden önce olamaz.";
+            return RedirectToAction(nameof(Index));
         }
+
         if (Fotograf != null && Fotograf.Length > 0)
         {
             string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
@@ -40,8 +44,11 @@ public class KayiplarController : Controller
             model.FotografYolu = "/img/kayiplar/" + dosyaAdi;
         }
 
-        // DateOnly dönüşümü (Kritik nokta)
         model.VefatTarihi = DateOnly.FromDateTime(VefatTarihiInput);
+        if (DogumTarihiInput.HasValue)
+        {
+            model.DogumTarihi = DateOnly.FromDateTime(DogumTarihiInput.Value);
+        }
 
         _context.Kaybettiklerimizs.Add(model);
         await _context.SaveChangesAsync();
@@ -59,11 +66,14 @@ public class KayiplarController : Controller
         return RedirectToAction(nameof(Index));
     }
     [HttpPost]
-    public async Task<IActionResult> KayitGuncelle(Kaybettiklerimiz gelenVeri, IFormFile? Fotograf, DateTime VefatTarihiInput)
+    public async Task<IActionResult> KayitGuncelle(Kaybettiklerimiz gelenVeri, IFormFile? Fotograf, DateTime VefatTarihiInput, DateTime? DogumTarihiInput)
     {
-        if (HttpContext.Session.GetInt32("AdminID") == null)
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        if (DogumTarihiInput.HasValue && VefatTarihiInput < DogumTarihiInput.Value)
         {
-            return RedirectToAction("Login", "Auth");
+            TempData["Hata"] = "Vefat tarihi, doğum tarihinden önce olamaz.";
+            return RedirectToAction(nameof(Index));
         }
 
         var mevcut = await _context.Kaybettiklerimizs.FindAsync(gelenVeri.Id);
@@ -72,7 +82,10 @@ public class KayiplarController : Controller
         mevcut.AdSoyad = gelenVeri.AdSoyad;
         mevcut.Aciklama = gelenVeri.Aciklama;
         mevcut.VefatTarihi = DateOnly.FromDateTime(VefatTarihiInput);
-
+        if (DogumTarihiInput.HasValue)
+        {
+            mevcut.DogumTarihi = DateOnly.FromDateTime(DogumTarihiInput.Value);
+        }
         if (Fotograf != null && Fotograf.Length > 0)
         {
             // Eski fotoğrafı silme (isteğe bağlı)

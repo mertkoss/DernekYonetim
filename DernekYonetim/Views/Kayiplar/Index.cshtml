@@ -34,6 +34,7 @@
                                             data-id="@item.Id"
                                             data-adsoyad="@item.AdSoyad"
                                             data-tarih="@item.VefatTarihi?.ToString("yyyy-MM-dd")"
+                                            data-dogum="@item.DogumTarihi?.ToString("yyyy-MM-dd")" 
                                             data-aciklama="@item.Aciklama"
                                             onclick="kayipDuzenle(this)">
                                         <i class="fas fa-edit"></i>
@@ -55,6 +56,13 @@
                                 <div class="memorial-content flex-grow-1 text-center text-md-start w-100">
                                     <h3 class="fw-bold text-primary-dark mb-1">@item.AdSoyad</h3>
 
+                                    <div class="text-muted small mb-2 italic">
+                                        @if (item.DogumTarihi.HasValue)
+                                        {
+                                            <span>@item.DogumTarihi.Value.Year - @(item.VefatTarihi?.Year.ToString() ?? "???")</span>
+                                        }
+                                    </div>
+
                                     <div class="text-secondary mb-3 pb-2 border-bottom d-inline-block">
                                         <i class="fas fa-dove text-muted me-2"></i>
                                         <span class="fw-bold">Vefat:</span> @(item.VefatTarihi?.ToString("dd MMMM yyyy") ?? "Bilinmiyor")
@@ -69,6 +77,8 @@
                                         <button class="btn btn-link text-decoration-none text-warning fw-bold p-0"
                                                 data-adsoyad="@item.AdSoyad"
                                                 data-tarih="@item.VefatTarihi?.ToString("dd MMMM yyyy")"
+                                                data-dogum-yili="@(item.DogumTarihi?.Year.ToString() ?? "...")"
+                                                data-vefat-yili="@(item.VefatTarihi?.Year.ToString() ?? "...")"
                                                 data-img="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
                                                 data-aciklama="@item.Aciklama"
                                                 onclick="openTributeModal(this)">
@@ -105,8 +115,9 @@
                     </div>
                     <div class="col-md-7 p-5 bg-white">
                         <h2 id="tributeName" class="fw-bold text-primary-dark mb-1"></h2>
-                        <p class="text-muted mb-4 pb-3 border-bottom"><i class="fas fa-dove me-2"></i><span id="tributeDate"></span></p>
-
+                        <p class="text-muted mb-4 pb-3 border-bottom">
+                            <i class="fas fa-history me-2"></i><span id="tributeFullDate"></span>
+                        </p>
                         <div class="custom-scrollbar pe-2" style="max-height: 300px; overflow-y: auto;">
                             <p id="tributeText" class="text-secondary" style="white-space: pre-wrap; line-height: 1.8;"></p>
                         </div>
@@ -122,7 +133,7 @@
     <div class="modal fade" id="kayipDuzenleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow">
-                <form action="/Kayiplar/KayitGuncelle" method="post" enctype="multipart/form-data" novalidate="novalidate">
+                <form action="/Kayiplar/KayitGuncelle" method="post" onsubmit="return validateDates(this)" enctype="multipart/form-data" novalidate="novalidate">
                     <input type="hidden" name="Id" id="editId" />
                     <div class="modal-header bg-warning text-dark border-0">
                         <h5 class="modal-title fw-bold">Kaydı Düzenle</h5>
@@ -133,9 +144,15 @@
                             <label class="form-label fw-bold">Ad Soyad</label>
                             <input type="text" name="AdSoyad" id="editAdSoyad" class="form-control border-0 shadow-sm" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Vefat Tarihi</label>
-                            <input type="date" name="VefatTarihiInput" id="editVefatTarihi" class="form-control border-0 shadow-sm" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Doğum Tarihi</label>
+                                <input type="date" name="DogumTarihiInput" id="editDogumTarihi" class="form-control border-0 shadow-sm">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Vefat Tarihi</label>
+                                <input type="date" name="VefatTarihiInput" id="editVefatTarihi" class="form-control border-0 shadow-sm" required>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Fotoğrafı Değiştir</label>
@@ -168,9 +185,15 @@
                             <label class="form-label fw-bold">Ad Soyad</label>
                             <input type="text" name="AdSoyad" class="form-control border-0 shadow-sm" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Vefat Tarihi</label>
-                            <input type="date" name="VefatTarihiInput" class="form-control border-0 shadow-sm" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Doğum Tarihi</label>
+                                <input type="date" name="DogumTarihiInput" id="addDogumTarihi" class="form-control border-0 shadow-sm">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Vefat Tarihi</label>
+                                <input type="date" name="VefatTarihiInput" id="addVefatTarihi" class="form-control border-0 shadow-sm" required>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Fotoğraf</label>
@@ -267,26 +290,80 @@
 </style>
 
 <script>
-    // Taziyeyi Okuma Modalı (Zarif Lightbox)
-    function openTributeModal(btn) {
-        // Butonun data özelliklerinden verileri çekiyoruz
-        document.getElementById('tributeName').innerText = btn.getAttribute('data-adsoyad');
-        document.getElementById('tributeDate').innerText = btn.getAttribute('data-tarih');
-        document.getElementById('tributeImg').src = btn.getAttribute('data-img');
-        document.getElementById('tributeText').innerText = btn.getAttribute('data-aciklama');
+    // 1. Tarih Kısıtlamalarını Bağla
+    function bindDateLimits(dogumId, vefatId) {
+        const dogumInput = document.getElementById(dogumId);
+        const vefatInput = document.getElementById(vefatId);
 
-        var tributeModal = new bootstrap.Modal(document.getElementById('tributeModal'));
-        tributeModal.show();
+        if(dogumInput && vefatInput) {
+            dogumInput.addEventListener('change', function() {
+                if(this.value) vefatInput.min = this.value;
+            });
+            vefatInput.addEventListener('change', function() {
+                if(this.value) dogumInput.max = this.value;
+            });
+        }
     }
 
-    // Düzenleme Modalı (Güvenli Veri Aktarımı)
-    function kayipDuzenle(btn) {
+    document.addEventListener("DOMContentLoaded", function() {
+        bindDateLimits('addDogumTarihi', 'addVefatTarihi');
+        bindDateLimits('editDogumTarihi', 'editVefatTarihi');
+    });
+
+    // 2. Taziye Modalı Açılış
+ function openTributeModal(btn) {
+    // Diğer verileri çekiyoruz
+    document.getElementById('tributeName').innerText = btn.getAttribute('data-adsoyad');
+    document.getElementById('tributeImg').src = btn.getAttribute('data-img');
+    document.getElementById('tributeText').innerText = btn.getAttribute('data-aciklama');
+    
+    // Doğrudan yılları çekip birleştiriyoruz
+    const dogumYil = btn.getAttribute('data-dogum-yili');
+    const vefatYil = btn.getAttribute('data-vefat-yili');
+    document.getElementById('tributeFullDate').innerText = dogumYil + " - " + vefatYil;
+
+    // Modalı açıyoruz
+    var tributeModal = new bootstrap.Modal(document.getElementById('tributeModal'));
+    tributeModal.show();
+}
+    // 3. Düzenleme Modalı Açılış
+       function kayipDuzenle(btn) {
+        // 1. Butondaki verileri alalım
+        let dogumTarihi = btn.getAttribute('data-dogum');
+        let vefatTarihi = btn.getAttribute('data-tarih');
+
+        // 2. Input elementlerini seçelim
+        let dogumInput = document.getElementById('editDogumTarihi');
+        let vefatInput = document.getElementById('editVefatTarihi');
+
+        // 3. Verileri inputlara yazalım
         document.getElementById('editId').value = btn.getAttribute('data-id');
         document.getElementById('editAdSoyad').value = btn.getAttribute('data-adsoyad');
-        document.getElementById('editVefatTarihi').value = btn.getAttribute('data-tarih');
+        dogumInput.value = dogumTarihi;
+        vefatInput.value = vefatTarihi;
         document.getElementById('editAciklama').value = btn.getAttribute('data-aciklama');
 
+        // 4. KRİTİK NOKTA: Takvim açıldığında sınırları anında uygula!
+        // Eğer doğum tarihi varsa vefatın minimumunu o yap, yoksa sınırı kaldır ('')
+        vefatInput.min = dogumTarihi ? dogumTarihi : '';
+
+        // Eğer vefat tarihi varsa doğumun maksimumunu o yap, yoksa sınırı kaldır ('')
+        dogumInput.max = vefatTarihi ? vefatTarihi : '';
+
+        // Modalı göster
         var editModal = new bootstrap.Modal(document.getElementById('kayipDuzenleModal'));
         editModal.show();
+    }
+
+    // 4. Tarih Doğrulama (Submit Öncesi)
+    function validateDates(form) {
+        const dogum = form.querySelector('input[name="DogumTarihiInput"]').value;
+        const vefat = form.querySelector('input[name="VefatTarihiInput"]').value;
+
+        if (dogum && vefat && new Date(vefat) < new Date(dogum)) {
+            alert("Hata: Vefat tarihi doğum tarihinden önce olamaz!");
+            return false;
+        }
+        return true;
     }
 </script>

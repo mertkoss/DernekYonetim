@@ -9,6 +9,8 @@ public partial class Kaybettiklerimiz
 
     public string? AdSoyad { get; set; }
 
+    public DateOnly? DogumTarihi { get; set; }
+
     public DateOnly? VefatTarihi { get; set; }
 
     public string? Aciklama { get; set; }
