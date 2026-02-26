@@ -18,4 +18,6 @@ public partial class AdminKullanicilar
     public bool? AktifMi { get; set; }
 
     public DateTime? KayitTarihi { get; set; }
+
+    public string Rol { get; set; } = "Yonetici";
 }

@@ -1,7 +1,11 @@
 ﻿using DernekYonetim.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http; // Session için gerekli
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Net;
 using System.Net.Mail;
 
@@ -23,8 +27,8 @@ namespace DernekYonetim.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Eğer kullanıcı zaten giriş yapmışsa direkt panele yönlendir
-            if (HttpContext.Session.GetInt32("AdminID") != null)
+            // Eğer kullanıcı zaten giriş yapmışsa (Cookie veya Session varsa) panele yönlendir
+            if (User.Identity!.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null)
             {
                 return RedirectToAction("Index", "Uyeler");
             }
@@ -32,98 +36,130 @@ namespace DernekYonetim.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string email, string sifre)
+        public async Task<IActionResult> Login(string email, string sifre)
         {
-            // 1. E-posta adresine göre kullanıcıyı getir
             var admin = _context.AdminKullanicilars
                 .FirstOrDefault(x => x.Email == email && x.AktifMi == true);
 
-            // 2. Şifre kontrolü (Trim() metodunu koruduk, boşluk hatası olmasın diye)
             if (admin == null || admin.SifreHash.Trim() != sifre)
             {
                 ViewBag.Hata = "E-posta adresi veya şifre hatalı!";
                 return View();
             }
 
-            // 3. Giriş başarılı: Session'ı doldur
+            // 1. GÜVENLİK: Çerez (Cookie) ve Claim tabanlı yetkilendirme (Authorize etiketleri için şarttır)
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, admin.AdminId.ToString()),
+                new Claim(ClaimTypes.Name, admin.AdSoyad ?? admin.Email),
+                new Claim(ClaimTypes.Email, admin.Email),
+                new Claim(ClaimTypes.Role, admin.Rol ?? "Yonetici") // Rolü sisteme tanıtıyoruz!
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            // 2. Session (Geriye dönük uyumluluk veya view'larda isim göstermek için)
             HttpContext.Session.SetInt32("AdminID", admin.AdminId);
-
-            // Ekranda isim yoksa e-posta görünsün diye güncelledik
             HttpContext.Session.SetString("AdminAd", admin.AdSoyad ?? admin.Email);
+            HttpContext.Session.SetString("AdminRol", admin.Rol ?? "Yonetici");
 
-            // 4. Anasayfaya yönlendir (BURASI DEĞİŞTİ)
             return RedirectToAction("Index", "Anasayfa");
         }
 
-        // --- REGISTER BÖLÜMÜ ---
+        // --- LOGOUT BÖLÜMÜ ---
+        public async Task<IActionResult> Logout()
+        {
+            // Hem çerezleri hem session'ı temizle
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear();
 
+            return RedirectToAction("Index", "Anasayfa");
+        }
+
+        // --- YÖNETİCİLERİ YÖNETME BÖLÜMÜ (SADECE SUPERADMIN) ---
+
+        [Authorize(Roles = "SuperAdmin")] // Sadece SuperAdmin girebilir!
+        [HttpGet]
+        public IActionResult AdminListesi()
+        {
+            // Tüm yöneticileri listelemek, düzenlemek ve silmek için ayrı bir sayfa.
+            var adminler = _context.AdminKullanicilars
+                                   .OrderByDescending(x => x.AdminId)
+                                   .ToList();
+            return View(adminler);
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost]
+        public IActionResult AdminSil(int id)
+        {
+            var admin = _context.AdminKullanicilars.Find(id);
+            if (admin != null)
+            {
+                // Ekstra Güvenlik: SuperAdmin'in kendi kendini yanlışlıkla silmesini engelle
+                var currentUserId = HttpContext.Session.GetInt32("AdminID");
+                if (currentUserId == id)
+                {
+                    TempData["Hata"] = "Kendi hesabınızı silemezsiniz!";
+                    return RedirectToAction("AdminListesi");
+                }
+
+                _context.AdminKullanicilars.Remove(admin);
+                _context.SaveChanges();
+                TempData["SilmeBasarili"] = true;
+            }
+            return RedirectToAction("AdminListesi");
+        }
+
+        // --- YÖNETİCİ EKLEME BÖLÜMÜ (SADECE SUPERADMIN) ---
+
+        [Authorize(Roles = "SuperAdmin")]
         [HttpGet]
         public IActionResult Register()
         {
-            // 1. GÜVENLİK KİLİDİ: Giriş yapmayan kişi sayfayı (URL'den yazsa bile) açamaz
-            if (HttpContext.Session.GetInt32("AdminID") == null)
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-
-            // Sayfa ilk açıldığında tabloyu doldurmak için listeyi çekiyoruz
-            ViewBag.Adminler = _context.AdminKullanicilars
-                                       .OrderByDescending(x => x.AdminId) // En son eklenen en üstte
-                                       .ToList();
-
+            // Artık manuel Session kontrolüne gerek yok, [Authorize] bunu hallediyor.
             return View(new AdminKullanicilar());
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
         public IActionResult Register(AdminKullanicilar model)
         {
-            // 2. GÜVENLİK KİLİDİ: Giriş yapmayan kişi post isteği (kayıt) gönderemez
-            if (HttpContext.Session.GetInt32("AdminID") == null)
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-
-            // 1. Validasyon Kontrolü
             if (!ModelState.IsValid)
             {
                 ViewBag.Hata = "Lütfen bilgileri eksiksiz doldurun.";
-                ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
                 return View(model);
             }
 
-            // 2. Kullanıcı Adı Kontrolü
             if (_context.AdminKullanicilars.Any(x => x.KullaniciAdi == model.KullaniciAdi))
             {
                 ViewBag.Hata = "Bu kullanıcı adı zaten alınmış.";
-                ViewBag.Adminler = _context.AdminKullanicilars.OrderByDescending(x => x.AdminId).ToList();
                 return View(model);
             }
 
-            // 3. Kayıt İşlemi
+            // Eğer formdan rol seçilmemişse, güvenlik için varsayılan olarak normal "Yonetici" yap.
+            if (string.IsNullOrEmpty(model.Rol))
+            {
+                model.Rol = "Yonetici";
+            }
+
             model.AktifMi = true;
             model.KayitTarihi = DateTime.Now;
 
             _context.AdminKullanicilars.Add(model);
             _context.SaveChanges();
 
-            // --- PROFESYONEL YÖNLENDİRME ---
             TempData["KayitBasarili"] = true;
 
-            // BURASI ÖNEMLİ: Artık Login'e gitmiyoruz. 
-            // Mevcut admin başka bir admin eklediği için aynı sayfayı yeniliyoruz.
-            return RedirectToAction("Register");
+            // Kayıt başarılı olunca yöneticileri yöneteceğimiz listeye yönlendir
+            return RedirectToAction("AdminListesi");
         }
 
-
-        // ÇIKIŞ YAP (LOGOUT)
-        public IActionResult Logout()
-        {
-            // Oturumdaki tüm verileri (AdminID, AdSoyad vs.) siler
-            HttpContext.Session.Clear();
-
-            // Kullanıcıyı Ana Sayfaya (veya istersen Login'e) gönderir
-            return RedirectToAction("Index", "Anasayfa");
-        }
+        // --- ŞİFRE SIFIRLAMA BÖLÜMLERİ ---
+        // (Bu kısımlarda bir değişiklik yapmadım, mevcut kodların gayet iyi çalışıyor)
 
         [HttpGet]
         public IActionResult SifremiUnuttum()
@@ -140,24 +176,17 @@ namespace DernekYonetim.Controllers
             {
                 try
                 {
-                    // Token oluşturma işlemleri...
                     var veri = $"{admin.AdminId}|{DateTime.Now.AddHours(1).Ticks}";
                     string token = _protector.Protect(veri);
                     var link = Url.Action("SifreSifirla", "Auth", new { t = token }, Request.Scheme);
 
-                    // Mail göndermeyi deniyoruz
                     GonderSifirlamaMaili(admin.Email, admin.AdSoyad, link);
 
-                    // Hata çıkmazsa burası çalışır
                     ViewBag.Basarili = "Sıfırlama bağlantısı gönderildi.";
                 }
                 catch (Exception ex)
                 {
-                    // HATA VARSA ARTIK GÖRECEĞİZ
-                    // ex.Message size hatanın sebebini söyleyecek
                     ViewBag.Hata = "Mail Gönderilemedi: " + ex.Message;
-
-                    // Eğer InnerException varsa onu da görelim (daha detaylı bilgi için)
                     if (ex.InnerException != null)
                     {
                         ViewBag.Hata += " Detay: " + ex.InnerException.Message;
@@ -179,7 +208,6 @@ namespace DernekYonetim.Controllers
 
             try
             {
-                // 1. Token'ı çözmeye çalış
                 string cozulmusVeri = _protector.Unprotect(t);
                 string[] parcalar = cozulmusVeri.Split('|');
 
@@ -187,24 +215,19 @@ namespace DernekYonetim.Controllers
                 long ticks = long.Parse(parcalar[1]);
                 DateTime sonKullanma = new DateTime(ticks);
 
-                // 2. Süre kontrolü
                 if (DateTime.Now > sonKullanma)
                 {
                     ViewBag.Hata = "Bu bağlantının süresi dolmuş.";
                     return View("Error");
                 }
 
-                // 3. Kullanıcıyı bul ve View'a ID ile Token'ı gönder
-                // ID'yi hidden input'a koymak yerine TempData veya Model ile taşıyabiliriz.
-                // Güvenlik için token'ı tekrar taşıyoruz.
                 ViewBag.Token = t;
                 return View();
             }
             catch
             {
-                // Token üzerinde oynama yapılmışsa Unprotect hata fırlatır.
                 ViewBag.Hata = "Geçersiz bağlantı.";
-                return View("Error"); // Veya Login'e atın
+                return View("Error");
             }
         }
 
@@ -214,24 +237,20 @@ namespace DernekYonetim.Controllers
             if (yeniSifre != yeniSifreTekrar)
             {
                 ViewBag.Hata = "Şifreler uyuşmuyor.";
-                ViewBag.Token = token; // Hata olunca token kaybolmasın
+                ViewBag.Token = token;
                 return View();
             }
 
             try
             {
-                // Token'ı tekrar çözüp ID'yi alıyoruz (Hidden inputtan ID almak güvensizdir)
                 string cozulmusVeri = _protector.Unprotect(token);
                 int adminId = int.Parse(cozulmusVeri.Split('|')[0]);
-                // Süreye tekrar bakmaya gerek yok ama isterseniz bakabilirsiniz.
 
                 var admin = _context.AdminKullanicilars.Find(adminId);
                 if (admin != null)
                 {
-                    admin.SifreHash = yeniSifre; // Hashleme yapıyorsanız burada yapın
+                    admin.SifreHash = yeniSifre;
                     _context.SaveChanges();
-
-                    // Başarılı, Login'e yönlendir
                     return RedirectToAction("Login");
                 }
             }
@@ -347,6 +366,28 @@ namespace DernekYonetim.Controllers
                 // Hata alırsak dönmeyi durdurup hatayı göstersin
                 throw new Exception("Mail Gönderilemedi: " + ex.Message);
             }
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost]
+        public IActionResult RolDegistir(int id, string yeniRol)
+        {
+            var admin = _context.AdminKullanicilars.Find(id);
+            if (admin != null)
+            {
+                // Güvenlik: SuperAdmin kendi rolünü yanlışlıkla düşüremesin
+                var currentUserId = HttpContext.Session.GetInt32("AdminID");
+                if (currentUserId == id)
+                {
+                    TempData["Hata"] = "Kendi yetkinizi değiştiremezsiniz!";
+                    return RedirectToAction("AdminListesi");
+                }
+
+                admin.Rol = yeniRol;
+                _context.SaveChanges();
+                TempData["IslemBasarili"] = "Kullanıcı yetkisi başarıyla güncellendi.";
+            }
+            return RedirectToAction("AdminListesi");
         }
     }
 }

@@ -250,6 +250,7 @@
                 }
 
                 <form asp-action="Register" asp-controller="Auth" method="post" autocomplete="off">
+
                     <div class="form-grup">
                         <label class="etiket" for="KullaniciAdi">Kullanıcı Adı</label>
                         <div class="input-kapsayici">
@@ -278,6 +279,19 @@
                     </div>
 
                     <div class="form-grup">
+                        <label class="etiket" for="Rol">Yetki Seviyesi</label>
+                        <div class="input-kapsayici">
+                            <select asp-for="Rol" class="ozel-input" style="appearance: none; cursor: pointer; padding-right: 40px;" required>
+                                <option value="Yonetici">Normal Yönetici</option>
+                                <option value="SuperAdmin">Süper Yönetici (Tüm Yetkiler)</option>
+                            </select>
+                            <i class="fas fa-user-shield ikon-sol"></i>
+                            <i class="fas fa-chevron-down ikon-sag" style="pointer-events: none;"></i>
+                        </div>
+                        <span asp-validation-for="Rol" class="text-danger" style="font-size:12px;"></span>
+                    </div>
+
+                    <div class="form-grup">
                         <label class="etiket" for="SifreHash">Geçici Şifre</label>
                         <div class="input-kapsayici">
                             <input asp-for="SifreHash" id="sifreInput" type="password" class="ozel-input" placeholder="••••••••" required />
@@ -293,7 +307,7 @@
 
                     <div class="alt-gecis mt-3">
                         <a href="/Anasayfa/Index" class="btn-text" style="display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b; text-decoration: none; transition: 0.3s;">
-                            <i class="fas fa-arrow-left"></i> Yönetim Paneline Dön
+                            <i class="fas fa-arrow-left"></i> Yöneticiler Listesine Dön
                         </a>
                     </div>
                 </form>
@@ -325,23 +339,23 @@
 
         @if (TempData["KayitBasarili"] != null)
         {
-                <text>
-                Swal.fire({
-                    title: 'İşlem Başarılı!',
-                    text: 'Yeni yönetici sisteme başarıyla eklendi.',
-                    icon: 'success',
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                    background: '#ffffff',
-                    color: '#0a1a5c',
-                    iconColor: '#b8860b',
-                    didClose: () => {
-                        // Kayıt sonrası Login'e değil, formu temizlemek için aynı sayfaya yönlendiriyoruz
-                        window.location.href = '/Auth/Register';
-                    }
-                });
-                </text>
+                    <text>
+                    Swal.fire({
+                        title: 'İşlem Başarılı!',
+                        text: 'Yeni yönetici sisteme başarıyla eklendi.',
+                        icon: 'success',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        background: '#ffffff',
+                        color: '#0a1a5c',
+                        iconColor: '#b8860b',
+                        didClose: () => {
+                            // Animasyon bitince yöneticileri yönetme sayfasına yönlendiriyoruz
+                            window.location.href = '/Auth/AdminListesi';
+                        }
+                    });
+                    </text>
         }
     </script>
 </body>

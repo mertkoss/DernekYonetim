@@ -54,14 +54,19 @@
                             <li class="px-3 py-2 text-center border-bottom mb-2 bg-light">
                                 <i id="dropdownProfileIcon" class="fas fa-user-shield fa-2x text-muted mb-2"></i>
                                 <h6 class="mb-0 fw-bold">@Context.Session.GetString("AdminAd")</h6>
-                                <small class="text-muted">Sistem Yöneticisi</small>
+                                <small class="text-muted fw-bold">
+                                    @(Context.Session.GetString("AdminRol") == "SuperAdmin" ? "Süper Yönetici" : "Yönetici")
+                                </small>
                             </li>
 
-                            <li>
-                                <a class="dropdown-item py-2" href="/Auth/Register">
-                                    <i class="fas fa-user-plus me-2 w-15px"></i> Yönetici Ekle
-                                </a>
-                            </li>
+                            @if (Context.Session.GetString("AdminRol") == "SuperAdmin")
+                            {
+                                <li>
+                                    <a class="dropdown-item py-2" href="/Auth/AdminListesi">
+                                        <i class="fas fa-users-cog me-2 w-15px text-primary"></i> Yöneticileri Yönet
+                                    </a>
+                                </li>
+                            }
 
                             <li>
                                 <a class="dropdown-item py-2" href="/Profil/Index">
@@ -89,7 +94,6 @@
                 else
                 {
                     // --- GİRİŞ YAPILMAMIŞ HALİ ---
-                    // 1. Tasarımın orijinal "Üye Girişi" stili
                     <li class="nav-item ms-lg-2">
                         <a class="nav-link btn btn-outline-warning rounded-pill px-4 text-dark fw-bold" href="/Auth/Login">
                             <i class="fa fa-user me-1"></i>

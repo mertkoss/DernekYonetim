@@ -1,0 +1,287 @@
+﻿@using DernekYonetim.Models
+@model IEnumerable<DernekYonetim.Models.AdminKullanicilar>
+
+@{
+    ViewData["Title"] = "Yöneticileri Yönet";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Kendi projenin Layout yoluna göre ayarlayabilirsin
+    var guncelAdminId = Context.Session.GetInt32("AdminID"); // Giriş yapan admini tespit etmek için
+}
+
+<style>
+    .admin-card {
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: none;
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        background-color: #0a1a5c;
+        color: white;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-altin {
+        background-color: #b8860b;
+        color: white;
+        font-weight: 600;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .btn-altin:hover {
+            background-color: #996e09;
+            color: white;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .badge-super {
+        background-color: #0a1a5c;
+        color: #b8860b;
+        border: 1px solid #b8860b;
+        padding: 6px 10px;
+        font-weight: bold;
+    }
+
+    .badge-normal {
+        background-color: #e2e8f0;
+        color: #334155;
+        padding: 6px 10px;
+        font-weight: 600;
+    }
+
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: 0.2s;
+        border: none;
+    }
+
+    .btn-edit {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+
+        .btn-edit:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+    .btn-delete {
+        background-color: #fef2f2;
+        color: #ef4444;
+    }
+
+        .btn-delete:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+</style>
+
+<div class="container py-5" style="max-width: 1200px;">
+
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8 mb-3 mb-md-0">
+            <h2 style="color: #0a1a5c; font-weight: 800; margin: 0;">Sistem Yöneticileri</h2>
+            <p class="text-muted mb-0">Ankara Öğretim Derneği panel erişimi olan yetkilileri buradan yönetebilirsiniz.</p>
+        </div>
+        <div class="col-md-4 text-md-end text-start">
+            <a href="/Auth/Register" class="btn btn-altin px-4 py-2" style="border-radius: 10px;">
+                <i class="fas fa-plus me-2"></i> Yeni Yönetici Ekle
+            </a>
+        </div>
+    </div>
+
+    <div class="card admin-card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                    <thead style="background-color: #f8fafc; color: #64748b; font-size: 13px; text-transform: uppercase;">
+                        <tr>
+                            <th class="ps-4 py-3">Yetkili Adı</th>
+                            <th class="py-3">Kullanıcı Adı</th>
+                            <th class="py-3">E-Posta</th>
+                            <th class="py-3">Kayıt Tarihi</th>
+                            <th class="py-3 text-center">Yetki Rolü</th>
+                            <th class="py-3 text-center pe-4">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var admin in Model)
+                        {
+                            var isCurrentUser = (admin.AdminId == guncelAdminId);
+
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-3"
+                                             style="width: 40px; height: 40px; background-color: #0a1a5c; font-weight: bold;">
+                                            @(string.IsNullOrEmpty(admin.AdSoyad) ? "A" : admin.AdSoyad.Substring(0, 1).ToUpper())
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold" style="color: #334155;">@admin.AdSoyad</h6>
+                                            @if (isCurrentUser)
+                                            {
+                                                <small class="text-success"><i class="fas fa-circle" style="font-size: 8px;"></i> Şu An Sizsiniz</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 text-muted">@admin.KullaniciAdi</td>
+                                <td class="py-3 text-muted">@admin.Email</td>
+                                <td class="py-3 text-muted">@(admin.KayitTarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                <td class="py-3 text-center">
+                                    @if (admin.Rol == "SuperAdmin")
+                                    {
+                                        <span class="badge rounded-pill badge-super"><i class="fas fa-crown me-1"></i> Süper Yönetici</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill badge-normal"><i class="fas fa-user-shield me-1"></i> Yönetici</span>
+                                    }
+                                </td>
+                                <td class="py-3 text-center pe-4">
+                                    @if (!isCurrentUser)
+                                    {
+                                        <button class="action-btn btn-edit me-1" onclick="rolDegistirModalAc(@admin.AdminId, '@admin.Rol', '@admin.AdSoyad')" title="Yetkiyi Düzenle">
+                                            <i class="fas fa-sliders-h"></i>
+                                        </button>
+
+                                        <button class="action-btn btn-delete" onclick="silmeOnayi(@admin.AdminId, '@admin.AdSoyad')" title="Sistemden Sil">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size: 12px; font-weight: 600;">İşlem Kilitli</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rolModal" tabindex="-1" aria-labelledby="rolModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none;">
+            <div class="modal-header" style="background-color: #0a1a5c; color: white; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                <h5 class="modal-title" id="rolModalLabel"><i class="fas fa-user-cog me-2"></i> Yetki Düzenle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="RolDegistir" asp-controller="Auth" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="id" id="modalAdminId" />
+
+                    <div class="mb-3 text-center">
+                        <h6 id="modalAdminAd" style="color: #b8860b; font-weight: bold; font-size: 18px;"></h6>
+                        <p class="text-muted" style="font-size: 14px;">kullanıcısının sistemdeki yetki seviyesini seçin.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="fw-bold mb-2" style="color: #0a1a5c;">Yeni Yetki Rolü</label>
+                        <select name="yeniRol" id="modalAdminRol" class="form-select" style="height: 50px; border-radius: 10px; border: 1px solid #e2e8f0; cursor: pointer;">
+                            <option value="Yonetici">Normal Yönetici (Kısıtlı Erişim)</option>
+                            <option value="SuperAdmin">Süper Yönetici (Tam Erişim)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: none; padding: 0 25px 25px 25px;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600;">İptal</button>
+                    <button type="submit" class="btn btn-altin" style="border-radius: 10px; border: none;">Yetkiyi Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Rol Değiştirme Modalını Dolduran ve Açan Fonksiyon
+    function rolDegistirModalAc(id, guncelRol, adSoyad) {
+        document.getElementById('modalAdminId').value = id;
+        document.getElementById('modalAdminAd').innerText = adSoyad;
+        document.getElementById('modalAdminRol').value = guncelRol;
+
+        var modal = new bootstrap.Modal(document.getElementById('rolModal'));
+        modal.show();
+    }
+
+    // Profesyonel Silme Onayı (SweetAlert)
+    function silmeOnayi(id, adSoyad) {
+        Swal.fire({
+            title: 'Emin misiniz?',
+            html: `<b style="color:#ef4444">${adSoyad}</b> adlı yöneticiyi sistemden kalıcı olarak silmek istiyor musunuz?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Evet, Yöneticiyi Sil',
+            cancelButtonText: 'İptal',
+            reverseButtons: true,
+            background: '#ffffff',
+            color: '#334155',
+            customClass: {
+                confirmButton: 'rounded-pill px-4',
+                cancelButton: 'rounded-pill px-4'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Silme işlemi için dinamik bir form oluşturup POST isteği atıyoruz (Daha güvenli yöntem)
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/Auth/AdminSil';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = id;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+
+    // Controller'dan gelen hata veya başarı mesajlarını ekranda gösterme
+    @if (TempData["Hata"] != null)
+    {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Hata!',
+                text: '@TempData["Hata"]',
+                confirmButtonColor: '#0a1a5c'
+            });
+            </text>
+    }
+
+    @if (TempData["IslemBasarili"] != null || TempData["SilmeBasarili"] != null)
+    {
+            var mesaj = TempData["IslemBasarili"] ?? "Yönetici sistemden başarıyla silindi.";
+            <text>
+            Swal.fire({
+                icon: 'success',
+                title: 'Başarılı!',
+                text: '@mesaj',
+                timer: 2500,
+                showConfirmButton: false,
+                iconColor: '#b8860b'
+            });
+            </text>
+    }
+</script>
