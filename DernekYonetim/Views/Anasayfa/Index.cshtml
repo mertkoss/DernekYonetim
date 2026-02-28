@@ -205,35 +205,28 @@
         margin-bottom: 15px;
     }
 
-    /* OKULLAR BÖLÜMÜ */
-    .schools-section {
-        padding: 80px 0;
-        background-color: var(--renk-gri);
-    }
+    /* Görsellerin kart içinde düzgün ve aynı boyutta durmasını sağlar */
+.school-card .card-img-top {
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
 
-    .school-card {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        height: 100%;
-        transition: transform 0.3s;
-    }
+/* Kartların üzerine gelindiğinde oluşan animasyon */
+.school-card {
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
 
-        .school-card:hover {
-            transform: translateY(-10px);
-        }
+.school-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(10, 26, 92, 0.15) !important;
+}
 
-    .school-img {
-        height: 200px;
-        background-size: cover;
-        background-position: center;
-    }
-
-    .school-body {
-        padding: 20px;
-    }
-
+/* Link yazılarının mavi veya altı çizili olmasını engeller */
+.text-decoration-none {
+    text-decoration: none !important;
+}
    
 
    .heritage-image-wrapper {
@@ -501,40 +494,48 @@
     </div>
 </section>
  
-
-<section class="schools-section">
+<section class="schools-section py-5">
     <div class="container">
         <div class="text-center mb-5">
             <h2 style="font-family:'Playfair Display'; font-weight:800; color:#0a1a5c;">Eğitim Kurumlarımız</h2>
             <div style="width:80px; height:4px; background:#b8860b; margin:10px auto;"></div>
         </div>
+        
         <div class="row">
             <div class="col-md-4 mb-4">
-                <div class="school-card">
-                    <div class="school-img" style="background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086');"></div>
-                    <div class="school-body">
-                        <h5 style="color:#0a1a5c; font-weight:700;">Ankara Tevfik Fikret Lisesi</h5>
-                        <p class="text-muted small">Köklü geçmiş, aydınlık gelecek.</p>
+                <a href="https://ankara.tfo.k12.tr/lise/" target="_blank" class="text-decoration-none">
+                    <div class="school-card card h-100 border-0 shadow-sm">
+                        <img src="lib/img/bina1.png" class="card-img-top" alt="Ankara Tevfik Fikret Lisesi">
+                        <div class="card-body text-center mt-3">
+                            <h5 class="card-title" style="color:#0a1a5c; font-weight:700;">Ankara Tevfik Fikret Lisesi</h5>
+                            <p class="card-text text-muted small">Köklü geçmiş, aydınlık gelecek.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
+
             <div class="col-md-4 mb-4">
-                <div class="school-card">
-                    <div class="school-img" style="background-image: url('https://images.unsplash.com/photo-1592280771800-bcf9fe730847?q=80&w=2070');"></div>
-                    <div class="school-body">
-                        <h5 style="color:#0a1a5c; font-weight:700;">Ankara Tevfik Fikret İlköğretim</h5>
-                        <p class="text-muted small">Geleceğin liderleri burada yetişiyor.</p>
+                <a href="https://ankara.tfo.k12.tr/ilkokul/" target="_blank" class="text-decoration-none">
+                    <div class="school-card card h-100 border-0 shadow-sm">
+                        <img src="~/lib/img/ilkokul.png" class="card-img-top" alt="Ankara Tevfik Fikret İlköğretim">
+                        <div class="card-body text-center mt-3">
+                            <h5 class="card-title" style="color:#0a1a5c; font-weight:700;">Ankara Tevfik Fikret İlköğretim</h5>
+                            <p class="card-text text-muted small">Geleceğin liderleri burada yetişiyor.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
+
             <div class="col-md-4 mb-4">
-                <div class="school-card">
-                    <div class="school-img" style="background-image: url('https://plus.unsplash.com/premium_photo-1664302152996-5e58cb30c776?q=80&w=2070');"></div>
-                    <div class="school-body">
-                        <h5 style="color:#0a1a5c; font-weight:700;">İzmir Tevfik Fikret Lisesi</h5>
-                        <p class="text-muted small">Ege'nin incisinde çağdaş eğitim.</p>
+                <a href="https://izmir.tfo.k12.tr" target="_blank" class="text-decoration-none">
+                    <div class="school-card card h-100 border-0 shadow-sm">
+                        <img src="~/lib/img/lise2.jpg" class="card-img-top" alt="İzmir Tevfik Fikret Lisesi">
+                        <div class="card-body text-center mt-3">
+                            <h5 class="card-title" style="color:#0a1a5c; font-weight:700;">İzmir Tevfik Fikret Lisesi</h5>
+                            <p class="card-text text-muted small">Ege'nin incisinde çağdaş eğitim.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
