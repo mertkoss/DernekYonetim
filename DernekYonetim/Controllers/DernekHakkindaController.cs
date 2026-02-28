@@ -32,6 +32,7 @@ public class DernekController : Controller
 
     // Güncelleme Aksiyonu (Modal'dan gelen veriler için)
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> BolumGuncelle(DernekHakkindaBolumleri model)
     {
         if (HttpContext.Session.GetInt32("AdminID") == null)
@@ -61,28 +62,38 @@ public class DernekController : Controller
     [HttpPost]
     public async Task<IActionResult> ResimYukle(IFormFile upload)
     {
+        // 1. GÜVENLİK: Sadece giriş yapan adminler dosya yükleyebilir
+        if (HttpContext.Session.GetInt32("AdminID") == null)
+        {
+            return Json(new { uploaded = 0, error = new { message = "Yetkisiz işlem!" } });
+        }
+
         if (upload != null && upload.Length > 0)
         {
-            // 1. Resim için benzersiz bir isim oluştur (Çakışma olmasın diye)
-            var dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName);
+            // 2. GÜVENLİK: Sadece resim formatlarına izin ver
+            var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var uzanti = Path.GetExtension(upload.FileName).ToLowerInvariant();
 
-            // 2. Yüklenecek klasörü belirle (wwwroot/img/icerik)
+            if (!izinVerilenUzantilar.Contains(uzanti))
+            {
+                return Json(new { uploaded = 0, error = new { message = "Sadece görsel (.jpg, .png, vb.) yükleyebilirsiniz!" } });
+            }
+
+            var dosyaAdi = Guid.NewGuid().ToString() + uzanti;
             var klasorYolu = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img/icerik");
-            if (!Directory.Exists(klasorYolu)) Directory.CreateDirectory(klasorYolu);
 
+            if (!Directory.Exists(klasorYolu)) Directory.CreateDirectory(klasorYolu);
             var tamYol = Path.Combine(klasorYolu, dosyaAdi);
 
-            // 3. Dosyayı sunucuya kaydet
             using (var stream = new FileStream(tamYol, FileMode.Create))
             {
                 await upload.CopyToAsync(stream);
             }
 
-            // 4. CKEditor'ün anlayacağı formatta (JSON) resmin URL'sini geri döndür
             var url = $"/img/icerik/{dosyaAdi}";
             return Json(new { uploaded = 1, fileName = dosyaAdi, url = url });
         }
 
-        return Json(new { uploaded = 0, error = new { message = "Resim yüklenemedi." } });
+        return Json(new { uploaded = 0, error = new { message = "Dosya boş olamaz." } });
     }
 }
