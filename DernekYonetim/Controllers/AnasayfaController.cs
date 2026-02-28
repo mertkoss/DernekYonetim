@@ -14,29 +14,27 @@ namespace DernekYonetim.Controllers
             _context = context;
         }
 
-        // Ana Sayfa (Ziyaretçi Sayacı, Hakkımızda, Üyeler ve Son Haberler)
         public async Task<IActionResult> Index()
         {
-            // --- 1. ZİYARETÇİ SAYACI İŞLEMLERİ ---
-            var sayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
-
-            if (sayac == null)
+            if (HttpContext.Session.GetString("ZiyaretEdildi") == null)
             {
-                // Eğer tabloda hiç kayıt yoksa, ilk kaydı 1 olarak oluşturuyoruz
-                sayac = new ZiyaretciSayaci { ToplamZiyaretci = 1 };
-                _context.ZiyaretciSayacis.Add(sayac);
-            }
-            else
-            {
-                // Kayıt varsa sayıyı 1 artırıyoruz
-                sayac.ToplamZiyaretci++;
+                var sayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
+                if (sayac == null)
+                {
+                    sayac = new ZiyaretciSayaci { ToplamZiyaretci = 1 };
+                    _context.ZiyaretciSayacis.Add(sayac);
+                }
+                else
+                {
+                    sayac.ToplamZiyaretci++;
+                }
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.SetString("ZiyaretEdildi", "evet");
             }
 
-            // Değişikliği veritabanına kaydediyoruz
-            await _context.SaveChangesAsync();
-
-            // Güncel sayıyı View tarafına gönderiyoruz
-            ViewBag.ZiyaretciSayisi = sayac.ToplamZiyaretci;
+            var guncelSayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
+            ViewBag.ZiyaretciSayisi = guncelSayac?.ToplamZiyaretci ?? 0;
 
 
             var model = new HomeViewModel
@@ -65,6 +63,9 @@ namespace DernekYonetim.Controllers
         // Üye Detay
         public IActionResult Detay(int id)
         {
+            if (HttpContext.Session.GetInt32("AdminID") == null && !User.Identity.IsAuthenticated)
+                return RedirectToAction("Index");
+
             var uye = _context.Uyelers
                 .Include(x => x.Aidatlars)
                 .Include(x => x.DerbisKaydis)
