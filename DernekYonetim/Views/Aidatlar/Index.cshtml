@@ -15,17 +15,7 @@
         padding: 0 15px; /* Mobilde kenarlara yapışmasın */
     }
 
-    /* Tablonun kendi genişlik sınırını kaldırıyoruz, çünkü artık page-wrapper onu tutuyor */
-    .table-container {
-        width: 100%; /* Kutuya tam sığsın */
-        /* max-width sildik */
-        /* margin sildik */
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        border: 1px solid #eaeaea;
-    }
+    
     /* Tablonun sonsuz uzamasını engeller, ortalar ve kart görünümü verir */
     .table-container {
         max-width: 1200px; /* İstersen burayı 1400px yapabilirsin */
@@ -583,4 +573,59 @@
             .catch(error => console.error('Hata:', error));
         }
     }
+        // Form submit işlemini yakala
+    document.getElementById("uyeForm").addEventListener("submit", function(e) {
+        e.preventDefault(); // Sayfanın klasik yöntemle yenilenmesini tamamen durdur
+
+        const form = this;
+        const formData = new FormData(form);
+        const url = form.action; // Action dinamik değiştiği için (Ekle/Güncelle) otomatik doğru adresi alır
+
+        // Kullanıcıya işlem yapıldığını hissettirmek için butonu yükleniyor moduna al
+        const submitBtn = document.getElementById("btnKaydet");
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Kaydediliyor...';
+        submitBtn.disabled = true;
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                // İşlem başarılıysa güncel sayfanın tüm HTML'ini al
+                return response.text();
+            } else {
+                // Backend'den BadRequest gelirse (örneğin hata mesajı), onu yakala
+                return response.text().then(text => { throw new Error(text); });
+            }
+        })
+        .then(html => {
+            // Gelen tam sayfa HTML'ini sanal bir DOM'a dönüştür
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            // Sadece güncel tabloyu al ve mevcut sayfadaki tablonun içine yapıştır
+            const newTableHtml = doc.querySelector('.table-container').innerHTML;
+            document.querySelector('.table-container').innerHTML = newTableHtml;
+
+            // Modalı Bootstrap JS ile kapat
+            const modalEl = document.getElementById('yeniUyeModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
+            // Butonu eski haline getir
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+
+            // Formu temizle
+            resetForm();
+
+        })
+        .catch(error => {
+            alert("Bir hata oluştu:\n" + error.message);
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    });
 </script>

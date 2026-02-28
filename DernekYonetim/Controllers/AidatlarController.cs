@@ -74,6 +74,9 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult YeniUyeEkle(YeniUyeGirisModel model)
         {
+            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
+            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
+
             if (!ModelState.IsValid)
             {
                 var hatalar = string.Join(" | ", ModelState.Values
@@ -170,6 +173,9 @@ namespace DernekYonetim.Controllers
         [HttpGet]
         public IActionResult UyeGetir(int id)
         {
+            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
+            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
+
             var uye = _context.Uyelers
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
@@ -225,6 +231,9 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UyeGuncelle(YeniUyeGirisModel model, int UyeId)
         {
+            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
+            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
+
             // using kullandığımız için işlem sonunda veya hatada otomatik temizlik yapılır.
             using var transaction = _context.Database.BeginTransaction();
 
@@ -316,15 +325,19 @@ namespace DernekYonetim.Controllers
             }
             catch (Exception ex)
             {
-
+                transaction.Rollback(); 
                 string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 return BadRequest("Güncelleme Hatası Detayı: " + detayliHata);
             }
-    }
+        }
         // 5. ÜYE SİLME İŞLEMİ (Tüm ilişkili verilerle birlikte)
         [HttpPost]
         public IActionResult UyeSil(int id)
         {
+
+            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
+            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
+
             var uye = _context.Uyelers
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
@@ -348,6 +361,9 @@ namespace DernekYonetim.Controllers
         [HttpPost]
         public IActionResult AidatSil(int id)
         {
+            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
+            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
+
             var aidat = _context.Aidatlars.Find(id);
             if (aidat != null)
             {
