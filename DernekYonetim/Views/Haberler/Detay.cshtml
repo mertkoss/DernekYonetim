@@ -4,32 +4,14 @@
     Layout = "_Layout";
 }
 
-@if (TempData["Basari"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show shadow-sm container mt-4" role="alert" style="margin-top: 100px;">
-        <i class="fas fa-check-circle me-2"></i> @TempData["Basari"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (TempData["Hata"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm container mt-4" role="alert" style="margin-top: 100px;">
-        <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Hata"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-<section class="page-section bg-white" style="padding-top:80px; padding-bottom: 80px;">
+<section class="page-section bg-white" style="padding-top:100px; padding-bottom: 80px;">
     <div class="container">
         <div class="row justify-content-center">
-
             <div class="col-lg-9 col-xl-8">
-
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <a href="/Haberler" class="text-decoration-none text-muted fw-bold">
                         <i class="fas fa-arrow-left me-2"></i> Haberlere Dön
                     </a>
-
                     @if (Model.Kategori != null)
                     {
                         <span class="badge bg-gold text-dark py-2 px-3 fs-6 shadow-sm">
@@ -39,7 +21,6 @@
                 </div>
 
                 <h1 class="text-primary-dark fw-bold mb-3" style="line-height: 1.3;">@Model.Baslik</h1>
-
                 <div class="d-flex align-items-center text-muted mb-4 pb-3 border-bottom border-warning">
                     <i class="far fa-calendar-alt me-2 text-warning fs-5"></i>
                     <span class="fs-6 fw-bold">Yayınlanma Tarihi: @Model.YayimTarihi?.ToString("dd MMMM yyyy")</span>
@@ -51,15 +32,16 @@
                         <span class="fw-bold text-primary-dark"><i class="fas fa-user-shield me-2 text-warning"></i>Yönetici İşlemleri</span>
                         <div>
                             <button class="btn btn-sm btn-outline-primary-dark me-2 rounded-pill px-3"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#detayHaberDuzenleModal"
-                                    onclick="modalAcildi()">
+                                    data-bs-toggle="modal" data-bs-target="#detayHaberDuzenleModal" onclick="modalAcildi()">
                                 <i class="fas fa-edit me-1"></i> Haberi Düzenle
                             </button>
-                            <a href="/Haberler/Sil/@Model.Id" class="btn btn-sm btn-danger rounded-pill px-3"
-                               onclick="return confirm('Bu haberi silmek istediğinize emin misiniz? (Silindikten sonra haberler listesine yönlendirileceksiniz)')">
-                                <i class="fas fa-trash-alt me-1"></i> Sil
-                            </a>
+                            <form action="/Haberler/Sil" method="post" class="d-inline" onsubmit="return confirm('Bu haberi silmek istediğinize emin misiniz?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3">
+                                    <i class="fas fa-trash-alt me-1"></i> Sil
+                                </button>
+                            </form>
                         </div>
                     </div>
                 }
@@ -83,11 +65,8 @@
                 </div>
 
                 <div class="mt-5 pt-4 border-top border-light d-flex justify-content-between align-items-center">
-                    <div class="text-muted small">
-                        <strong>Ankara Öğretim Derneği</strong> - Tüm Hakları Saklıdır
-                    </div>
+                    <div class="text-muted small"><strong>Ankara Öğretim Derneği</strong> - Tüm Hakları Saklıdır</div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -99,8 +78,8 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content border-0 shadow-lg">
                 <form action="/Haberler/HaberGuncelle" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="Id" value="@Model.Id" />
-
                     <div class="modal-header bg-warning text-dark border-0">
                         <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -111,7 +90,6 @@
                                 <label class="form-label fw-bold text-primary-dark">Haber Başlığı</label>
                                 <input type="text" name="Baslik" value="@Model.Baslik" class="form-control border-0 shadow-sm" maxlength="150" required />
                             </div>
-
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Kategori</label>
                                 <select name="KategoriId" class="form-select border-0 shadow-sm" required>
@@ -120,7 +98,6 @@
                                     {
                                         foreach (var item in (SelectList)ViewBag.KategoriListesi)
                                         {
-                                            // Mevcut kategoriyi seçili getiriyoruz
                                             if (item.Value == Model.KategoriId.ToString())
                                             {
                                                 <option value="@item.Value" selected>@item.Text</option>
@@ -133,27 +110,21 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Fotoğrafı Değiştir</label>
                                 <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*" />
                             </div>
-
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Kısa Özet <span class="text-danger">*</span></label>
                                 <textarea name="Ozet" id="detayOzet" class="form-control border-0 shadow-sm" rows="2" maxlength="255" oninput="karakterSayici(this, 'detayOzetSayac')" required>@Model.Ozet</textarea>
-                                <div class="d-flex justify-content-end mt-1">
-                                    <small id="detayOzetSayac" class="text-muted fw-bold">0 / 255</small>
-                                </div>
+                                <div class="d-flex justify-content-end mt-1"><small id="detayOzetSayac" class="text-muted fw-bold">0 / 255</small></div>
                             </div>
-
                             <div class="col-md-12 mb-3">
                                 <div class="form-check form-switch mt-2">
                                     <input class="form-check-input fs-5" type="checkbox" name="SlayttaGoster" value="true" id="detaySlayttaGoster" @(Model.SlayttaGoster ? "checked" : "")>
                                     <label class="form-check-label fw-bold text-primary-dark ms-2 mt-1" for="detaySlayttaGoster">Ana Sayfa Slider'ında Göster</label>
                                 </div>
                             </div>
-
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
                                 <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="6">@Model.Icerik</textarea>
@@ -171,7 +142,6 @@
 }
 
 <style>
-    /* Detay Sayfası Özel Stilleri */
     .text-primary-dark {
         color: #0d2b4d !important;
     }
@@ -204,7 +174,6 @@
             color: #fff;
         }
 
-    /* İçerik içindeki olası linkler veya kalın yazılar için */
     .news-content b, .news-content strong {
         color: #0d2b4d;
     }
@@ -220,14 +189,13 @@
             text-decoration: underline;
         }
 
-    /* Geri dön butonu hover */
     a.text-muted:hover {
         color: #ffc800 !important;
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Ortak karakter sayacı ve uyarı fonksiyonu
     function karakterSayici(element, sayacId) {
         var max = element.getAttribute("maxlength");
         var mevcut = element.value.length;
@@ -235,26 +203,45 @@
 
         if(sayac) {
             sayac.innerText = mevcut + " / " + max;
-
-            // 250'ye ulaşırsa (veya geçerse) kırmızı yapıp görsel uyarı ver
             if (mevcut >= 250) {
-                sayac.classList.remove("text-muted");
-                sayac.classList.add("text-danger", "fw-bold");
+                sayac.classList.remove("text-muted"); sayac.classList.add("text-danger", "fw-bold");
             } else {
-                sayac.classList.remove("text-danger", "fw-bold");
-                sayac.classList.add("text-muted");
+                sayac.classList.remove("text-danger", "fw-bold"); sayac.classList.add("text-muted");
             }
         }
     }
 
-    // Modal açıldığında sayacı tetiklemek için basit bir fonksiyon
     function modalAcildi() {
-        // Biraz gecikme ekliyoruz ki modal DOM'a tam yerleşsin
         setTimeout(function() {
             var ozetAlani = document.getElementById('detayOzet');
-            if(ozetAlani) {
-                karakterSayici(ozetAlani, 'detayOzetSayac');
-            }
+            if(ozetAlani) { karakterSayici(ozetAlani, 'detayOzetSayac'); }
         }, 200);
     }
+
+    @if (TempData["Basari"] != null)
+     {
+             <text>
+             document.addEventListener('DOMContentLoaded', function() {
+                 Swal.fire({
+                     icon: 'success',
+                     title: 'Başarılı!',
+                     text: @Html.Raw(Json.Serialize(TempData["Basari"])),
+                     confirmButtonColor: '#0d2b4d'
+                 });
+             });
+             </text>
+     }
+     @if (TempData["Hata"] != null)
+     {
+             <text>
+             document.addEventListener('DOMContentLoaded', function() {
+                 Swal.fire({
+                     icon: 'error',
+                     title: 'Hata!',
+                     text: @Html.Raw(Json.Serialize(TempData["Hata"])),
+                     confirmButtonColor: '#0d2b4d'
+                 });
+             });
+             </text>
+     }
 </script>

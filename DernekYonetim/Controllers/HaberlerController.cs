@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DernekYonetim.Models;
+using System.IO;
 
 public class HaberlerController : Controller
 {
@@ -14,26 +15,14 @@ public class HaberlerController : Controller
         _hostEnvironment = hostEnvironment;
     }
 
-    // GÜNCELLENEN KISIM: Arama, Filtreleme ve Sayfalama
     public async Task<IActionResult> Index(string arama, int? kategoriId, int sayfa = 1)
     {
-        // Sayfada gösterilecek haber sayısı (Dikey akış olduğu için 5 idealdir)
         int sayfaBoyutu = 5;
         var query = _context.Haberlers.Include(h => h.Kategori).AsQueryable();
 
-        // 1. Arama Filtresi (Sadece Başlıkta)
-        if (!string.IsNullOrEmpty(arama))
-        {
-            query = query.Where(x => x.Baslik.Contains(arama));
-        }
+        if (!string.IsNullOrEmpty(arama)) { query = query.Where(x => x.Baslik.Contains(arama)); }
+        if (kategoriId.HasValue && kategoriId > 0) { query = query.Where(x => x.KategoriId == kategoriId); }
 
-        // 2. Kategori Filtresi (Örn: Sadece Duyurular)
-        if (kategoriId.HasValue && kategoriId > 0)
-        {
-            query = query.Where(x => x.KategoriId == kategoriId);
-        }
-
-        // 3. Sayfalama Hesaplamaları
         var toplamKayit = await query.CountAsync();
         var toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
 
@@ -42,17 +31,14 @@ public class HaberlerController : Controller
                                .Take(sayfaBoyutu)
                                .ToListAsync();
 
-        // 4. Slider İçin Haberleri Seçme (Sadece ilk sayfadaysa ve arama/filtre yoksa göster)
         bool aramaYok = string.IsNullOrEmpty(arama) && !kategoriId.HasValue && sayfa == 1;
         if (aramaYok)
         {
-            // Önce yöneticinin "Slaytta Göster" dediklerini al
             var sliderHaberler = await _context.Haberlers.Include(h => h.Kategori)
                                             .Where(x => x.SlayttaGoster == true)
                                             .OrderByDescending(x => x.YayimTarihi)
                                             .Take(3).ToListAsync();
 
-            // Eğer hiç seçili yoksa, genel en yeni 3 haberi al
             if (!sliderHaberler.Any())
             {
                 sliderHaberler = await _context.Haberlers.Include(h => h.Kategori)
@@ -61,12 +47,8 @@ public class HaberlerController : Controller
             }
             ViewBag.SliderHaberler = sliderHaberler;
         }
-        else
-        {
-            ViewBag.SliderHaberler = new List<Haberler>(); // Arama yapılıyorsa slider'ı boşalt (gizle)
-        }
+        else { ViewBag.SliderHaberler = new List<Haberler>(); }
 
-        // Kategorileri Dropdown için View'a gönder
         var kategoriler = await _context.HaberKategorileris.ToListAsync();
         ViewBag.Kategoriler = kategoriler;
         ViewBag.KategoriListesi = new SelectList(kategoriler, "Id", "KategoriAdi");
@@ -78,10 +60,17 @@ public class HaberlerController : Controller
         ViewBag.ToplamKayit = toplamKayit;
         ViewBag.AramaYok = aramaYok;
 
+        // AJAX ILE GELDİYSE PARTIAL VIEW DÖNDÜR
+        if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return PartialView("_HaberListesiPartial", liste);
+        }
+
         return View(liste);
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> HaberKaydet(Haberler haber, IFormFile? Fotograf)
     {
         if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
@@ -90,16 +79,12 @@ public class HaberlerController : Controller
         {
             if (string.IsNullOrWhiteSpace(haber.Baslik) || string.IsNullOrWhiteSpace(haber.Ozet))
             {
-                TempData["Hata"] = "Başlık ve Özet alanları boş bırakılamaz.";
-                return RedirectToAction("Index");
+                TempData["Hata"] = "Başlık ve Özet alanları boş bırakılamaz."; return RedirectToAction("Index");
             }
-
             if (haber.KategoriId == null || haber.KategoriId <= 0)
             {
-                TempData["Hata"] = "Lütfen geçerli bir kategori seçiniz.";
-                return RedirectToAction("Index");
+                TempData["Hata"] = "Lütfen geçerli bir kategori seçiniz."; return RedirectToAction("Index");
             }
-
             if (haber.Baslik.Length > 150) { TempData["Hata"] = "Haber başlığı 150 karakterden uzun olamaz."; return RedirectToAction("Index"); }
             if (haber.Ozet.Length > 255) { TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz."; return RedirectToAction("Index"); }
 
@@ -134,6 +119,7 @@ public class HaberlerController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> HaberGuncelle(Haberler gelenHaber, IFormFile? Fotograf)
     {
         if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
@@ -167,8 +153,12 @@ public class HaberlerController : Controller
                 }
 
                 string dosyaAdi = Guid.NewGuid().ToString() + uzanti;
-                string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler", dosyaAdi);
-                using (var stream = new FileStream(yol, FileMode.Create)) { await Fotograf.CopyToAsync(stream); }
+                string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler");
+                // EKSİKTİ: Klasör kontrolünü buraya ekledik
+                if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
+                string tamYol = Path.Combine(yol, dosyaAdi);
+
+                using (var stream = new FileStream(tamYol, FileMode.Create)) { await Fotograf.CopyToAsync(stream); }
                 mevcutHaber.FotografYolu = "/img/haberler/" + dosyaAdi;
             }
 
@@ -192,6 +182,8 @@ public class HaberlerController : Controller
         return View(haber);
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Sil(int id)
     {
         if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
@@ -206,6 +198,7 @@ public class HaberlerController : Controller
             }
             _context.Haberlers.Remove(silinecekHaber);
             await _context.SaveChangesAsync();
+            TempData["Basari"] = "Haber başarıyla silindi.";
         }
         return RedirectToAction("Index");
     }
