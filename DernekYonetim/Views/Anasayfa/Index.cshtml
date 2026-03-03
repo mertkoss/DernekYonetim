@@ -656,37 +656,42 @@
 
 @section Scripts {
     <script>
-        // jQuery'nin yüklendiğinden emin olalım
-        if (typeof jQuery == 'undefined') {
-            console.error("HATA: jQuery kütüphanesi sayfada yüklü değil! Layout dosyanızı kontrol edin.");
-        } else {
-            console.log("Başarılı: jQuery çalışıyor, sayaca başlanıyor...");
-
-            $(document).ready(function () {
-                $('.counter').each(function () {
-                    var $this = $(this);
-
-                    // Sayıyı al ve sayıya çevir (ParseInt)
-                    var countTo = parseInt($this.attr('data-count'));
-                    var suffix = $this.attr('data-suffix') || "";
-
-                    console.log("Hedef Sayı: " + countTo); // Konsola yazdırır
-
-                    $({ countNum: 0 }).animate({
-                        countNum: countTo
-                    },
-                    {
-                        duration: 2000,
-                        easing: 'swing',
-                        step: function () {
-                            $this.text(Math.ceil(this.countNum).toLocaleString('tr-TR') + suffix);
-                        },
-                        complete: function () {
-                            $this.text(Math.ceil(this.countNum).toLocaleString('tr-TR') + suffix);
-                        }
-                    });
-                });
-            });
+        // 1. TARAYICININ KAYDIRMA HAFIZASINI KAPAT VE EN ÜSTE ÇIK
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
         }
+        window.scrollTo(0, 0);
+
+        // 2. MODERN SAYAÇ ANİMASYONU
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Başarılı: Modern sayaç animasyonu başlatılıyor...");
+
+            const counters = document.querySelectorAll('.counter');
+            const duration = 2000; // Animasyon süresi (2 saniye)
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-count')) || 0;
+                const suffix = counter.getAttribute('data-suffix') || "";
+                let startTimestamp = null;
+
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const easeProgress = 1 - (1 - progress) * (1 - progress);
+                    const currentCount = Math.ceil(easeProgress * target);
+                    
+                    counter.innerText = currentCount.toLocaleString('tr-TR') + suffix;
+
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        counter.innerText = target.toLocaleString('tr-TR') + suffix;
+                    }
+                };
+
+                window.requestAnimationFrame(step);
+            });
+        });
     </script>
 }

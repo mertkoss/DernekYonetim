@@ -1,6 +1,5 @@
 ﻿using DernekYonetim.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DernekYonetim.Controllers
@@ -36,25 +35,23 @@ namespace DernekYonetim.Controllers
             var guncelSayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
             ViewBag.ZiyaretciSayisi = guncelSayac?.ToplamZiyaretci ?? 0;
 
-
             var model = new HomeViewModel
             {
                 Uyeler = await _context.Uyelers.ToListAsync(),
-
                 About = await _context.DernekHakkindaBolumleris.FirstOrDefaultAsync(),
 
                 // Son 4 Haber
                 SonHaberler = await _context.Haberlers
-                     .Include(h => h.Kategori)
-                     .OrderByDescending(h => h.YayimTarihi)
-                     .Take(4)
-                     .ToListAsync(),
+                    .Include(h => h.Kategori)
+                    .OrderByDescending(h => h.YayimTarihi)
+                    .Take(4)
+                    .ToListAsync(),
 
                 SliderHaberler = await _context.Haberlers
-                     .Where(h => h.SlayttaGoster)
-                     .OrderByDescending(h => h.YayimTarihi)
-                     .Take(5)
-                     .ToListAsync()
+                    .Where(h => h.SlayttaGoster)
+                    .OrderByDescending(h => h.YayimTarihi)
+                    .Take(5)
+                    .ToListAsync()
             };
 
             return View(model);
@@ -82,42 +79,50 @@ namespace DernekYonetim.Controllers
             return View(model);
         }
 
-        // Test Admin
-        public IActionResult TestAdmin()
+        // PROFESYONEL VE GÜVENLİ TEST ADMIN METODU
+        public async Task<IActionResult> TestAdmin()
         {
-            using SqlConnection con = new SqlConnection(
-                "Server=.;Database=DernekYonetimDB;Trusted_Connection=True;");
+            // Test bile olsa dışarıdan erişimi kapattık
+            if (HttpContext.Session.GetInt32("AdminID") == null)
+                return RedirectToAction("Login", "Auth");
 
-            con.Open();
-            SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM AdminKullanicilar", con);
-            int sayi = (int)cmd.ExecuteScalar();
+            // İlkel SqlConnection yerine Entity Framework kullanarak sorgu attık
+            int sayi = await _context.AdminKullanicilars.CountAsync();
 
             ViewBag.AdminSayisi = sayi;
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken] // GÜVENLİK EKLENDİ
         public IActionResult SosyalMedyaKaydet(string facebook, string twitter, string instagram, string linkedin, string youtube)
         {
-            // Admin değilse at
-            if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+            if (HttpContext.Session.GetInt32("AdminID") == null)
+                return RedirectToAction("Login", "Auth");
 
-            // Formdan gelen verileri bir sözlükte (Dictionary) topla
-            var data = new Dictionary<string, string>
+            try
             {
-                { "facebook", facebook ?? "" },
-                { "twitter", twitter ?? "" },
-                { "instagram", instagram ?? "" },
-                { "linkedin", linkedin ?? "" },
-                { "youtube", youtube ?? "" }
-            };
+                var data = new Dictionary<string, string>
+                {
+                    { "facebook", facebook ?? "" },
+                    { "twitter", twitter ?? "" },
+                    { "instagram", instagram ?? "" },
+                    { "linkedin", linkedin ?? "" },
+                    { "youtube", youtube ?? "" }
+                };
 
-            // wwwroot klasörünün içine social.json adında bir dosyaya kaydet
-            string jsonPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "social.json");
-            string jsonString = System.Text.Json.JsonSerializer.Serialize(data);
-            System.IO.File.WriteAllText(jsonPath, jsonString);
+                string jsonPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "social.json");
+                string jsonString = System.Text.Json.JsonSerializer.Serialize(data);
+                System.IO.File.WriteAllText(jsonPath, jsonString);
 
-            // Kayıt bitince, kullanıcının tıklamayı yaptığı sayfaya geri dönmesini sağlar
+                // UX GÜNCELLEMESİ: İşlem başarılı mesajı
+                TempData["Basari"] = "Sosyal medya bağlantıları başarıyla güncellendi.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Hata"] = "Sosyal medya kaydedilirken bir hata oluştu: " + ex.Message;
+            }
+
             string referer = Request.Headers["Referer"].ToString();
             return Redirect(string.IsNullOrEmpty(referer) ? "/" : referer);
         }
