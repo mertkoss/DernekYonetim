@@ -54,17 +54,16 @@
         </div>
 
         <div class="row g-4 align-items-stretch">
-
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100" style="min-height: 450px;">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3060.3709784013586!2d32.76199857576997!3d39.91071347152553!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d3459d9df8a92d%3A0x5e3f3e939e331051!2sAnkara%20%C3%96zel%20Tevfik%20Fikret%20Okullar%C4%B1!5e0!3m2!1str!2str!4v1771541894942!5m2!1str!2str" 
-                    width="600" 
-                    height="450" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.900985474932!2d32.8597419!3d39.91987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDU1JzExLjUiTiAzMsKwNTEnMzUuMSJF!5e0!3m2!1str!2str!4v1634567890123!5m2!1str!2str"
+                            width="100%"
+                            height="100%"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
                 </div>
             </div>
 
@@ -72,22 +71,8 @@
                 <div class="card border-0 shadow-sm rounded-4 bg-white h-100 p-4 p-md-5">
                     <h4 class="fw-bold text-primary-dark mb-4">Mesaj Gönderin</h4>
 
-                    @if (TempData["MesajBasarili"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3">
-                            <i class="fas fa-check-circle me-2"></i> @TempData["MesajBasarili"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
-                    @if (TempData["MesajHata"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["MesajHata"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
-
                     <form action="/Iletisim/MesajGonder" method="post">
+                        @Html.AntiForgeryToken()
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Adınız Soyadınız</label>
@@ -124,7 +109,8 @@
     <div class="modal fade" id="iletisimDuzenleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
-                <form action="/Iletisim/Guncelle" method="post">
+                <form action="/Iletisim/Guncelle" method="post" novalidate>
+                    @Html.AntiForgeryToken()
                     <div class="modal-header border-0 bg-white pb-0">
                         <h5 class="modal-title fw-bold text-primary-dark">
                             <i class="fas fa-edit me-2 text-warning"></i>İletişim Bilgilerini Düzenle
@@ -162,7 +148,6 @@
 }
 
 <style>
-    /* Renk Paleti ve Stiller */
     .text-primary-dark {
         color: #0d2b4d !important;
     }
@@ -200,7 +185,6 @@
             box-shadow: 0 10px 20px rgba(13,43,77,0.2) !important;
         }
 
-    /* Kart Hover Efektleri */
     .contact-info-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -210,7 +194,6 @@
             box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
         }
 
-    /* İkon Yuvarlakları */
     .icon-circle {
         width: 80px;
         height: 80px;
@@ -225,10 +208,39 @@
         transform: scale(1.1);
     }
 
-    /* Form Odaklanma Efekti */
     .form-control:focus {
         background-color: #fff !important;
         border: 1px solid #ffc800 !important;
         box-shadow: 0 0 0 0.25rem rgba(255, 200, 0, 0.15) !important;
     }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    @if (TempData["Basari"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Başarılı!',
+                    text: @Html.Raw(Json.Serialize(TempData["Basari"])),
+                    confirmButtonColor: '#0d2b4d'
+                });
+            });
+            </text>
+    }
+    @if (TempData["Hata"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata!',
+                    text: @Html.Raw(Json.Serialize(TempData["Hata"])),
+                    confirmButtonColor: '#0d2b4d'
+                });
+            });
+            </text>
+    }
+</script>
