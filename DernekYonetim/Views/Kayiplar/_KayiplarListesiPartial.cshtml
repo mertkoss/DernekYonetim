@@ -1,0 +1,121 @@
+﻿@model IEnumerable<DernekYonetim.Models.Kaybettiklerimiz>
+
+@if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi))
+{
+    <div class="text-center mt-2 mb-4 text-muted small">
+        <strong>"@ViewBag.AramaKelimesi"</strong> için @ViewBag.ToplamKayit kayıt bulundu.
+        <a href="#" onclick="document.getElementById('canliAramaKutusu').value=''; document.getElementById('canliAramaKutusu').dispatchEvent(new Event('input')); return false;" class="text-decoration-none ms-2 text-primary-dark"><i class="fas fa-times me-1"></i>Temizle</a>
+    </div>
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        @if (Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="memorial-row bg-white shadow-sm rounded-4 p-4 mb-4 position-relative">
+
+                    @if (Context.Session.GetInt32("AdminID") != null)
+                    {
+                        <div class="admin-controls position-absolute top-0 end-0 mt-3 me-3 d-flex align-items-center">
+                            <button class="btn btn-sm btn-light text-warning shadow-sm rounded-circle me-1" title="Düzenle"
+                                    data-id="@item.Id"
+                                    data-adsoyad="@item.AdSoyad"
+                                    data-tarih="@item.VefatTarihi?.ToString("yyyy-MM-dd")"
+                                    data-dogum="@item.DogumTarihi?.ToString("yyyy-MM-dd")"
+                                    data-aciklama="@item.Aciklama"
+                                    onclick="kayipDuzenle(this)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <form action="/Kayiplar/Sil" method="post" class="d-inline m-0 p-0" onsubmit="event.stopPropagation(); return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-light text-danger shadow-sm rounded-circle" title="Sil">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+
+                    <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
+                        <div class="memorial-img-container flex-shrink-0 mb-4 mb-md-0 me-md-5">
+                            <img src="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
+                                 alt="@item.AdSoyad" class="rounded-circle shadow-sm">
+                        </div>
+
+                        <div class="memorial-content flex-grow-1 text-center text-md-start w-100">
+                            <h3 class="fw-bold text-primary-dark mb-1">@item.AdSoyad</h3>
+
+                            <div class="text-muted small mb-2 italic">
+                                @if (item.DogumTarihi.HasValue)
+                                {
+                                    <span>@item.DogumTarihi.Value.Year - @(item.VefatTarihi?.Year.ToString() ?? "???")</span>
+                                }
+                            </div>
+
+                            <div class="text-secondary mb-3 pb-2 border-bottom d-inline-block">
+                                <i class="fas fa-dove text-muted me-2"></i>
+                                <span class="fw-bold">Vefat:</span> @(item.VefatTarihi?.ToString("dd MMMM yyyy") ?? "Bilinmiyor")
+                            </div>
+
+                            <p class="text-muted memorial-desc mb-3">
+                                @item.Aciklama
+                            </p>
+
+                            @if (!string.IsNullOrWhiteSpace(item.Aciklama))
+                            {
+                                <button class="btn btn-link text-decoration-none text-warning fw-bold p-0"
+                                        data-adsoyad="@item.AdSoyad"
+                                        data-vefat-tam="@(item.VefatTarihi?.ToString("dd MMMM yyyy") ?? "Bilinmiyor")"
+                                        data-dogum-yili="@(item.DogumTarihi?.Year.ToString() ?? "")"
+                                        data-vefat-yili="@(item.VefatTarihi?.Year.ToString() ?? "")"
+                                        data-img="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
+                                        data-aciklama="@item.Aciklama"
+                                        onclick="openTributeModal(this)">
+                                    Taziyeyi Oku <i class="fas fa-arrow-right ms-1 fs-6"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (ViewBag.ToplamSayfa > 1)
+            {
+                <nav aria-label="Sayfa Gezinmesi" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
+                            <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                               href="/Kayiplar/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
+                                <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")"
+                                   href="/Kayiplar/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
+                            <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                               href="/Kayiplar/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3 opacity-50"></i>
+                <p class="text-muted fs-5">Aradığınız kriterlere uygun kayıt bulunamadı.</p>
+            </div>
+        }
+    </div>
+</div>

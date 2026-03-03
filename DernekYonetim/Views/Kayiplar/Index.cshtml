@@ -6,7 +6,6 @@
 
 <section class="page-section bg-light" style="padding-top:120px; padding-bottom: 100px;">
     <div class="container">
-
         <div class="text-center mb-5 pb-4 border-bottom border-secondary border-opacity-25">
             <h2 class="section-heading text-primary-dark text-uppercase mb-3" style="letter-spacing: 2px;">Kaybettiklerimiz</h2>
             <p class="text-muted fs-5 fst-italic mb-4">"Aramızdan ayrılan değerli büyüklerimizi ve dostlarımızı sevgi, saygı ve özlemle anıyoruz..."</p>
@@ -31,125 +30,7 @@
         </div>
 
         <div id="aramaSonuclariAlani" style="transition: opacity 0.3s ease;">
-
-            @if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi))
-            {
-                <div class="text-center mt-2 mb-4 text-muted small">
-                    <strong>"@ViewBag.AramaKelimesi"</strong> için @ViewBag.ToplamKayit kayıt bulundu.
-                    <a href="#" onclick="document.getElementById('canliAramaKutusu').value=''; document.getElementById('canliAramaKutusu').dispatchEvent(new Event('input')); return false;" class="text-decoration-none ms-2 text-primary-dark"><i class="fas fa-times me-1"></i>Temizle</a>
-                </div>
-            }
-
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    @if (Model.Any())
-                    {
-                        foreach (var item in Model)
-                        {
-                            <div class="memorial-row bg-white shadow-sm rounded-4 p-4 mb-4 position-relative">
-
-                                @if (Context.Session.GetInt32("AdminID") != null)
-                                {
-                                    <div class="admin-controls position-absolute top-0 end-0 mt-3 me-3">
-                                        <button class="btn btn-sm btn-light text-warning shadow-sm rounded-circle me-1" title="Düzenle"
-                                                data-id="@item.Id"
-                                                data-adsoyad="@item.AdSoyad"
-                                                data-tarih="@item.VefatTarihi?.ToString("yyyy-MM-dd")"
-                                                data-dogum="@item.DogumTarihi?.ToString("yyyy-MM-dd")"
-                                                data-aciklama="@item.Aciklama"
-                                                onclick="kayipDuzenle(this)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <a href="/Kayiplar/Sil/@item.Id" class="btn btn-sm btn-light text-danger shadow-sm rounded-circle" title="Sil"
-                                           onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    </div>
-                                }
-
-                                <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
-                                    <div class="memorial-img-container flex-shrink-0 mb-4 mb-md-0 me-md-5">
-                                        <img src="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
-                                             alt="@item.AdSoyad" class="rounded-circle shadow-sm">
-                                    </div>
-
-                                    <div class="memorial-content flex-grow-1 text-center text-md-start w-100">
-                                        <h3 class="fw-bold text-primary-dark mb-1">@item.AdSoyad</h3>
-
-                                        <div class="text-muted small mb-2 italic">
-                                            @if (item.DogumTarihi.HasValue)
-                                            {
-                                                <span>@item.DogumTarihi.Value.Year - @(item.VefatTarihi?.Year.ToString() ?? "???")</span>
-                                            }
-                                        </div>
-
-                                        <div class="text-secondary mb-3 pb-2 border-bottom d-inline-block">
-                                            <i class="fas fa-dove text-muted me-2"></i>
-                                            <span class="fw-bold">Vefat:</span> @(item.VefatTarihi?.ToString("dd MMMM yyyy") ?? "Bilinmiyor")
-                                        </div>
-
-                                        <p class="text-muted memorial-desc mb-3">
-                                            @item.Aciklama
-                                        </p>
-
-                                        @if (!string.IsNullOrWhiteSpace(item.Aciklama))
-                                        {
-                                            <button class="btn btn-link text-decoration-none text-warning fw-bold p-0"
-                                                    data-adsoyad="@item.AdSoyad"
-                                                    data-vefat-tam="@(item.VefatTarihi?.ToString("dd MMMM yyyy") ?? "Bilinmiyor")"
-                                                    data-dogum-yili="@(item.DogumTarihi?.Year.ToString() ?? "")"
-                                                    data-vefat-yili="@(item.VefatTarihi?.Year.ToString() ?? "")"
-                                                    data-img="@(string.IsNullOrEmpty(item.FotografYolu) ? "/img/default-profile.png" : item.FotografYolu)"
-                                                    data-aciklama="@item.Aciklama"
-                                                    onclick="openTributeModal(this)">
-                                                Taziyeyi Oku <i class="fas fa-arrow-right ms-1 fs-6"></i>
-                                            </button>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
-                        @if (ViewBag.ToplamSayfa > 1)
-                        {
-                            <nav aria-label="Sayfa Gezinmesi" class="mt-5">
-                                <ul class="pagination justify-content-center">
-                                    <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
-                                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
-                                           href="/Kayiplar/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
-                                            <i class="fas fa-chevron-left"></i>
-                                        </a>
-                                    </li>
-
-                                    @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
-                                    {
-                                        <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
-                                            <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")"
-                                               href="/Kayiplar/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
-                                                @i
-                                            </a>
-                                        </li>
-                                    }
-
-                                    <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
-                                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
-                                           href="/Kayiplar/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        }
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="fas fa-search fa-3x text-muted mb-3 opacity-50"></i>
-                            <p class="text-muted fs-5">Aradığınız kriterlere uygun kayıt bulunamadı.</p>
-                        </div>
-                    }
-                </div>
-            </div>
+            @await Html.PartialAsync("_KayiplarListesiPartial", Model)
         </div>
     </div>
 </section>
@@ -191,7 +72,8 @@
     <div class="modal fade" id="kayipDuzenleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow">
-                <form action="/Kayiplar/KayitGuncelle" method="post" onsubmit="return validateDates(this)" enctype="multipart/form-data" novalidate="novalidate">
+                <form action="/Kayiplar/KayitGuncelle" method="post" onsubmit="return validateDates(this)" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="Id" id="editId" />
                     <div class="modal-header bg-warning text-dark border-0">
                         <h5 class="modal-title fw-bold">Kaydı Düzenle</h5>
@@ -233,7 +115,8 @@
     <div class="modal fade" id="kayipEkleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow">
-                <form action="/Kayiplar/KayitEkle" method="post" onsubmit="return validateDates(this)" enctype="multipart/form-data">
+                <form action="/Kayiplar/KayitEkle" method="post" onsubmit="return validateDates(this)" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
                     <div class="modal-header bg-dark text-white border-0">
                         <h5 class="modal-title fw-bold"><i class="fas fa-plus me-2 text-warning"></i>Yeni Kayıt Ekle</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -349,10 +232,9 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    // -----------------------------------------
-    // 1. CANLI ARAMA (LIVE SEARCH) SİSTEMİ
-    // -----------------------------------------
     const aramaKutusu = document.getElementById('canliAramaKutusu');
     const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
     let aramaZamanlayici;
@@ -361,30 +243,17 @@
         aramaKutusu.addEventListener('input', function() {
             clearTimeout(aramaZamanlayici);
             const kelime = this.value;
-
-            // Yazarken hafif soluklaşsın (Yükleniyor hissi)
             sonuclarAlani.style.opacity = '0.5';
 
-            // Kullanıcı yazmayı bıraktıktan 400ms sonra arama yapar (Sunucuyu yormamak için)
             aramaZamanlayici = setTimeout(() => {
                 const url = `/Kayiplar/Index?arama=${encodeURIComponent(kelime)}`;
 
-                // Arka planda yeni sayfayı çekiyoruz
-                fetch(url)
+                // AJAX ISTEGI (DOMParser iptal edildi)
+                fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
                     .then(response => response.text())
                     .then(html => {
-                        // Gelen HTML'i parçala
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-
-                        // Sadece liste kısmını alıp sayfadakinin yerine koy
-                        const yeniIcerik = doc.getElementById('aramaSonuclariAlani').innerHTML;
-                        sonuclarAlani.innerHTML = yeniIcerik;
-
-                        // Görünürlüğü eski haline getir
+                        sonuclarAlani.innerHTML = html;
                         sonuclarAlani.style.opacity = '1';
-
-                        // Sayfa yenilenirse arama kaybolmasın diye URL'yi sessizce güncelle
                         window.history.pushState({}, '', url);
                     })
                     .catch(error => {
@@ -395,9 +264,6 @@
         });
     }
 
-    // -----------------------------------------
-    // 2. DİĞER MODAL VE TARİH FONKSİYONLARI
-    // -----------------------------------------
     function bindDateLimits(dogumId, vefatId) {
         const dogumInput = document.getElementById(dogumId);
         const vefatInput = document.getElementById(vefatId);
@@ -460,9 +326,27 @@
         const dogum = form.querySelector('input[name="DogumTarihiInput"]').value;
         const vefat = form.querySelector('input[name="VefatTarihiInput"]').value;
         if (dogum && vefat && new Date(vefat) < new Date(dogum)) {
-            alert("Hata: Vefat tarihi doğum tarihinden önce olamaz!");
+            Swal.fire({ icon: 'error', title: 'Hata!', text: 'Vefat tarihi doğum tarihinden önce olamaz!', confirmButtonColor: '#0d2b4d' });
             return false;
         }
         return true;
+    }
+
+    // UYARI MESAJLARI (JSON FORMATINDA GÜVENLİ)
+    @if (TempData["Basari"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#0d2b4d' });
+            });
+            </text>
+    }
+    @if (TempData["Hata"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#0d2b4d' });
+            });
+            </text>
     }
 </script>
