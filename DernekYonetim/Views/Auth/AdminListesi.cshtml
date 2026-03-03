@@ -3,8 +3,8 @@
 
 @{
     ViewData["Title"] = "Yöneticileri Yönet";
-    Layout = "~/Views/Shared/_Layout.cshtml"; // Kendi projenin Layout yoluna göre ayarlayabilirsin
-    var guncelAdminId = Context.Session.GetInt32("AdminID"); // Giriş yapan admini tespit etmek için
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var guncelAdminId = Context.Session.GetInt32("AdminID");
 }
 
 <style>
@@ -89,7 +89,6 @@
 </style>
 
 <div class="container py-5" style="max-width: 1200px;">
-
     <div class="row mb-4 align-items-center">
         <div class="col-md-8 mb-3 mb-md-0">
             <h2 style="color: #0a1a5c; font-weight: 800; margin: 0;">Sistem Yöneticileri</h2>
@@ -120,7 +119,6 @@
                         @foreach (var admin in Model)
                         {
                             var isCurrentUser = (admin.AdminId == guncelAdminId);
-
                             <tr>
                                 <td class="ps-4 py-3">
                                     <div class="d-flex align-items-center">
@@ -156,7 +154,6 @@
                                         <button class="action-btn btn-edit me-1" onclick="rolDegistirModalAc(@admin.AdminId, '@admin.Rol', '@admin.AdSoyad')" title="Yetkiyi Düzenle">
                                             <i class="fas fa-sliders-h"></i>
                                         </button>
-
                                         <button class="action-btn btn-delete" onclick="silmeOnayi(@admin.AdminId, '@admin.AdSoyad')" title="Sistemden Sil">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -182,7 +179,8 @@
                 <h5 class="modal-title" id="rolModalLabel"><i class="fas fa-user-cog me-2"></i> Yetki Düzenle</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form asp-action="RolDegistir" asp-controller="Auth" method="post">
+            <form action="/Auth/RolDegistir" method="post">
+                @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <input type="hidden" name="id" id="modalAdminId" />
 
@@ -208,9 +206,10 @@
     </div>
 </div>
 
+@Html.AntiForgeryToken()
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Rol Değiştirme Modalını Dolduran ve Açan Fonksiyon
     function rolDegistirModalAc(id, guncelRol, adSoyad) {
         document.getElementById('modalAdminId').value = id;
         document.getElementById('modalAdminAd').innerText = adSoyad;
@@ -220,7 +219,6 @@
         modal.show();
     }
 
-    // Profesyonel Silme Onayı (SweetAlert)
     function silmeOnayi(id, adSoyad) {
         Swal.fire({
             title: 'Emin misiniz?',
@@ -240,7 +238,7 @@
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Silme işlemi için dinamik bir form oluşturup POST isteği atıyoruz (Daha güvenli yöntem)
+                // SİLME İŞLEMİ GÜVENLİK GÜNCELLEMESİ
                 const form = document.createElement('form');
                 form.method = 'post';
                 form.action = '/Auth/AdminSil';
@@ -250,6 +248,16 @@
                 input.name = 'id';
                 input.value = id;
 
+                // Gizli olarak ürettiğimiz Token'ı alıp JS formuna ekliyoruz
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                if(tokenElement) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = tokenElement.value;
+                    form.appendChild(tokenInput);
+                }
+
                 form.appendChild(input);
                 document.body.appendChild(form);
                 form.submit();
@@ -257,15 +265,16 @@
         });
     }
 
-    // Controller'dan gelen hata veya başarı mesajlarını ekranda gösterme
     @if (TempData["Hata"] != null)
     {
             <text>
-            Swal.fire({
-                icon: 'error',
-                title: 'Hata!',
-                text: '@TempData["Hata"]',
-                confirmButtonColor: '#0a1a5c'
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata!',
+                    text: @Html.Raw(Json.Serialize(TempData["Hata"])),
+                    confirmButtonColor: '#0a1a5c'
+                });
             });
             </text>
     }
@@ -274,13 +283,15 @@
     {
             var mesaj = TempData["IslemBasarili"] ?? "Yönetici sistemden başarıyla silindi.";
             <text>
-            Swal.fire({
-                icon: 'success',
-                title: 'Başarılı!',
-                text: '@mesaj',
-                timer: 2500,
-                showConfirmButton: false,
-                iconColor: '#b8860b'
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Başarılı!',
+                    text: @Html.Raw(Json.Serialize(mesaj)),
+                    timer: 2500,
+                    showConfirmButton: false,
+                    iconColor: '#b8860b'
+                });
             });
             </text>
     }

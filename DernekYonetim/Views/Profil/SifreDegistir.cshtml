@@ -6,7 +6,6 @@
 <section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px; min-height: 80vh;">
     <div class="container">
         <div class="row justify-content-center">
-
             <div class="col-lg-6 col-md-8">
 
                 <div class="text-center mb-4">
@@ -23,23 +22,8 @@
 
                     <div class="card-body p-4 p-md-5">
 
-                        @if (ViewBag.Hata != null)
-                        {
-                            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4">
-                                <i class="fas fa-exclamation-triangle me-2"></i> <strong>Hata:</strong> @ViewBag.Hata
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        }
-
-                        @if (ViewBag.Basarili != null)
-                        {
-                            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4">
-                                <i class="fas fa-check-circle me-2"></i> <strong>Başarılı!</strong> @ViewBag.Basarili
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        }
-
-                        <form action="/Profil/SifreDegistir" method="post">
+                        <form action="/Profil/SifreDegistir" method="post" novalidate>
+                            @Html.AntiForgeryToken()
 
                             <div class="mb-4 position-relative">
                                 <label class="form-label fw-bold text-muted small text-uppercase">Mevcut Şifreniz</label>
@@ -87,7 +71,6 @@
                         </form>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -122,48 +105,58 @@
         background-color: #fff !important;
     }
 
-        .input-group:focus-within .input-group-text,
-        .input-group:focus-within .form-control {
+        .input-group:focus-within .input-group-text, .input-group:focus-within .form-control {
             background-color: #fff !important;
         }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // ŞİFRE GÜCÜNÜ ÖLÇEN JAVASCRIPT KODU
     document.getElementById('yeniSifreInput').addEventListener('input', function(e) {
         var password = e.target.value;
         var strengthBar = document.getElementById('strengthBar');
         var strengthText = document.getElementById('strengthText');
         var strength = 0;
 
-        // Kriterler: Uzunluk, Küçük Harf, Büyük Harf, Rakam/Sembol
         if (password.length >= 6) strength += 25;
         if (password.match(/[a-z]+/)) strength += 25;
         if (password.match(/[A-Z]+/)) strength += 25;
         if (password.match(/[0-9]+/) || password.match(/[\W]+/)) strength += 25;
 
-        // Çubuk genişliğini ayarla
         strengthBar.style.width = strength + '%';
 
-        // Renkleri ve Metinleri Ayarla
         if (password.length === 0) {
             strengthBar.style.width = '0%';
             strengthText.innerText = '';
         } else if (strength < 50) {
-            // Zayıf: Kırmızı
             strengthBar.className = 'progress-bar bg-danger';
             strengthText.innerText = 'Zayıf';
             strengthText.className = 'text-danger fw-bold small';
         } else if (strength < 100) {
-            // Orta: Sarı/Turuncu
             strengthBar.className = 'progress-bar bg-warning';
             strengthText.innerText = 'Orta';
             strengthText.className = 'text-warning fw-bold small';
         } else {
-            // Güçlü: Yeşil
             strengthBar.className = 'progress-bar bg-success';
             strengthText.innerText = 'Güçlü';
             strengthText.className = 'text-success fw-bold small';
         }
     });
+
+    @if (TempData["Basari"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#0d2b4d' });
+            });
+            </text>
+    }
+    @if (TempData["Hata"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#0d2b4d' });
+            });
+            </text>
+    }
 </script>

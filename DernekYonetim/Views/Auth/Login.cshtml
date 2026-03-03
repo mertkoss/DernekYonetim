@@ -272,6 +272,7 @@
             }
 
             <form asp-action="Login" asp-controller="Auth" method="post">
+                @Html.AntiForgeryToken()
 
                 <div class="form-grup">
                     <label class="etiket">E-Posta Adresi</label>
