@@ -16,60 +16,54 @@ namespace DernekYonetim.Controllers
             _context = context;
         }
 
-        // 1. LİSTELEME SAYFASI
-        public IActionResult Index()
+        // 1. LİSTELEME SAYFASI 
+        public async Task<IActionResult> Index()
         {
             bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-
-            // Bu bilgiyi sayfaya (View) gönderiyoruz
             ViewBag.GirisYapti = girisVarMi;
 
-            // Veritabanından tüm ilişkili verileri çekiyoruz
-            var uyeler = _context.Uyelers
+            // Veritabanından veriyi DÜMDÜZ ve TERTEMİZ bir şekilde çekiyoruz. 
+            // Select ve Ternary işlemlerini burada yapmıyoruz ki Visual Studio hata ayıklayıcısı çökmesin.
+            var uyelerListesi = await _context.Uyelers
+                .AsNoTracking()
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
                 .Include(u => u.Aidatlars)
-                .OrderByDescending(u => u.UyeId) // En son eklenen en üstte görünsün
-                .ToList();
+                .OrderByDescending(u => u.UyeId)
+                .ToListAsync();
 
-            var modelList = new List<UyeListesiViewModel>();
-
-            foreach (var uye in uyeler)
+            // Veriyi RAM'e aldıktan sonra C# ile güvenle modelliyoruz.
+            var modelList = uyelerListesi.Select(uye =>
             {
                 var egitim = uye.EgitimMesleks.FirstOrDefault();
                 var derbis = uye.DerbisKaydis.FirstOrDefault();
 
-                var vm = new UyeListesiViewModel
+                return new UyeListesiViewModel
                 {
                     UyeId = uye.UyeId,
                     UyeNo = uye.UyeNo,
                     UyelikTarihi = uye.UyelikTarihi,
-                    AdSoyad = $"{uye.Ad} {uye.Soyad}",
+                    AdSoyad = uye.Ad + " " + uye.Soyad,
+                    EvlilikSoyadi = uye.EvlilikSoyadi,
                     TcKimlikNo = uye.TckimlikNo,
                     DogumTarihi = uye.DogumTarihi,
                     DogumYeri = uye.DogumYeri,
                     Telefon = uye.Telefon,
                     Email = uye.Email,
-                    AdresTam = $"{uye.Adres} / {uye.Ilce} / {uye.Il}",
+                    AdresTam = uye.Adres + " / " + uye.Ilce + " / " + uye.Il,
                     Vefat = uye.Vefat ?? false,
-                    Universite = egitim != null ? $"{egitim.Universite} - {egitim.Fakulte}" : "-",
-                    Meslek = egitim?.Meslek ?? "-",
+                    Universite = egitim != null ? egitim.Universite + " - " + egitim.Fakulte : "-",
+                    Meslek = egitim != null ? egitim.Meslek : "-",
                     MezuniyetYili = egitim?.MezuniyetYili,
                     DerbisDurumu = derbis?.KayitDurumu ?? "Kaydı Yok",
-
-                    OdenenAidatlar = uye.Aidatlars
-                                        .OrderBy(x => x.Yil)
-                                        .Select(a => new AidatOzet { Yil = a.Yil, Tutar = a.Tutar })
-                                        .ToList()
+                    OdenenAidatlar = uye.Aidatlars.OrderBy(a => a.Yil).Select(a => new AidatOzet { Id = a.Id, Yil = a.Yil, Tutar = a.Tutar }).ToList()
                 };
-
-                modelList.Add(vm);
-            }
+            }).ToList();
 
             return View(modelList);
         }
 
-        // 2. YENİ ÜYE EKLEME İŞLEMİ
+        // 2. YENİ ÜYE EKLEME İŞLEMİ (ÇÖKME KORUMALI)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult YeniUyeEkle(YeniUyeGirisModel model)
@@ -77,18 +71,17 @@ namespace DernekYonetim.Controllers
             bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
             if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
 
-            if (!ModelState.IsValid)
+            // GÜVENLİK: Boş TC veya İsim gelirse DB'yi yormadan direkt reddet
+            if (string.IsNullOrWhiteSpace(model.Ad) || string.IsNullOrWhiteSpace(model.Soyad) || string.IsNullOrWhiteSpace(model.TckimlikNo))
             {
-                var hatalar = string.Join(" | ", ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage));
-                return BadRequest("Form Hatası: " + hatalar);
+                TempData["Hata"] = "Ad, Soyad ve TC Kimlik No alanları zorunludur!";
+                return RedirectToAction("Index");
             }
 
             using var transaction = _context.Database.BeginTransaction();
-
             try
             {
+                // 1. Ana Üye Kaydı
                 var yeniUye = new Uyeler
                 {
                     UyeNo = model.UyeNo,
@@ -97,9 +90,7 @@ namespace DernekYonetim.Controllers
                     Soyad = model.Soyad,
                     EvlilikSoyadi = model.EvlilikSoyadi,
                     TckimlikNo = model.TckimlikNo,
-                    DogumTarihi = model.DogumTarihi.HasValue
-                                    ? DateOnly.FromDateTime(model.DogumTarihi.Value)
-                                    : null,
+                    DogumTarihi = model.DogumTarihi.HasValue ? DateOnly.FromDateTime(model.DogumTarihi.Value) : null,
                     DogumYeri = model.DogumYeri,
                     Telefon = model.Telefon,
                     Email = model.Email,
@@ -110,9 +101,10 @@ namespace DernekYonetim.Controllers
                 };
 
                 _context.Uyelers.Add(yeniUye);
-                _context.SaveChanges();
+                _context.SaveChanges(); // UyeId'yi almak için önce kaydetmeliyiz.
 
-                if (!string.IsNullOrEmpty(model.Universite) || !string.IsNullOrEmpty(model.Meslek))
+                // 2. Eğitim Kaydı
+                if (!string.IsNullOrWhiteSpace(model.Universite) || !string.IsNullOrWhiteSpace(model.Meslek))
                 {
                     var egitim = new EgitimMeslek
                     {
@@ -125,18 +117,10 @@ namespace DernekYonetim.Controllers
                     _context.EgitimMesleks.Add(egitim);
                 }
 
-                // C) DERBİS TABLOSUNA KAYIT
-                // Arayüz: "Var/Yok/Belirtilmedi" -> DB: "Evet/Hayır/NULL"
-                string? derbisDurum = null; // Varsayılan (Belirtilmedi)
-
-                if (model.KayitDurumu == "Var")
-                {
-                    derbisDurum = "Evet";
-                }
-                else if (model.KayitDurumu == "Yok")
-                {
-                    derbisDurum = "Hayır";
-                }
+                // 3. Derbis Kaydı
+                string? derbisDurum = null;
+                if (model.KayitDurumu == "Var") derbisDurum = "Evet";
+                else if (model.KayitDurumu == "Yok") derbisDurum = "Hayır";
 
                 var derbis = new DerbisKaydi
                 {
@@ -145,6 +129,7 @@ namespace DernekYonetim.Controllers
                 };
                 _context.DerbisKaydis.Add(derbis);
 
+                // 4. Aidat Kaydı
                 if (model.AidatTutari > 0)
                 {
                     var aidat = new Aidatlar
@@ -157,19 +142,34 @@ namespace DernekYonetim.Controllers
                     _context.Aidatlars.Add(aidat);
                 }
 
+                // Tüm işlemleri tek seferde veritabanına yaz
                 _context.SaveChanges();
                 transaction.Commit();
 
+                TempData["Basari"] = "Yeni üye sisteme başarıyla kaydedildi.";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
+                // HATA YÖNETİMİ: Çökmeyi engellemek için devasa Exception loglarını sadece güvenli bir şekilde ilk satıra indirgiyoruz.
                 transaction.Rollback();
-                string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                return BadRequest("Kayıt Hatası Detayı: " + detayliHata);
-            }
-        } // <--- BURASI! Önceki metot burada bitmeli.
+                string hataMesaji = ex.InnerException != null ? ex.InnerException.Message.Split('\n').FirstOrDefault() : ex.Message;
 
+                // Eğer veritabanı kısıtlamasına takıldıysa (Örn: Aynı TC Kimlik numarası)
+                if (hataMesaji != null && hataMesaji.Contains("UNIQUE") || hataMesaji.Contains("Duplicate"))
+                {
+                    TempData["Hata"] = "Bu TC Kimlik Numarası veya Üye No sistemde zaten kayıtlı!";
+                }
+                else
+                {
+                    TempData["Hata"] = "Kayıt sırasında bir veritabanı hatası oluştu: " + hataMesaji;
+                }
+
+                return RedirectToAction("Index");
+            }
+        }
+
+        // 3. AJAX İÇİN JSON VERİ GETİRME
         [HttpGet]
         public IActionResult UyeGetir(int id)
         {
@@ -179,7 +179,7 @@ namespace DernekYonetim.Controllers
             var uye = _context.Uyelers
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
-                .Include(u => u.Aidatlars) // Aidatları çekmeyi unutma!
+                .Include(u => u.Aidatlars)
                 .FirstOrDefault(x => x.UyeId == id);
 
             if (uye == null) return NotFound();
@@ -187,7 +187,6 @@ namespace DernekYonetim.Controllers
             var egitim = uye.EgitimMesleks.FirstOrDefault();
             var derbis = uye.DerbisKaydis.FirstOrDefault();
 
-            // DB: "Evet/Hayır" -> UI: "Var/Yok" Çevirisi
             string uiKayitDurumu = "Belirtilmedi";
             if (derbis?.KayitDurumu == "Evet") uiKayitDurumu = "Var";
             else if (derbis?.KayitDurumu == "Hayır") uiKayitDurumu = "Yok";
@@ -214,10 +213,8 @@ namespace DernekYonetim.Controllers
                 mezuniyetYili = egitim?.MezuniyetYili,
                 meslek = egitim?.Meslek,
                 kayitDurumu = uiKayitDurumu,
-
-                // YENİ EKLENEN KISIM: Geçmiş Aidatları Listele
                 gecmisAidatlar = uye.Aidatlars.OrderBy(x => x.Yil).Select(x => new {
-                    id = x.Id, 
+                    id = x.Id,
                     yil = x.Yil,
                     tutar = x.Tutar
                 }).ToList()
@@ -226,7 +223,7 @@ namespace DernekYonetim.Controllers
             return Json(data);
         }
 
-        // 4. ÜYE GÜNCELLEME İŞLEMİ
+        // 4. ÜYE GÜNCELLEME İŞLEMİ (ÇÖKME KORUMALI)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UyeGuncelle(YeniUyeGirisModel model, int UyeId)
@@ -234,15 +231,23 @@ namespace DernekYonetim.Controllers
             bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
             if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
 
-            // using kullandığımız için işlem sonunda veya hatada otomatik temizlik yapılır.
-            using var transaction = _context.Database.BeginTransaction();
+            if (UyeId <= 0 || string.IsNullOrWhiteSpace(model.Ad) || string.IsNullOrWhiteSpace(model.TckimlikNo))
+            {
+                TempData["Hata"] = "Geçersiz üye bilgisi veya eksik zorunlu alanlar.";
+                return RedirectToAction("Index");
+            }
 
+            using var transaction = _context.Database.BeginTransaction();
             try
             {
                 var uye = _context.Uyelers.Find(UyeId);
-                if (uye == null) return NotFound("Üye bulunamadı.");
+                if (uye == null)
+                {
+                    TempData["Hata"] = "Güncellenecek üye bulunamadı.";
+                    return RedirectToAction("Index");
+                }
 
-                // A) Temel Bilgileri Güncelle
+                // Temel Bilgiler
                 uye.UyeNo = model.UyeNo;
                 uye.UyelikTarihi = DateOnly.FromDateTime(model.UyelikTarihi);
                 uye.TckimlikNo = model.TckimlikNo;
@@ -260,7 +265,7 @@ namespace DernekYonetim.Controllers
 
                 _context.Uyelers.Update(uye);
 
-                // B) Eğitim Bilgilerini Güncelle
+                // Eğitim Bilgileri
                 var egitim = _context.EgitimMesleks.FirstOrDefault(x => x.UyeId == UyeId);
                 if (egitim != null)
                 {
@@ -270,26 +275,22 @@ namespace DernekYonetim.Controllers
                     egitim.Meslek = model.Meslek;
                     _context.EgitimMesleks.Update(egitim);
                 }
-                else
+                else if (!string.IsNullOrWhiteSpace(model.Universite) || !string.IsNullOrWhiteSpace(model.Meslek))
                 {
-                    if (!string.IsNullOrEmpty(model.Universite) || !string.IsNullOrEmpty(model.Meslek))
+                    var yeniEgitim = new EgitimMeslek
                     {
-                        var yeniEgitim = new EgitimMeslek
-                        {
-                            UyeId = UyeId,
-                            Universite = model.Universite,
-                            Fakulte = model.Fakulte,
-                            MezuniyetYili = model.MezuniyetYili,
-                            Meslek = model.Meslek
-                        };
-                        _context.EgitimMesleks.Add(yeniEgitim);
-                    }
+                        UyeId = UyeId,
+                        Universite = model.Universite,
+                        Fakulte = model.Fakulte,
+                        MezuniyetYili = model.MezuniyetYili,
+                        Meslek = model.Meslek
+                    };
+                    _context.EgitimMesleks.Add(yeniEgitim);
                 }
 
-                // C) Derbis Güncelle (Var/Yok -> Evet/Hayır Çevirisi)
+                // Derbis Kaydı
                 var derbis = _context.DerbisKaydis.FirstOrDefault(x => x.UyeId == UyeId);
                 string? derbisDurum = null;
-
                 if (model.KayitDurumu == "Var") derbisDurum = "Evet";
                 else if (model.KayitDurumu == "Yok") derbisDurum = "Hayır";
 
@@ -304,8 +305,7 @@ namespace DernekYonetim.Controllers
                     _context.DerbisKaydis.Add(yeniDerbis);
                 }
 
-                // D) AİDAT GÜNCELLEME / EKLEME
-                // Düzenleme ekranında alt kısma girilen Yıl ve Tutar, yeni bir aidat satırı olarak eklenir.
+                // Yeni Aidat Ekleme (Güncelleme ekranından)
                 if (model.AidatTutari > 0)
                 {
                     var yeniAidat = new Aidatlar
@@ -321,20 +321,31 @@ namespace DernekYonetim.Controllers
                 _context.SaveChanges();
                 transaction.Commit();
 
+                TempData["Basari"] = "Üye bilgileri başarıyla güncellendi.";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                transaction.Rollback(); 
-                string detayliHata = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                return BadRequest("Güncelleme Hatası Detayı: " + detayliHata);
+                transaction.Rollback();
+                string hataMesaji = ex.InnerException != null ? ex.InnerException.Message.Split('\n').FirstOrDefault() : ex.Message;
+
+                if (hataMesaji != null && hataMesaji.Contains("UNIQUE"))
+                {
+                    TempData["Hata"] = "Bu TC Kimlik Numarası veya Üye No sistemde zaten kullanılıyor!";
+                }
+                else
+                {
+                    TempData["Hata"] = "Güncelleme sırasında bir hata oluştu: " + hataMesaji;
+                }
+                return RedirectToAction("Index");
             }
         }
-        // 5. ÜYE SİLME İŞLEMİ (Tüm ilişkili verilerle birlikte)
+
+        // 5. ÜYE SİLME İŞLEMİ (GÜVENLİ)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UyeSil(int id)
         {
-
             bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
             if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
 
@@ -346,23 +357,24 @@ namespace DernekYonetim.Controllers
 
             if (uye == null) return NotFound();
 
-            // İlişkili kayıtları temizle
             if (uye.EgitimMesleks.Any()) _context.EgitimMesleks.RemoveRange(uye.EgitimMesleks);
             if (uye.DerbisKaydis.Any()) _context.DerbisKaydis.RemoveRange(uye.DerbisKaydis);
             if (uye.Aidatlars.Any()) _context.Aidatlars.RemoveRange(uye.Aidatlars);
 
-            // Ana üyeyi sil
             _context.Uyelers.Remove(uye);
             _context.SaveChanges();
 
+            TempData["Basari"] = "Üye ve bağlı tüm kayıtlar başarıyla silindi.";
             return RedirectToAction("Index");
         }
-        // 6. TEKİL AİDAT SİLME (Modal İçinden)
+
+        // 6. TEKİL AİDAT SİLME (GÜVENLİ AJAX)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult AidatSil(int id)
         {
             bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
+            if (!girisVarMi) return Unauthorized();
 
             var aidat = _context.Aidatlars.Find(id);
             if (aidat != null)

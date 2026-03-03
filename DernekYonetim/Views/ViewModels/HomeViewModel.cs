@@ -52,6 +52,7 @@ namespace DernekYonetim.Models
 
     public class AidatOzet
     {
+        public int Id { get; set; }
         public int Yil { get; set; }
         public decimal? Tutar { get; set; }
     }
