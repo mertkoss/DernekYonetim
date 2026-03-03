@@ -1,0 +1,98 @@
+﻿@model DernekYonetim.Models.HomeViewModel
+
+@if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi))
+{
+    <div class="text-center mb-4 text-muted small">
+        <strong>"@ViewBag.AramaKelimesi"</strong> için @ViewBag.ToplamKayit fotoğraf bulundu.
+        <a href="#" onclick="document.getElementById('canliAramaKutusu').value=''; document.getElementById('canliAramaKutusu').dispatchEvent(new Event('input')); return false;" class="text-decoration-none ms-2 text-primary-dark fw-bold"><i class="fas fa-times me-1 text-danger"></i>Temizle</a>
+    </div>
+}
+
+<div class="row g-4">
+    @if (Model.Galeri != null && Model.Galeri.Any())
+    {
+        int index = 0;
+        foreach (var item in Model.Galeri)
+        {
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-sm border-0 gallery-card position-relative">
+
+                    @if (Context.Session.GetInt32("AdminID") != null)
+                    {
+                        <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                            <button class="btn btn-light btn-sm shadow rounded-circle me-1" title="Düzenle" data-id="@item.Id" data-baslik="@item.Baslik" data-aciklama="@item.Aciklama" onclick="editGallery(this); event.stopPropagation();">
+                                <i class="fas fa-edit text-warning"></i>
+                            </button>
+                            <form action="/Galeri/Sil" method="post" class="d-inline" onsubmit="event.stopPropagation(); return confirm('Bu fotoğrafı silmek istediğinize emin misiniz?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-light btn-sm shadow rounded-circle" title="Sil">
+                                    <i class="fas fa-trash-alt text-danger"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+
+                    <div class="img-container lightbox-trigger" data-src="@item.FotografYolu" data-title="@item.Baslik" data-desc="@item.Aciklama" onclick="openLightbox(@index)" style="cursor: pointer;">
+                        <div class="hover-overlay d-flex align-items-center justify-content-center">
+                            <i class="fas fa-search-plus fa-3x text-white opacity-75"></i>
+                        </div>
+                        <img src="@item.FotografYolu" class="card-img-top" alt="@item.Baslik" loading="lazy" />
+                    </div>
+
+                    <div class="card-body bg-white border-bottom border-warning border-3">
+                        <h5 class="card-title fw-bold text-primary-dark">@item.Baslik</h5>
+                        <p class="card-text text-muted small gallery-desc">@item.Aciklama</p>
+                    </div>
+
+                    <div class="card-footer bg-light border-0 d-flex justify-content-between align-items-center py-3">
+                        <small class="text-muted fw-bold"><i class="far fa-calendar-alt text-warning me-2"></i> @(item.YuklemeTarihi?.ToString("dd.MM.yyyy") ?? "-")</small>
+                    </div>
+                </div>
+            </div>
+            index++;
+        }
+
+        @if (ViewBag.ToplamSayfa > 1)
+        {
+            <div class="col-12 mt-5">
+                <nav aria-label="Sayfa Gezinmesi">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
+                            <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                               href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
+                                <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")"
+                                   href="/Galeri/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
+                            <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                               href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <div class="empty-state-icon mb-3">
+                <i class="fas fa-images fa-4x text-muted opacity-50"></i>
+            </div>
+            <h5 class="text-primary-dark mt-3">Aradığınız kriterlere uygun fotoğraf bulunamadı.</h5>
+        </div>
+    }
+</div>
