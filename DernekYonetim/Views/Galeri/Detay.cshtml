@@ -1,0 +1,554 @@
+﻿@model DernekYonetim.Models.GaleriAlbum
+@{
+    ViewData["Title"] = Model.Baslik + " Fotoğrafları";
+    Layout = "_Layout";
+}
+
+<section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px;">
+    <div class="container">
+
+        <div class="mb-4">
+            <a href="/Galeri/Index" class="btn btn-outline-secondary rounded-pill btn-sm mb-3 shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Albümlere Dön
+            </a>
+
+            <div class="row bg-white p-4 rounded-4 shadow-sm border-start border-warning border-5 position-relative">
+                <div class="col-md-9">
+                    <h2 class="text-uppercase mb-2 text-primary-dark fw-bold">@Model.Baslik</h2>
+
+                    @if (!string.IsNullOrEmpty(Model.Aciklama))
+                    {
+                        <div class="album-desc-container">
+                            <p class="text-muted mb-0 album-desc-text collapsed" id="albumDescText">@Model.Aciklama</p>
+                            @if (Model.Aciklama.Length > 150)
+                            {
+                                <button class="btn btn-link p-0 text-warning text-decoration-none mt-1 fw-bold" id="toggleDescBtn" onclick="toggleDescription()">Devamını Oku <i class="fas fa-chevron-down ms-1"></i></button>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="col-md-3 text-md-end mt-3 mt-md-0 d-flex align-items-center justify-content-md-end">
+                    @if (Context.Session.GetInt32("AdminID") != null)
+                    {
+                        <button class="btn btn-gold btn-lg rounded-pill shadow" data-bs-toggle="modal" data-bs-target="#fotoEkleModal">
+                            <i class="fas fa-upload me-2"></i>Fotoğraf Yükle
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            @if (Model.Fotograflar != null && Model.Fotograflar.Any())
+            {
+                int index = 0;
+                foreach (var item in Model.Fotograflar)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card h-100 shadow-sm border-0 gallery-card position-relative">
+                            @if (Context.Session.GetInt32("AdminID") != null)
+                            {
+                                <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                                    <button class="btn btn-light btn-sm shadow rounded-circle me-1" title="Açıklama Düzenle" data-id="@item.Id" data-aciklama="@item.Aciklama" onclick="editPhotoDesc(this); event.stopPropagation();">
+                                        <i class="fas fa-comment-dots text-primary"></i>
+                                    </button>
+                                    <form action="/Galeri/FotografSil" method="post" class="d-inline" onsubmit="event.stopPropagation(); return confirm('Silmek istediğinize emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="hidden" name="albumId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-light btn-sm shadow rounded-circle">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+
+                            <div class="img-container lightbox-trigger" data-src="@item.FotografYolu" data-title="@Model.Baslik" data-desc="@item.Aciklama" onclick="openLightbox(@index)">
+                                <div class="hover-overlay d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-expand-arrows-alt fa-3x text-white opacity-75"></i>
+                                </div>
+                                <img src="@item.FotografYolu" class="card-img-top" alt="Fotoğraf" loading="lazy" />
+                            </div>
+                        </div>
+                    </div>
+                    index++;
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm border">
+                    <i class="fas fa-images fa-4x text-muted opacity-50 mb-3"></i>
+                    <h5 class="text-primary-dark">Bu albüme henüz fotoğraf eklenmemiş.</h5>
+                    <p class="text-muted">Yukarıdaki butonu kullanarak hemen yüklemeye başlayabilirsiniz.</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<div id="lightbox-modal" class="lightbox-overlay" style="display: none;" onclick="closeLightbox()">
+
+    <div class="lightbox-top-bar">
+        <div class="text-white fs-5 fw-bold drop-shadow">
+            <i class="fas fa-camera text-warning me-2"></i><span id="lb-counter-current">1</span> / <span id="lb-counter-total">X</span>
+        </div>
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    </div>
+
+    <button class="lightbox-nav prev-btn" onclick="changeImage(-1); event.stopPropagation();"><i class="fas fa-chevron-left"></i></button>
+    <button class="lightbox-nav next-btn" onclick="changeImage(1); event.stopPropagation();"><i class="fas fa-chevron-right"></i></button>
+
+    <div class="lb-content" onclick="event.stopPropagation();">
+        <div class="loader-spinner" id="lb-loader"><i class="fas fa-circle-notch fa-spin text-warning fa-3x"></i></div>
+        <img id="lightbox-img" src="" alt="" class="anim-fade-in" onload="document.getElementById('lb-loader').style.display='none';">
+    </div>
+
+    <div class="lb-caption-fixed anim-fade-in" id="lb-caption-box" onclick="event.stopPropagation();">
+        <h4 id="lightbox-title" class="text-warning fw-bold mb-2 drop-shadow"></h4>
+        <div class="desc-scroll-area custom-scrollbar">
+            <p id="lightbox-desc" class="mb-0 text-light drop-shadow" style="font-size: 1.1rem; line-height: 1.5;"></p>
+        </div>
+    </div>
+</div>
+
+@if (Context.Session.GetInt32("AdminID") != null)
+{
+    <div class="modal fade" id="fotoEkleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <form action="/Galeri/FotografEkle" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="AlbumId" value="@Model.Id" />
+                    <div class="modal-header text-white border-0" style="background-color: #0d2b4d;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-cloud-upload-alt text-warning me-2"></i>Çoklu Fotoğraf Yükle</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body bg-light text-center py-4">
+                        <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                        <input type="file" name="Fotograflar" class="form-control border-0 shadow-sm" required accept="image/*" multiple>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="submit" class="btn btn-gold rounded-pill px-4">Toplu Yükle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="fotoDuzenleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <form action="/Galeri/FotografDuzenle" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" id="editFotoId" />
+                    <input type="hidden" name="AlbumId" value="@Model.Id" />
+                    <div class="modal-header bg-white border-bottom border-warning">
+                        <h5 class="modal-title fw-bold text-primary-dark">Açıklama Düzenle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body bg-light">
+                        <textarea name="Aciklama" id="editFotoAciklama" class="form-control border-0 shadow-sm" rows="4"></textarea>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="submit" class="btn btn-gold rounded-pill px-4">Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .text-primary-dark {
+        color: #0d2b4d !important;
+    }
+
+    .btn-gold {
+        background-color: #ffc800;
+        border-color: #ffc800;
+        color: #0d2b4d;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+        .btn-gold:hover {
+            background-color: #e6b400;
+            transform: translateY(-2px);
+        }
+
+    .gallery-card {
+        transition: all 0.4s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(13, 43, 77, 0.15) !important;
+        }
+
+    .img-container {
+        overflow: hidden;
+        height: 220px;
+        position: relative;
+        cursor: pointer;
+        background-color: #000;
+    }
+
+    .gallery-card img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: opacity 0.4s ease, transform 0.6s ease;
+    }
+
+    .gallery-card:hover img {
+        transform: scale(1.08);
+        opacity: 0.8;
+    }
+
+    .hover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(13, 43, 77, 0.4);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .gallery-card:hover .hover-overlay {
+        opacity: 1;
+    }
+
+    .admin-controls {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gallery-card:hover .admin-controls {
+        opacity: 1;
+    }
+
+    .album-desc-text {
+        transition: all 0.3s ease;
+    }
+
+        .album-desc-text.collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+    /* SİNEMATİK LIGHTBOX STİLLERİ (GÜNCELLENDİ) */
+    .lightbox-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 15, 15, 0.98);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .lightbox-top-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10002;
+    }
+
+    .lightbox-close {
+        font-size: 50px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        line-height: 0.5;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+
+        .lightbox-close:hover {
+            color: #ffc800;
+            transform: scale(1.1);
+        }
+
+    .drop-shadow {
+        text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    }
+
+    /* Fotoğrafı ekranın tam ortasına alıyoruz */
+    .lb-content {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 0 120px 0;
+        pointer-events: none;
+    }
+
+    #lightbox-img {
+        max-width: 90%;
+        max-height: 85vh;
+        object-fit: contain;
+        z-index: 2;
+        border-radius: 4px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        pointer-events: auto;
+    }
+
+    .loader-spinner {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* YENİ: Alt Açıklama Kutusu (Her zaman ekranın en altında kalır, resmin boyutundan etkilenmez) */
+    .lb-caption-fixed {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 80px 15% 25px 15%;
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, transparent 100%);
+        text-align: center;
+        z-index: 10001;
+        pointer-events: none;
+    }
+
+        /* İçindeki yazılar tıklanabilsin / kaydırılabilsin */
+        .lb-caption-fixed h4, .lb-caption-fixed .desc-scroll-area {
+            pointer-events: auto;
+        }
+
+    /* YENİ: Uzun açıklamalar için kaydırma (scroll) alanı */
+    .desc-scroll-area {
+        max-height: 15vh;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    /* Kaydırma çubuğu özelleştirmesi */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #ffc800;
+        border-radius: 4px;
+    }
+
+    .anim-fade-in {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 4rem;
+        cursor: pointer;
+        z-index: 10003;
+        transition: all 0.3s ease;
+        padding: 20px;
+        outline: none;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+        .lightbox-nav:hover {
+            color: #ffc800;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+    .prev-btn {
+        left: 2%;
+    }
+
+    .next-btn {
+        right: 2%;
+    }
+
+    @@media (max-width: 992px) {
+        .lightbox-nav
+
+    {
+        font-size: 2.5rem;
+        padding: 10px;
+    }
+
+    .prev-btn {
+        left: 0;
+    }
+
+    .next-btn {
+        right: 0;
+    }
+
+    .lightbox-top-bar {
+        padding: 15px 20px;
+    }
+
+    .lb-caption-fixed {
+        padding: 50px 5% 15px 5%;
+    }
+
+    .desc-scroll-area {
+        max-height: 25vh;
+    }
+
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function toggleDescription() {
+        var textElem = document.getElementById("albumDescText");
+        var btnElem = document.getElementById("toggleDescBtn");
+
+        if (textElem.classList.contains("collapsed")) {
+            textElem.classList.remove("collapsed");
+            btnElem.innerHTML = 'Daha Az Göster <i class="fas fa-chevron-up ms-1"></i>';
+        } else {
+            textElem.classList.add("collapsed");
+            btnElem.innerHTML = 'Devamını Oku <i class="fas fa-chevron-down ms-1"></i>';
+        }
+    }
+
+    let galleryItems = [];
+    let currentIndex = 0;
+
+    function buildGalleryItems() {
+        galleryItems = [];
+        const items = document.querySelectorAll('.lightbox-trigger');
+        items.forEach((item, index) => {
+            item.setAttribute('onclick', `openLightbox(${index})`);
+            galleryItems.push({
+                src: item.getAttribute('data-src'),
+                title: item.getAttribute('data-title'),
+                desc: item.getAttribute('data-desc')
+            });
+        });
+        document.getElementById('lb-counter-total').innerText = galleryItems.length;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() { buildGalleryItems(); });
+
+    function openLightbox(index) {
+        if (!galleryItems || galleryItems.length === 0) buildGalleryItems();
+        currentIndex = index;
+        updateLightboxContent();
+        document.getElementById('lightbox-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightbox-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function changeImage(direction) {
+        currentIndex += direction;
+        if (currentIndex >= galleryItems.length) currentIndex = 0;
+        else if (currentIndex < 0) currentIndex = galleryItems.length - 1;
+
+        const img = document.getElementById('lightbox-img');
+        img.classList.remove('anim-fade-in');
+        void img.offsetWidth;
+
+        updateLightboxContent();
+    }
+
+    function updateLightboxContent() {
+        var item = galleryItems[currentIndex];
+        document.getElementById('lb-loader').style.display = 'block';
+
+        const img = document.getElementById('lightbox-img');
+        img.src = item.src;
+        img.classList.add('anim-fade-in');
+
+        const titleElem = document.getElementById('lightbox-title');
+        const descElem = document.getElementById('lightbox-desc');
+        const captionBox = document.getElementById('lb-caption-box');
+
+        titleElem.innerText = item.title || "";
+
+        // Eğer fotoğrafa ait açıklama varsa göster, yoksa karartma kutusunu tamamen gizle.
+        if (item.desc && item.desc.trim() !== "") {
+            descElem.innerText = item.desc;
+            captionBox.style.display = 'block';
+        } else {
+            descElem.innerText = "";
+            captionBox.style.display = 'none';
+        }
+
+        document.getElementById('lb-counter-current').innerText = currentIndex + 1;
+    }
+
+    document.addEventListener('keydown', function(event) {
+        var lightbox = document.getElementById('lightbox-modal');
+        if (lightbox.style.display === 'flex') {
+            if (event.key === "Escape") closeLightbox();
+            if (event.key === "ArrowRight") changeImage(1);
+            if (event.key === "ArrowLeft") changeImage(-1);
+        }
+    });
+
+    function editPhotoDesc(btn) {
+        document.getElementById('editFotoId').value = btn.getAttribute('data-id');
+        document.getElementById('editFotoAciklama').value = btn.getAttribute('data-aciklama');
+        new bootstrap.Modal(document.getElementById('fotoDuzenleModal')).show();
+    }
+
+    @if (TempData["Mesaj"] != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: '@TempData["Durum"]',
+                    title: '@(TempData["Durum"].ToString() == "success" ? "Başarılı!" : "Uyarı!")',
+                    text: '@Html.Raw(TempData["Mesaj"])',
+                    confirmButtonColor: '#0d2b4d',
+                    confirmButtonText: 'Tamam'
+                });
+            });
+            </text>
+    }
+</script>

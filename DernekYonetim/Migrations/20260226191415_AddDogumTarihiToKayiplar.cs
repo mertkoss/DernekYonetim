@@ -11,11 +11,11 @@ namespace DernekYonetim.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "DogumTarihi",
-                table: "Kaybettiklerimiz",
-                type: "date",
-                nullable: true);
+            //migrationBuilder.AddColumn<DateOnly>(
+            //    name: "DogumTarihi",
+            //    table: "Kaybettiklerimiz",
+            //    type: "date",
+            //    nullable: true);
         }
 
         /// <inheritdoc />

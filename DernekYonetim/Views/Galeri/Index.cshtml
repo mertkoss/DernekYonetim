@@ -1,129 +1,208 @@
 ﻿@model DernekYonetim.Models.HomeViewModel
 @{
-    ViewData["Title"] = "Galeri Yönetimi";
+    ViewData["Title"] = "Etkinlik Albümleri";
     Layout = "_Layout";
 }
 
 <section class="page-section bg-light" style="padding-top:120px; padding-bottom: 80px;">
     <div class="container">
 
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-warning pb-3">
-            <div>
-                <h2 class="section-heading text-uppercase mb-0 text-primary-dark">Galeri</h2>
-                <h3 class="section-subheading text-muted mt-2">Derneğimizden özel anlar</h3>
+        <div class="row align-items-center mb-4 border-bottom border-warning pb-3">
+            <div class="col-md-8">
+                <h2 class="section-heading text-uppercase mb-0 text-primary-dark">Galeri Albümleri</h2>
+                <h3 class="section-subheading text-muted mt-2">Derneğimizin etkinlik arşivi</h3>
             </div>
-
-            @if (Context.Session.GetInt32("AdminID") != null)
-            {
-                <button class="btn btn-gold btn-lg rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#ekleModal">
-                    <i class="fas fa-plus me-2"></i>Yeni Fotoğraf Ekle
-                </button>
-            }
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                @if (Context.Session.GetInt32("AdminID") != null)
+                {
+                    <button class="btn btn-gold rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#albumEkleModal">
+                        <i class="fas fa-folder-plus me-2"></i>Yeni Albüm Oluştur
+                    </button>
+                }
+            </div>
         </div>
 
-        <div class="row justify-content-center mb-5 mt-2">
+        <div class="row justify-content-center mb-5 mt-4">
             <div class="col-md-10 col-lg-8">
-                <form action="/Galeri/Index" method="get" class="d-flex shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border" onsubmit="return false;">
+                <form action="/Galeri/Index" method="get" class="d-flex shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border">
                     <div class="d-flex align-items-center ps-4 text-muted">
                         <i class="fas fa-search fs-5 opacity-75"></i>
                     </div>
-                    <input type="text" id="canliAramaKutusu" name="arama" value="@ViewBag.AramaKelimesi" class="form-control border-0 px-3 py-3 shadow-none fs-5 bg-transparent" placeholder="Fotoğraf başlığı ile ara..." style="outline: none;">
-                    <button type="button" class="btn btn-warning px-5 text-dark fw-bold border-0 fs-5" style="border-radius: 0 50rem 50rem 0; cursor: default; transition: all 0.3s ease;">
+                    <input type="text" name="arama" value="@ViewBag.AramaKelimesi" class="form-control border-0 px-3 py-3 shadow-none fs-5 bg-transparent" placeholder="Albüm veya etkinlik adı ile ara..." style="outline: none;">
+                    <button type="submit" class="btn btn-warning px-5 text-dark fw-bold border-0 fs-5" style="border-radius: 0 50rem 50rem 0; transition: all 0.3s ease;">
                         Ara
                     </button>
                 </form>
             </div>
         </div>
 
-        <div id="aramaSonuclariAlani" style="transition: opacity 0.3s ease;">
-            @await Html.PartialAsync("_GaleriListesiPartial", Model)
+        @if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi))
+        {
+            <div class="text-center mb-4 text-muted small">
+                <strong>"@ViewBag.AramaKelimesi"</strong> için @ViewBag.ToplamKayit sonuç bulundu.
+                <a href="/Galeri/Index" class="text-decoration-none ms-2 text-primary-dark fw-bold"><i class="fas fa-times me-1 text-danger"></i>Temizle</a>
+            </div>
+        }
+
+        <div class="row g-4 mt-2">
+            @if (Model.GaleriAlbumleri != null && Model.GaleriAlbumleri.Any())
+            {
+                foreach (var album in Model.GaleriAlbumleri)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <a href="/Galeri/Detay/@album.Id" class="text-decoration-none">
+                            <div class="card h-100 shadow-sm border-0 gallery-folder-card position-relative">
+
+                                @if (Context.Session.GetInt32("AdminID") != null)
+                                {
+                                    <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                                        <button class="btn btn-light btn-sm shadow rounded-circle me-1" title="Düzenle" data-id="@album.Id" data-baslik="@album.Baslik" data-aciklama="@album.Aciklama" onclick="event.preventDefault(); event.stopPropagation(); editAlbum(this);">
+                                            <i class="fas fa-edit text-warning"></i>
+                                        </button>
+                                        <form action="/Galeri/AlbumSil" method="post" class="d-inline" onsubmit="event.stopPropagation(); return confirm('Bu albümü ve içindeki TÜM fotoğrafları silmek istediğinize emin misiniz?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@album.Id" />
+                                            <button type="submit" class="btn btn-light btn-sm shadow rounded-circle" title="Albümü Sil" onclick="event.preventDefault(); event.stopPropagation(); this.closest('form').submit();">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+
+                                <div class="folder-img-container">
+                                    @if (!string.IsNullOrEmpty(album.KapakFotografYolu))
+                                    {
+                                        <img src="@album.KapakFotografYolu" class="card-img-top" alt="@album.Baslik" style="height:100%; width:100%; object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-secondary text-white" style="height:100%;">
+                                            <i class="fas fa-folder-open fa-4x opacity-50"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="card-body bg-white border-bottom border-warning border-3">
+                                    <h5 class="card-title fw-bold text-primary-dark mb-2">
+                                        <i class="far fa-folder-open text-warning me-2"></i>@album.Baslik
+                                    </h5>
+                                    <p class="card-text text-muted small gallery-desc mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">@album.Aciklama</p>
+                                </div>
+                                <div class="card-footer bg-light border-0 py-2 d-flex justify-content-between align-items-center">
+                                    <small class="text-muted fw-bold"><i class="far fa-calendar-alt text-warning me-2"></i> @album.OlusturulmaTarihi.ToString("dd.MM.yyyy")</small>
+                                    <small class="text-primary-dark fw-bold"><i class="fas fa-images me-1"></i> @album.Fotograflar.Count</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-folder-open fa-4x text-muted opacity-50 mb-3"></i>
+                    <h5 class="text-primary-dark mt-3">Aradığınız kriterlere uygun albüm bulunamadı.</h5>
+                </div>
+            }
         </div>
+
+        @if (ViewBag.ToplamSayfa > 1)
+        {
+            <div class="row mt-5">
+                <div class="col-12">
+                    <nav aria-label="Sayfa Gezinmesi">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
+                                <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white" href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
+                                    <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")" href="/Galeri/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
+                                <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white" href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
 
     </div>
 </section>
 
-<div id="lightbox-modal" class="lightbox-overlay" style="display: none;" onclick="closeLightbox()">
-    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-    <button class="lightbox-nav prev-btn" onclick="changeImage(-1); event.stopPropagation();"><i class="fas fa-chevron-left"></i></button>
-    <button class="lightbox-nav next-btn" onclick="changeImage(1); event.stopPropagation();"><i class="fas fa-chevron-right"></i></button>
-
-    <div class="ig-lightbox-container shadow-lg" onclick="event.stopPropagation();">
-        <div class="ig-image-section">
-            <img id="lightbox-img" src="" alt="">
-        </div>
-        <div class="ig-text-section">
-            <div class="ig-header">
-                <h5 id="lightbox-title" class="text-primary-dark fw-bold mb-0"></h5>
-            </div>
-            <div class="ig-body custom-scrollbar">
-                <p id="lightbox-desc" class="text-muted"></p>
-            </div>
-        </div>
-    </div>
-</div>
-
 @if (Context.Session.GetInt32("AdminID") != null)
 {
-    <div class="modal fade" id="duzenleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="albumEkleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
-                <form action="/Galeri/Guncelle" method="post" enctype="multipart/form-data">
+                <form action="/Galeri/AlbumEkle" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" name="Id" id="editId" />
-                    <div class="modal-header bg-warning text-dark border-0">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Fotoğrafı Düzenle</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header text-white border-0" style="background-color: #0d2b4d;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-folder-plus text-warning me-2"></i>Yeni Klasör/Albüm Oluştur</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body bg-light">
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-primary-dark">Başlık</label>
-                            <input type="text" name="Baslik" id="editBaslik" class="form-control border-0 shadow-sm" required>
+                            <label class="form-label fw-bold text-primary-dark">Albüm (Etkinlik) Adı</label>
+                            <input type="text" name="Baslik" class="form-control border-0 shadow-sm" required placeholder="Örn: 2026 Bilişim Semineri">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-primary-dark">Açıklama</label>
-                            <textarea name="Aciklama" id="editAciklama" class="form-control border-0 shadow-sm" rows="3"></textarea>
+                            <label class="form-label fw-bold text-primary-dark">Kısa Açıklama</label>
+                            <textarea name="Aciklama" class="form-control border-0 shadow-sm" rows="3" placeholder="Etkinlik hakkında kısa bilgi..."></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-primary-dark">Fotoğrafı Değiştir</label>
-                            <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" accept="image/*">
-                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle text-warning me-1"></i>Yeni fotoğraf seçmezseniz mevcut fotoğraf korunur.</small>
+                            <label class="form-label fw-bold text-primary-dark">Klasör Kapak Fotoğrafı</label>
+                            <input type="file" name="KapakFotografi" class="form-control border-0 shadow-sm" accept="image/*">
                         </div>
                     </div>
                     <div class="modal-footer border-0 bg-light">
-                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
-                        <button type="submit" class="btn btn-gold rounded-pill px-4">Kaydet</button>
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-4">Oluştur</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="ekleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="albumDuzenleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
-                <form action="/Galeri/Ekle" method="post" enctype="multipart/form-data">
+                <form action="/Galeri/AlbumDuzenle" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
-                    <div class="modal-header text-white border-0" style="background-color: #0d2b4d;">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle text-warning me-2"></i>Yeni Fotoğraf Yükle</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <input type="hidden" name="Id" id="editAlbumId" />
+                    <div class="modal-header bg-warning border-0">
+                        <h5 class="modal-title text-dark fw-bold"><i class="fas fa-edit me-2"></i>Albümü Düzenle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body bg-light">
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-primary-dark">Başlık</label>
-                            <input type="text" name="Baslik" class="form-control border-0 shadow-sm" required placeholder="Fotoğraf başlığı...">
+                            <label class="form-label fw-bold text-primary-dark">Albüm Adı</label>
+                            <input type="text" name="Baslik" id="editAlbumBaslik" class="form-control border-0 shadow-sm" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold text-primary-dark">Açıklama</label>
-                            <textarea name="Aciklama" class="form-control border-0 shadow-sm" rows="3" placeholder="Kısa bir açıklama..."></textarea>
+                            <textarea name="Aciklama" id="editAlbumAciklama" class="form-control border-0 shadow-sm" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-primary-dark">Fotoğraf Seç</label>
-                            <input type="file" name="Fotograf" class="form-control border-0 shadow-sm" required accept="image/*">
+                            <label class="form-label fw-bold text-primary-dark">Yeni Kapak Fotoğrafı</label>
+                            <input type="file" name="KapakFotografi" class="form-control border-0 shadow-sm" accept="image/*">
+                            <small class="text-muted">Seçmezseniz mevcut fotoğraf korunur.</small>
                         </div>
                     </div>
                     <div class="modal-footer border-0 bg-light">
-                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
-                        <button type="submit" class="btn btn-gold rounded-pill px-4">Kaydet ve Yayınla</button>
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-4">Kaydet</button>
                     </div>
                 </form>
             </div>
@@ -136,10 +215,6 @@
         color: #0d2b4d !important;
     }
 
-    .bg-primary-dark {
-        background-color: #0d2b4d !important;
-    }
-
     .btn-gold {
         background-color: #ffc800;
         border-color: #ffc800;
@@ -150,62 +225,27 @@
 
         .btn-gold:hover {
             background-color: #e6b400;
-            border-color: #e6b400;
-            color: #000;
             transform: translateY(-2px);
         }
 
-    .search-bar-wrapper {
-        transition: box-shadow 0.3s ease, border-color 0.3s ease;
-    }
-
-        .search-bar-wrapper:focus-within, .search-bar-wrapper:hover {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-            border-color: #ffc800 !important;
-        }
-
-    .gallery-card {
+    .gallery-folder-card {
         transition: all 0.4s ease;
         border-radius: 12px;
-        overflow: hidden;
+        background-color: transparent;
+        cursor: pointer;
     }
 
-        .gallery-card:hover {
-            transform: translateY(-8px);
+        .gallery-folder-card:hover {
+            transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(13, 43, 77, 0.15) !important;
         }
 
-    .img-container {
-        overflow: hidden;
-        height: 260px;
+    .folder-img-container {
         position: relative;
-    }
-
-    .gallery-card img {
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-        transition: transform 0.6s ease;
-    }
-
-    .gallery-card:hover img {
-        transform: scale(1.08);
-    }
-
-    .hover-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(13, 43, 77, 0.5);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        z-index: 2;
-    }
-
-    .gallery-card:hover .hover-overlay {
-        opacity: 1;
+        border-radius: 0 12px 0 0;
+        overflow: hidden;
+        height: 220px;
+        background-color: #e9ecef;
     }
 
     .admin-controls {
@@ -213,305 +253,22 @@
         transition: opacity 0.3s ease;
     }
 
-    .gallery-card:hover .admin-controls {
+    .gallery-folder-card:hover .admin-controls {
         opacity: 1;
     }
 
-    .gallery-desc {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .lightbox-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(10, 20, 35, 0.95);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px);
-    }
-
-    .lightbox-close {
-        position: absolute;
-        top: 15px;
-        right: 25px;
-        font-size: 40px;
-        color: #ffc800;
-        cursor: pointer;
-        z-index: 10001;
-        transition: color 0.3s ease;
-    }
-
-        .lightbox-close:hover {
-            color: #fff;
-        }
-
-    .ig-lightbox-container {
-        display: flex;
-        flex-direction: row;
-        width: 90%;
-        max-width: 1200px;
-        height: 85vh;
-        background: #fff;
-        border-radius: 12px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .ig-image-section {
-        flex: 1;
-        background: #000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    #lightbox-img {
-        max-width: 100%;
-        max-height: 100%;
-        min-width: 250px;
-        object-fit: contain;
-    }
-
-    .ig-text-section {
-        width: 380px;
-        display: flex;
-        flex-direction: column;
-        background-color: #fff;
-        border-left: 1px solid #e0e0e0;
-    }
-
-    .ig-header {
-        padding: 1.5rem;
-        background-color: #f8f9fa;
-        border-bottom: 2px solid #ffc800;
-    }
-
-    .ig-body {
-        padding: 1.5rem;
-        overflow-y: auto;
-        flex: 1;
-    }
-
-    #lightbox-desc {
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        line-height: 1.6;
-        font-size: 0.95rem;
-        color: #4a5568 !important;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #ffc800;
-        border-radius: 4px;
-    }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #0d2b4d;
-        }
-
-    .lightbox-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.15);
-        border: none;
-        color: #ffc800;
-        font-size: 2rem;
-        cursor: pointer;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-    }
-
-        .lightbox-nav:hover {
-            background: #ffc800;
-            color: #0d2b4d;
-        }
-
-    .prev-btn {
-        left: 2%;
-    }
-
-    .next-btn {
-        right: 2%;
-    }
-
-    .page-item.active .page-link {
-        z-index: 3;
-        color: #000;
-        background-color: #ffc107;
-        border-color: #ffc107;
-    }
-
-    @@media (max-width: 992px) {
-        .ig-lightbox-container {
-            flex-direction: column;
-            height: 90vh;
-        }
-
-        .ig-image-section {
-            flex: none;
-            height: 60%;
-        }
-
-        .ig-text-section {
-            width: 100%;
-            height: 40%;
-            border-left: none;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .lightbox-nav {
-            font-size: 1.5rem;
-            width: 40px;
-            height: 40px;
-        }
+    .search-bar-wrapper:focus-within {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        border-color: #ffc800 !important;
     }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-    let galleryItems = [];
-    let currentIndex = 0;
-
-    function buildGalleryItems() {
-        galleryItems = [];
-        const items = document.querySelectorAll('.lightbox-trigger');
-        items.forEach((item, index) => {
-            item.setAttribute('onclick', `openLightbox(${index})`);
-            galleryItems.push({
-                src: item.getAttribute('data-src'),
-                title: item.getAttribute('data-title'),
-                desc: item.getAttribute('data-desc')
-            });
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        buildGalleryItems();
-    });
-
-    const aramaKutusu = document.getElementById('canliAramaKutusu');
-    const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
-    let aramaZamanlayici;
-
-    if(aramaKutusu && sonuclarAlani) {
-        aramaKutusu.addEventListener('input', function() {
-            clearTimeout(aramaZamanlayici);
-            const kelime = this.value;
-            sonuclarAlani.style.opacity = '0.5';
-
-            aramaZamanlayici = setTimeout(() => {
-                const url = `/Galeri/Index?arama=${encodeURIComponent(kelime)}`;
-
-                fetch(url, {
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    sonuclarAlani.innerHTML = html;
-                    sonuclarAlani.style.opacity = '1';
-                    window.history.pushState({}, '', url);
-                    buildGalleryItems();
-                })
-                .catch(error => {
-                    console.error("Arama hatası:", error);
-                    sonuclarAlani.style.opacity = '1';
-                });
-            }, 400);
-        });
-    }
-
-    function openLightbox(index) {
-        if (!galleryItems || galleryItems.length === 0) buildGalleryItems();
-        currentIndex = index;
-        updateLightboxContent();
-        document.getElementById('lightbox-modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLightbox() {
-        document.getElementById('lightbox-modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function changeImage(direction) {
-        currentIndex += direction;
-        if (currentIndex >= galleryItems.length) {
-            currentIndex = 0;
-        } else if (currentIndex < 0) {
-            currentIndex = galleryItems.length - 1;
-        }
-        updateLightboxContent();
-    }
-
-    function updateLightboxContent() {
-        var item = galleryItems[currentIndex];
-        document.getElementById('lightbox-img').src = item.src;
-        document.getElementById('lightbox-title').innerText = item.title || "";
-        document.getElementById('lightbox-desc').innerText = item.desc || "";
-    }
-
-    document.addEventListener('keydown', function(event) {
-        var lightbox = document.getElementById('lightbox-modal');
-        if (lightbox.style.display === 'flex') {
-            if (event.key === "Escape") closeLightbox();
-            if (event.key === "ArrowRight") changeImage(1);
-            if (event.key === "ArrowLeft") changeImage(-1);
-        }
-    });
-
-    function editGallery(btn) {
-        var id = btn.getAttribute('data-id');
-        var baslik = btn.getAttribute('data-baslik');
-        var aciklama = btn.getAttribute('data-aciklama');
-
-        document.getElementById('editId').value = id;
-        document.getElementById('editBaslik').value = baslik;
-        document.getElementById('editAciklama').value = aciklama;
-
-        var myModal = new bootstrap.Modal(document.getElementById('duzenleModal'));
-        myModal.show();
-    }
-
-    @if (TempData["Mesaj"] != null)
-    {
-            <text>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: '@TempData["Durum"]',
-                    title: '@(TempData["Durum"].ToString() == "success" ? "Başarılı!" : "Uyarı!")',
-                    text: '@Html.Raw(TempData["Mesaj"])',
-                    confirmButtonColor: '#0d2b4d',
-                    confirmButtonText: 'Tamam'
-                });
-            });
-            </text>
+    function editAlbum(btn) {
+        document.getElementById('editAlbumId').value = btn.getAttribute('data-id');
+        document.getElementById('editAlbumBaslik').value = btn.getAttribute('data-baslik');
+        document.getElementById('editAlbumAciklama').value = btn.getAttribute('data-aciklama');
+        new bootstrap.Modal(document.getElementById('albumDuzenleModal')).show();
     }
 </script>

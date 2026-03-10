@@ -57,6 +57,10 @@ namespace DernekYonetim.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SifreHash")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -210,12 +214,11 @@ namespace DernekYonetim.Migrations
                     b.ToTable("EgitimMeslek", (string)null);
                 });
 
-            modelBuilder.Entity("DernekYonetim.Models.Galeri", b =>
+            modelBuilder.Entity("DernekYonetim.Models.GaleriAlbum", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ID");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -223,24 +226,46 @@ namespace DernekYonetim.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Baslik")
-                        .HasMaxLength(150)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(150)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KapakFotografYolu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OlusturulmaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GaleriAlbumleri");
+                });
+
+            modelBuilder.Entity("DernekYonetim.Models.GaleriFotograf", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("AlbumId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FotografYolu")
-                        .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("YuklemeTarihi")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
+                    b.Property<DateTime>("YuklemeTarihi")
+                        .HasColumnType("datetime2");
 
-                    b.HasKey("Id")
-                        .HasName("PK__Galeri__3214EC272F64344B");
+                    b.HasKey("Id");
 
-                    b.ToTable("Galeri", (string)null);
+                    b.HasIndex("AlbumId");
+
+                    b.ToTable("GaleriFotograflari");
                 });
 
             modelBuilder.Entity("DernekYonetim.Models.HaberKategorileri", b =>
@@ -548,6 +573,17 @@ namespace DernekYonetim.Migrations
                     b.Navigation("Uye");
                 });
 
+            modelBuilder.Entity("DernekYonetim.Models.GaleriFotograf", b =>
+                {
+                    b.HasOne("DernekYonetim.Models.GaleriAlbum", "Album")
+                        .WithMany("Fotograflar")
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Album");
+                });
+
             modelBuilder.Entity("DernekYonetim.Models.Haberler", b =>
                 {
                     b.HasOne("DernekYonetim.Models.HaberKategorileri", "Kategori")
@@ -556,6 +592,11 @@ namespace DernekYonetim.Migrations
                         .HasConstraintName("FK_Haberler_Kategoriler");
 
                     b.Navigation("Kategori");
+                });
+
+            modelBuilder.Entity("DernekYonetim.Models.GaleriAlbum", b =>
+                {
+                    b.Navigation("Fotograflar");
                 });
 
             modelBuilder.Entity("DernekYonetim.Models.HaberKategorileri", b =>

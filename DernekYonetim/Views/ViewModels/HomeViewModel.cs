@@ -11,7 +11,7 @@ namespace DernekYonetim.Models
         public List<Aidatlar> Aidatlar { get; set; }
         public List<DerbisKaydi>? DerbisKayitlari { get; set; }
         public Uyeler? UyeDetay { get; set; }
-        public List<Galeri> Galeri { get; internal set; }
+        public List<GaleriAlbum> GaleriAlbumleri { get; set; }
 
         public List<UyeListesiViewModel> OzelUyeListesi { get; set; }
 

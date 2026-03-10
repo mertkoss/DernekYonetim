@@ -14,10 +14,12 @@ public class GaleriController : Controller
         _hostEnvironment = hostEnvironment;
     }
 
+    // --- 1. ALBÜM (KLASÖR) İŞLEMLERİ ---
+
     public async Task<IActionResult> Index(string arama, int sayfa = 1)
     {
         int sayfaBoyutu = 6;
-        var query = _context.Galeris.AsQueryable();
+        var query = _context.GaleriAlbumleri.AsQueryable();
 
         if (!string.IsNullOrEmpty(arama))
         {
@@ -27,175 +29,201 @@ public class GaleriController : Controller
         var toplamKayit = await query.CountAsync();
         var toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
 
-        var liste = await query.OrderByDescending(x => x.YuklemeTarihi)
+        var liste = await query.Include(x => x.Fotograflar)
+                               .OrderByDescending(x => x.OlusturulmaTarihi)
                                .Skip((sayfa - 1) * sayfaBoyutu)
                                .Take(sayfaBoyutu)
                                .ToListAsync();
 
-        var model = new HomeViewModel { Galeri = liste };
+        var model = new HomeViewModel { GaleriAlbumleri = liste };
+        ViewBag.MevcutSayfa = sayfa; ViewBag.ToplamSayfa = toplamSayfa;
+        ViewBag.AramaKelimesi = arama; ViewBag.ToplamKayit = toplamKayit;
 
-        ViewBag.MevcutSayfa = sayfa;
-        ViewBag.ToplamSayfa = toplamSayfa;
-        ViewBag.AramaKelimesi = arama;
-        ViewBag.ToplamKayit = toplamKayit;
-
-        // EĞER İSTEK AJAX İLE GELDİYSE SADECE PARTIAL DÖNDÜR
-        if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-        {
-            return PartialView("_GaleriListesiPartial", model);
-        }
-
-        // NORMAL SAYFA YÜKLEMESİYSE TÜM SAYFAYI DÖNDÜR
         return View(model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Ekle(string Baslik, string Aciklama, IFormFile Fotograf)
+    public async Task<IActionResult> AlbumEkle(string Baslik, string Aciklama, IFormFile KapakFotografi)
     {
-        if (HttpContext.Session.GetInt32("AdminID") == null)
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        var yeniAlbum = new GaleriAlbum { Baslik = Baslik, Aciklama = Aciklama, OlusturulmaTarihi = DateTime.Now };
+
+        if (KapakFotografi != null && KapakFotografi.Length > 0)
         {
-            return RedirectToAction("Login", "Auth");
+            string yeniAdi = Guid.NewGuid().ToString() + Path.GetExtension(KapakFotografi.FileName).ToLowerInvariant();
+            string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri", "albumler");
+            if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
+
+            using (var stream = new FileStream(Path.Combine(yol, yeniAdi), FileMode.Create))
+            {
+                await KapakFotografi.CopyToAsync(stream);
+            }
+            yeniAlbum.KapakFotografYolu = "/img/galeri/albumler/" + yeniAdi;
         }
 
-        if (Fotograf != null && Fotograf.Length > 0)
+        _context.GaleriAlbumleri.Add(yeniAlbum);
+        await _context.SaveChangesAsync();
+        TempData["Mesaj"] = "Albüm oluşturuldu."; TempData["Durum"] = "success";
+        return RedirectToAction("Index");
+    }
+
+    // YENİ EKLENEN: Albüm Düzenleme
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AlbumDuzenle(int Id, string Baslik, string Aciklama, IFormFile? KapakFotografi)
+    {
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        var album = await _context.GaleriAlbumleri.FindAsync(Id);
+        if (album == null) return NotFound();
+
+        album.Baslik = Baslik;
+        album.Aciklama = Aciklama;
+
+        if (KapakFotografi != null && KapakFotografi.Length > 0)
         {
-            if (Fotograf.Length > 5 * 1024 * 1024)
+            // Eski kapak fotoğrafı varsa fiziksel olarak sil
+            if (!string.IsNullOrEmpty(album.KapakFotografYolu))
             {
-                TempData["Mesaj"] = "Dosya boyutu 5MB'dan büyük olamaz!";
-                TempData["Durum"] = "error";
-                return RedirectToAction("Index");
+                var eskiYol = Path.Combine(_hostEnvironment.WebRootPath, album.KapakFotografYolu.TrimStart('/'));
+                if (System.IO.File.Exists(eskiYol)) System.IO.File.Delete(eskiYol);
             }
 
-            var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-            var dosyaUzantisi = Path.GetExtension(Fotograf.FileName).ToLowerInvariant();
+            string yeniAdi = Guid.NewGuid().ToString() + Path.GetExtension(KapakFotografi.FileName).ToLowerInvariant();
+            string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri", "albumler");
+            if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
 
-            if (!izinVerilenUzantilar.Contains(dosyaUzantisi))
+            using (var stream = new FileStream(Path.Combine(yol, yeniAdi), FileMode.Create))
             {
-                TempData["Mesaj"] = "Sadece .jpg, .jpeg, .png ve .webp formatında resim yükleyebilirsiniz!";
-                TempData["Durum"] = "error";
-                return RedirectToAction("Index");
+                await KapakFotografi.CopyToAsync(stream);
             }
-
-            string yeniDosyaAdi = Guid.NewGuid().ToString() + dosyaUzantisi;
-            string yuklemeYolu = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri");
-
-            if (!Directory.Exists(yuklemeYolu))
-                Directory.CreateDirectory(yuklemeYolu);
-
-            string tamYol = Path.Combine(yuklemeYolu, yeniDosyaAdi);
-
-            using (var stream = new FileStream(tamYol, FileMode.Create))
-            {
-                await Fotograf.CopyToAsync(stream);
-            }
-
-            var yeniGaleri = new Galeri
-            {
-                Baslik = Baslik,
-                Aciklama = Aciklama,
-                FotografYolu = "/img/galeri/" + yeniDosyaAdi,
-                YuklemeTarihi = DateTime.Now
-            };
-
-            _context.Galeris.Add(yeniGaleri);
-            await _context.SaveChangesAsync();
-
-            TempData["Mesaj"] = "Fotoğraf başarıyla eklendi.";
-            TempData["Durum"] = "success";
-            return RedirectToAction("Index");
+            album.KapakFotografYolu = "/img/galeri/albumler/" + yeniAdi;
         }
 
-        TempData["Mesaj"] = "Lütfen geçerli bir dosya seçin.";
-        TempData["Durum"] = "warning";
+        _context.GaleriAlbumleri.Update(album);
+        await _context.SaveChangesAsync();
+        TempData["Mesaj"] = "Albüm güncellendi."; TempData["Durum"] = "success";
         return RedirectToAction("Index");
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Sil(int id)
+    public async Task<IActionResult> AlbumSil(int id)
     {
-        if (HttpContext.Session.GetInt32("AdminID") == null)
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        var album = await _context.GaleriAlbumleri.Include(x => x.Fotograflar).FirstOrDefaultAsync(x => x.Id == id);
+        if (album != null)
         {
-            return RedirectToAction("Login", "Auth");
+            foreach (var foto in album.Fotograflar)
+            {
+                var fotoYol = Path.Combine(_hostEnvironment.WebRootPath, foto.FotografYolu.TrimStart('/'));
+                if (System.IO.File.Exists(fotoYol)) System.IO.File.Delete(fotoYol);
+            }
+            if (!string.IsNullOrEmpty(album.KapakFotografYolu))
+            {
+                var kapakYol = Path.Combine(_hostEnvironment.WebRootPath, album.KapakFotografYolu.TrimStart('/'));
+                if (System.IO.File.Exists(kapakYol)) System.IO.File.Delete(kapakYol);
+            }
+            _context.GaleriAlbumleri.Remove(album);
+            await _context.SaveChangesAsync();
+            TempData["Mesaj"] = "Albüm ve fotoğraflar silindi."; TempData["Durum"] = "success";
+        }
+        return RedirectToAction("Index");
+    }
+
+    // --- 2. FOTOĞRAF İŞLEMLERİ (ALBÜM İÇİ - DETAY) ---
+
+    public async Task<IActionResult> Detay(int id)
+    {
+        var album = await _context.GaleriAlbumleri.Include(x => x.Fotograflar).FirstOrDefaultAsync(x => x.Id == id);
+        if (album == null) return NotFound();
+        album.Fotograflar = album.Fotograflar.OrderByDescending(f => f.YuklemeTarihi).ToList();
+        return View(album);
+    }
+
+    // GÜNCELLENEN: Çoklu Fotoğraf Yükleme (List<IFormFile>)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FotografEkle(int AlbumId, List<IFormFile> Fotograflar)
+    {
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        if (Fotograflar != null && Fotograflar.Count > 0)
+        {
+            string yuklemeYolu = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri", "fotograflar");
+            if (!Directory.Exists(yuklemeYolu)) Directory.CreateDirectory(yuklemeYolu);
+
+            int yuklenenSayi = 0;
+            foreach (var foto in Fotograflar)
+            {
+                if (foto.Length > 0)
+                {
+                    string yeniDosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(foto.FileName).ToLowerInvariant();
+                    using (var stream = new FileStream(Path.Combine(yuklemeYolu, yeniDosyaAdi), FileMode.Create))
+                    {
+                        await foto.CopyToAsync(stream);
+                    }
+
+                    _context.GaleriFotograflari.Add(new GaleriFotograf
+                    {
+                        AlbumId = AlbumId,
+                        Aciklama = "", // Toplu yüklemede açıklama boş bırakılır, istenirse sonra tek tek eklenir
+                        FotografYolu = "/img/galeri/fotograflar/" + yeniDosyaAdi,
+                        YuklemeTarihi = DateTime.Now
+                    });
+                    yuklenenSayi++;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Mesaj"] = $"{yuklenenSayi} adet fotoğraf başarıyla eklendi.";
+            TempData["Durum"] = "success";
+        }
+        else
+        {
+            TempData["Mesaj"] = "Lütfen en az bir fotoğraf seçin."; TempData["Durum"] = "warning";
         }
 
-        var foto = await _context.Galeris.FindAsync(id);
+        return RedirectToAction("Detay", new { id = AlbumId });
+    }
+
+    // YENİ EKLENEN: Özel bir fotoğrafa sonradan açıklama eklemek için
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FotografDuzenle(int Id, int AlbumId, string Aciklama)
+    {
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        var foto = await _context.GaleriFotograflari.FindAsync(Id);
+        if (foto != null)
+        {
+            foto.Aciklama = Aciklama;
+            _context.GaleriFotograflari.Update(foto);
+            await _context.SaveChangesAsync();
+            TempData["Mesaj"] = "Fotoğraf açıklaması güncellendi."; TempData["Durum"] = "success";
+        }
+        return RedirectToAction("Detay", new { id = AlbumId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FotografSil(int id, int albumId)
+    {
+        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
+
+        var foto = await _context.GaleriFotograflari.FindAsync(id);
         if (foto != null)
         {
             var dosyaYolu = Path.Combine(_hostEnvironment.WebRootPath, foto.FotografYolu.TrimStart('/'));
-            if (System.IO.File.Exists(dosyaYolu))
-                System.IO.File.Delete(dosyaYolu);
+            if (System.IO.File.Exists(dosyaYolu)) System.IO.File.Delete(dosyaYolu);
 
-            _context.Galeris.Remove(foto);
+            _context.GaleriFotograflari.Remove(foto);
             await _context.SaveChangesAsync();
-
-            TempData["Mesaj"] = "Fotoğraf başarıyla silindi.";
-            TempData["Durum"] = "success";
+            TempData["Mesaj"] = "Fotoğraf silindi."; TempData["Durum"] = "success";
         }
-        return RedirectToAction("Index");
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Guncelle(int Id, string Baslik, string Aciklama, IFormFile? Fotograf)
-    {
-        if (HttpContext.Session.GetInt32("AdminID") == null)
-        {
-            return RedirectToAction("Login", "Auth");
-        }
-
-        var mevcutKayit = await _context.Galeris.FindAsync(Id);
-        if (mevcutKayit == null) return NotFound();
-
-        mevcutKayit.Baslik = Baslik;
-        mevcutKayit.Aciklama = Aciklama;
-
-        if (Fotograf != null && Fotograf.Length > 0)
-        {
-            if (Fotograf.Length > 5 * 1024 * 1024)
-            {
-                TempData["Mesaj"] = "Dosya boyutu 5MB'dan büyük olamaz!";
-                TempData["Durum"] = "error";
-                return RedirectToAction("Index");
-            }
-
-            var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-            var dosyaUzantisi = Path.GetExtension(Fotograf.FileName).ToLowerInvariant();
-
-            if (!izinVerilenUzantilar.Contains(dosyaUzantisi))
-            {
-                TempData["Mesaj"] = "Sadece .jpg, .jpeg, .png ve .webp yükleyebilirsiniz!";
-                TempData["Durum"] = "error";
-                return RedirectToAction("Index");
-            }
-
-            if (!string.IsNullOrEmpty(mevcutKayit.FotografYolu))
-            {
-                var eskiDosyaYolu = Path.Combine(_hostEnvironment.WebRootPath, mevcutKayit.FotografYolu.TrimStart('/'));
-                if (System.IO.File.Exists(eskiDosyaYolu)) System.IO.File.Delete(eskiDosyaYolu);
-            }
-
-            string yuklemeYolu = Path.Combine(_hostEnvironment.WebRootPath, "img", "galeri");
-            if (!Directory.Exists(yuklemeYolu))
-                Directory.CreateDirectory(yuklemeYolu);
-
-            string yeniDosyaAdi = Guid.NewGuid().ToString() + dosyaUzantisi;
-            string tamYol = Path.Combine(yuklemeYolu, yeniDosyaAdi);
-
-            using (var stream = new FileStream(tamYol, FileMode.Create))
-            {
-                await Fotograf.CopyToAsync(stream);
-            }
-
-            mevcutKayit.FotografYolu = "/img/galeri/" + yeniDosyaAdi;
-        }
-
-        _context.Galeris.Update(mevcutKayit);
-        await _context.SaveChangesAsync();
-
-        TempData["Mesaj"] = "Fotoğraf başarıyla güncellendi.";
-        TempData["Durum"] = "success";
-        return RedirectToAction("Index");
+        return RedirectToAction("Detay", new { id = albumId });
     }
 }

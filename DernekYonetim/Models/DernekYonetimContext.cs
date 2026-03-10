@@ -25,7 +25,8 @@ public partial class DernekYonetimContext : DbContext
 
     public virtual DbSet<EgitimMeslek> EgitimMesleks { get; set; }
 
-    public virtual DbSet<Galeri> Galeris { get; set; }
+    public DbSet<GaleriAlbum> GaleriAlbumleri { get; set; }
+    public DbSet<GaleriFotograf> GaleriFotograflari { get; set; }
 
     public virtual DbSet<HaberKategorileri> HaberKategorileris { get; set; }
 
@@ -145,24 +146,7 @@ public partial class DernekYonetimContext : DbContext
                 .HasConstraintName("FK_EgitimMeslek_Uyeler");
         });
 
-        modelBuilder.Entity<Galeri>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Galeri__3214EC272F64344B");
-
-            entity.ToTable("Galeri");
-
-            entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.Baslik)
-                .HasMaxLength(150)
-                .IsUnicode(false);
-            entity.Property(e => e.FotografYolu)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.YuklemeTarihi)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-        });
-
+        
         modelBuilder.Entity<HaberKategorileri>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__HaberKat__3214EC27DBE51158");
