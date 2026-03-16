@@ -1,26 +1,37 @@
 ﻿@using System.IO
 @using System.Text.Json
 @{
-    // --- VERİTABANI YERİNE JSON DOSYASINDAN OKUMA MANTIĞI ---
-    string jsonPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "social.json");
+    // 'Combine' hatasını önlemek için tam yol (Full Qualifier) kullanıyoruz
     string fb = "", tw = "", ig = "", ln = "", yt = "";
+
+    // HostingEnvironment üzerinden yol almak daha sağlıklıdır ancak
+    // doğrudan Directory üzerinden gideceksek şu yazım en güvenlisidir:
+    var rootPath = System.IO.Directory.GetCurrentDirectory();
+    string jsonPath = System.IO.Path.Combine(rootPath, "wwwroot", "social.json");
 
     if (System.IO.File.Exists(jsonPath))
     {
-        string jsonString = System.IO.File.ReadAllText(jsonPath);
-        var socialData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
-        if (socialData != null)
+        try
         {
-            socialData.TryGetValue("facebook", out fb);
-            socialData.TryGetValue("twitter", out tw);
-            socialData.TryGetValue("instagram", out ig);
-            socialData.TryGetValue("linkedin", out ln);
-            socialData.TryGetValue("youtube", out yt);
+            string jsonString = System.IO.File.ReadAllText(jsonPath);
+            if (!string.IsNullOrWhiteSpace(jsonString))
+            {
+                var socialData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
+                if (socialData != null)
+                {
+                    socialData.TryGetValue("facebook", out fb);
+                    socialData.TryGetValue("twitter", out tw);
+                    socialData.TryGetValue("instagram", out ig);
+                    socialData.TryGetValue("linkedin", out ln);
+                    socialData.TryGetValue("youtube", out yt);
+                }
+            }
         }
+        catch { /* Hata yönetimi */ }
     }
 }
 
-<footer class="mt-4 pb-3 pt-5" style="background-color: var(--renk-lacivert);">
+<footer class="mt-auto pb-3 pt-5" style="background-color: var(--renk-lacivert);">
     <div class="container">
         <div class="row">
             <div class="col-lg-4 mb-4">
@@ -28,12 +39,9 @@
                     <div style="width:30px; height:30px; background:var(--renk-altin); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#0a1a5c; font-size:12px; font-weight:bold;">AÖD</div>
                     <h5 class="m-0 fw-bold" style="color: var(--renk-altin);">Ankara Öğretim Derneği</h5>
                 </div>
-
                 <p style="color: #cbd5e1; line-height:1.6; font-size: 0.95rem;">
                     Eğitim meşalesini yarım asırdır gururla taşıyoruz. Amacımız, çağdaş uygarlık seviyesine ulaşmış bir Türkiye için çalışmaktır.
                 </p>
-
-                @* DB'DEN GELEN İLETİŞİM BİLGİLERİ BURADA ÇAĞRILIYOR *@
                 @await Component.InvokeAsync("FooterContact")
             </div>
 
@@ -45,13 +53,11 @@
                             <li class="mb-2"><a href="/" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Anasayfa</a></li>
                             <li class="mb-2"><a href="/Dernek/Hakkinda/tarihce" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Hakkımızda</a></li>
                             <li class="mb-2"><a href="/Dernek/Hakkinda/yonetim-kurulu" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Yönetim Kurulu</a></li>
-                            <li class="mb-2"><a href="/Dernek/Hakkinda/tuzuk" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Tüzük</a></li>
                         </ul>
                     </div>
                     <div class="col-6">
                         <ul class="list-unstyled footer-links">
                             <li class="mb-2"><a href="/Galeri" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Galeri</a></li>
-                            <li class="mb-2"><a href="/Kayiplar/Index" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Kaybettiklerimiz</a></li>
                             <li class="mb-2"><a href="/Haberler/Index" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> Haberler</a></li>
                             <li class="mb-2"><a href="/Iletisim/Index" class="text-decoration-none hover-gold" style="color: #cbd5e1;"><i class="fas fa-angle-right me-1 text-warning small"></i> İletişim</a></li>
                         </ul>
@@ -61,7 +67,6 @@
 
             <div class="col-lg-4 mb-4">
                 <h5 class="fw-bold mb-3" style="color: var(--renk-altin);">Bizi Takip Edin</h5>
-
                 <div class="social-icons d-flex flex-wrap gap-2">
                     @if (!string.IsNullOrWhiteSpace(fb))
                     {
@@ -87,7 +92,7 @@
 
                 @if (Context.Session.GetInt32("AdminID") != null)
                 {
-                    <button class="btn btn-sm btn-outline-warning mt-3 fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#socialSettingsModal">
+                    <button class="btn btn-sm btn-outline-warning mt-4 fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#socialSettingsModal">
                         <i class="fas fa-cog me-1"></i> Sosyal Medya Ayarları
                     </button>
                 }
@@ -97,12 +102,12 @@
         <div class="copyright pt-3 mt-2 border-top border-secondary">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    <span class="small" style="color: #94a3b8;">&copy; @DateTime.Now.Year Ankara Öğretim Derneği. Tüm hakları saklıdır.</span>
+                    <span class="small" style="color: #94a3b8;">&copy; @DateTime.Now.Year Ankara Öğretim Derneği.</span>
                 </div>
                 <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
                     <a href="/Dernek/Hakkinda/cerez-politikasi" class="text-decoration-none small hover-gold" style="color: #94a3b8;">Çerez Politikası</a>
                     <span class="mx-2" style="color: #94a3b8;">|</span>
-                    <a href="#" class="text-decoration-none small hover-gold" style="color: #94a3b8;">Gizlilik ve KVKK</a>
+                    <a href="#" class="text-decoration-none small hover-gold" style="color: #94a3b8;">KVKK</a>
                 </div>
             </div>
         </div>
@@ -154,6 +159,24 @@
 }
 
 <style>
+    /* Sticky Footer için zorunlu ayarlar */
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Ekranın tamamını kapla */
+    }
+
+    /* Eğer sayfa içeriği bir 'main' veya 'div' içindeyse ona flex-grow veriyoruz */
+    main, .main-content {
+        flex: 1 0 auto;
+    }
+
+    /* Görsel İyileştirmeler */
     .hover-gold {
         transition: color 0.3s ease;
     }
@@ -172,12 +195,13 @@
         background-color: rgba(255, 255, 255, 0.1);
         color: #cbd5e1;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
         .social-btn:hover {
             background-color: var(--renk-altin);
             color: #0a1a5c;
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 </style>

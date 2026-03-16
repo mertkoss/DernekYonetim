@@ -6,52 +6,50 @@
     <title>@ViewData["Title"] - Dernek Yönetim</title>
 
     <link rel="icon" type="image/x-icon" href="~/img/favicon.ico" />
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
     <link rel="stylesheet" href="~/css/hakkinda.css" asp-append-version="true" />
-
     <link href="~/css/menu.css" rel="stylesheet" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
+
+    <style>
+        html, body {
+            height: 100%;
+        }
+    </style>
 </head>
-<body id="page-top">
+@* 1. ADIM: body etiketine sınıfları ekledik *@
+<body id="page-top" class="d-flex flex-column min-vh-100">
 
     @await Html.PartialAsync("_Navbar")
 
-    @RenderBody()
+    <main class="flex-grow-1">
+        @RenderBody()
+    </main>
 
     @await Html.PartialAsync("_Footer")
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const savedIcon = localStorage.getItem('userProfileIcon') || 'fa-user-circle';
+            const navIcon = document.getElementById('navProfileIcon');
+            if (navIcon) {
+                navIcon.className = `fas ${savedIcon} fs-5 me-1 text-warning align-middle`;
+            }
+            const dropIcon = document.getElementById('dropdownProfileIcon');
+            if (dropIcon) {
+                dropIcon.className = `fas ${savedIcon} fa-2x text-muted mb-2`;
+            }
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // LocalStorage'dan ikonu al, eğer yoksa varsayılan olarak 'fa-user-circle' yap
-        const savedIcon = localStorage.getItem('userProfileIcon') || 'fa-user-circle';
-
-        // Navbar'daki ismin yanındaki küçük ikonu bul ve değiştir
-        const navIcon = document.getElementById('navProfileIcon');
-        if (navIcon) {
-            navIcon.className = `fas ${savedIcon} fs-5 me-1 text-warning align-middle`;
-        }
-
-        // Dropdown içindeki büyük ikonu bul ve değiştir
-        const dropIcon = document.getElementById('dropdownProfileIcon');
-        if (dropIcon) {
-            dropIcon.className = `fas ${savedIcon} fa-2x text-muted mb-2`;
-        }
-    });
-</script>
