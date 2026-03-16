@@ -189,19 +189,18 @@
     }
 
     function sayfaDegistir(event, url) {
-        event.preventDefault(); // Linkin normal tıklama (sayfa yenileme) davranışını engelle
+        event.preventDefault(); 
 
         const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
-        sonuclarAlani.style.opacity = '0.5'; // Yükleniyor hissi ver
+        sonuclarAlani.style.opacity = '0.5'; 
 
         fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
         .then(response => response.text())
         .then(html => {
             sonuclarAlani.innerHTML = html;
             sonuclarAlani.style.opacity = '1';
-            window.history.pushState({}, '', url); // URL çubuğunu güncelle
+            window.history.pushState({}, '', url); elle
 
-            // Yeni gelen listede sayfanın üstüne (arama çubuğuna) doğru kaydır
             document.querySelector('.search-bar-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
         })
         .catch(error => {
