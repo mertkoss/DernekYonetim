@@ -44,9 +44,11 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <form action="/Dernek/BolumGuncelle" method="post">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="Id" value="@Model.About?.Id" />
                     <input type="hidden" name="Slug" value="@Model.About?.Slug" />
                     <input type="hidden" name="Aktif" value="true" />
+                    <input type="hidden" name="Sira" value="@Model.About?.Sira" />
 
                     <div class="modal-header text-white border-0" style="background-color: #0a1a5c;">
                         <h5 class="modal-title fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>@Model.About?.Baslik - İçeriği Düzenle</h5>
@@ -135,7 +137,6 @@
     }
 
     /* 4. EDİTORYAL İÇERİK (CKEDITOR ÇIKTISI) DÜZENLEMELERİ */
-    /* Editörden gelen metinlerin sayfayı bozmaması için kurallar */
     .editorial-content {
         font-family: 'Inter', sans-serif;
         font-size: 1.15rem;
@@ -149,14 +150,13 @@
         }
 
         .editorial-content img {
-            max-width: 100% !important; /* Büyük resimlerin mobilde taşmasını engeller */
+            max-width: 100% !important;
             height: auto !important;
             border-radius: 8px;
             margin: 1.5rem 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        /* Editörden gelen H2, H3, H4 Başlıkları */
         .editorial-content h1, .editorial-content h2, .editorial-content h3, .editorial-content h4 {
             font-family: 'Playfair Display', serif;
             color: var(--renk-lacivert);
@@ -177,7 +177,6 @@
             padding-left: 15px;
         }
 
-        /* Editör Listeleri */
         .editorial-content ul {
             list-style-type: none;
             padding-left: 0;
@@ -191,7 +190,7 @@
             }
 
                 .editorial-content ul li::before {
-                    content: '\f058'; /* FontAwesome Check Circle */
+                    content: '\f058';
                     font-family: "Font Awesome 6 Free";
                     font-weight: 900;
                     color: var(--renk-altin);
@@ -200,7 +199,6 @@
                     top: 2px;
                 }
 
-        /* Editör Tabloları */
         .editorial-content table {
             width: 100% !important;
             margin-bottom: 2rem;
@@ -214,25 +212,22 @@
 
     /* Mobil Uyum */
     @@media (max-width: 768px) {
-        .about-hero-section
+        .about-hero-section {
+            padding-top: 120px;
+            padding-bottom: 80px;
+        }
 
-    {
-        padding-top: 120px;
-        padding-bottom: 80px;
-    }
+        .about-page-title {
+            font-size: 2.2rem;
+        }
 
-    .about-page-title {
-        font-size: 2.2rem;
-    }
+        .about-content-section {
+            margin-top: -40px;
+        }
 
-    .about-content-section {
-        margin-top: -40px;
-    }
-
-    .content-card {
-        padding: 20px !important;
-    }
-
+        .content-card {
+            padding: 20px !important;
+        }
     }
 </style>
 
@@ -242,7 +237,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
-            // Kartı aşağıdan yukarı zarifçe getiren Fade-in efekti
+            // Kart animasyonu
             const content = document.querySelector(".content-card");
             if (content) {
                 content.style.opacity = 0;
@@ -254,25 +249,16 @@
                 }, 100);
             }
 
-            // CKEditor'ü başlat ve Dosya Yükleme rotasını tanımla
+            // 3. DÜZELTME: Karışan JS kodları temizlendi, en kararlı yöntem bırakıldı
             if (document.getElementById('editor')) {
-                CKEDITOR.replace('editor', {
+                var editor = CKEDITOR.replace('editor', {
                     height: 400,
                     versionCheck: false,
                     uiColor: '#f8fafc',
-
-                    // BİLGİSAYARDAN RESİM YÜKLEME AYARI
                     filebrowserUploadUrl: '/Dernek/ResimYukle',
                     filebrowserUploadMethod: 'xhr',
-
-                    // --- YENİ EKLENEN PROFESYONEL RÖTUŞLAR ---
-
-                    // 1. Alttaki kafa karıştıran "body p strong" HTML yol çubuğunu gizler
                     removePlugins: 'elementspath',
-
-                    // 2. Resim penceresindeki sahte "Lorem Ipsum" yazısını ufak bir ikonla değiştirir
                     image_previewText: '🖼️ Görselinizin sayfadaki duruşu burada görünecektir.',
-
                     toolbarGroups: [
                         { name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
                         { name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
@@ -283,6 +269,11 @@
                         { name: 'insert', groups: [ 'image', 'table', 'horizontalrule' ] }
                     ],
                     removeButtons: 'Subscript,Superscript'
+                });
+
+                // Siz yazdıkça textarea otomatik güncellenir
+                editor.on('change', function() {
+                    this.updateElement();
                 });
             }
         });

@@ -28,7 +28,22 @@
                         <li><a class="dropdown-item" href="/Dernek/Hakkinda/dernekler-kanunu">Dernekler Kanunu</a></li>
                         <li><a class="dropdown-item" href="/Dernek/Hakkinda/dernekler-yonetmeligi">Dernekler Yönetmeliği</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/Aidatlar/Index">Yıllık Aidatlarımız</a></li>
+
+                        @if (Context.Session.GetInt32("AdminID") != null)
+                        {
+                            <li>
+                                <a class="dropdown-item fw-bold text-primary" href="/Aidatlar/Index">
+                                    <i class="fas fa-cog me-1"></i> Aidat Yönetimi (Admin)
+                                </a>
+                            </li>
+                        }
+
+                        <li>
+                            <a class="dropdown-item" href="/Dernek/Hakkinda/aidatlar">
+                                Yıllık Aidatlarımız
+                            </a>
+                        </li>
+
                         <li><a class="dropdown-item" href="/Dernek/Hakkinda/banka-hesaplari">Banka Hesapları</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/Dernek/Hakkinda/uyeler-aydinlatma">Üyeler İçin Aydınlatma Metni</a></li>
