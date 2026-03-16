@@ -187,4 +187,26 @@
             });
             </text>
     }
+
+    function sayfaDegistir(event, url) {
+        event.preventDefault(); // Linkin normal tıklama (sayfa yenileme) davranışını engelle
+
+        const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
+        sonuclarAlani.style.opacity = '0.5'; // Yükleniyor hissi ver
+
+        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(response => response.text())
+        .then(html => {
+            sonuclarAlani.innerHTML = html;
+            sonuclarAlani.style.opacity = '1';
+            window.history.pushState({}, '', url); // URL çubuğunu güncelle
+
+            // Yeni gelen listede sayfanın üstüne (arama çubuğuna) doğru kaydır
+            document.querySelector('.search-bar-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        })
+        .catch(error => {
+            console.error("Sayfa değiştirme hatası:", error);
+            sonuclarAlani.style.opacity = '1';
+        });
+    }
 </script>

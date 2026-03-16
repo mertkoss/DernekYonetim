@@ -77,8 +77,11 @@
         <div class="col-12">
             <nav aria-label="Sayfa Gezinmesi">
                 <ul class="pagination justify-content-center">
+
                     <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
-                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white" href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
+                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                           href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi"
+                           onclick="sayfaDegistir(event, this.href)">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     </li>
@@ -86,17 +89,22 @@
                     @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
                     {
                         <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
-                            <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")" href="/Galeri/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
+                            <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")"
+                               href="/Galeri/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi"
+                               onclick="sayfaDegistir(event, this.href)">
                                 @i
                             </a>
                         </li>
                     }
 
                     <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
-                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white" href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
+                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white"
+                           href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi"
+                           onclick="sayfaDegistir(event, this.href)">
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>
+
                 </ul>
             </nav>
         </div>
