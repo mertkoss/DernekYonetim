@@ -12,8 +12,8 @@
                 <i class="fas fa-arrow-left me-2"></i>Albümlere Dön
             </a>
 
-            <div class="row bg-white p-4 rounded-4 shadow-sm border-start border-warning border-5 position-relative">
-                <div class="col-md-9">
+            <div class="bg-white p-4 rounded-4 shadow-sm border-start border-warning border-5 position-relative d-flex flex-column flex-md-row justify-content-between align-items-start">
+                <div class="flex-grow-1 pe-md-4">
                     <h2 class="text-uppercase mb-2 text-primary-dark fw-bold">@Model.Baslik</h2>
 
                     @if (!string.IsNullOrEmpty(Model.Aciklama))
@@ -27,14 +27,15 @@
                         </div>
                     }
                 </div>
-                <div class="col-md-3 text-md-end mt-3 mt-md-0 d-flex align-items-center justify-content-md-end">
-                    @if (Context.Session.GetInt32("AdminID") != null)
-                    {
+
+                @if (Context.Session.GetInt32("AdminID") != null)
+                {
+                    <div class="mt-5 mt-md-0 flex-shrink-0">
                         <button class="btn btn-gold btn-lg rounded-pill shadow" data-bs-toggle="modal" data-bs-target="#fotoEkleModal">
                             <i class="fas fa-upload me-2"></i>Fotoğraf Yükle
                         </button>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         </div>
 
@@ -120,7 +121,7 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="AlbumId" value="@Model.Id" />
                     <div class="modal-header text-white border-0" style="background-color: #0d2b4d;">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-cloud-upload-alt text-warning me-2"></i>Çoklu Fotoğraf Yükle</h5>
+                        <h5 class="modal-title fw-bold"><i class="fas fa-cloud-upload-alt text-warning me-2"></i>Fotoğrafları Yükle</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body bg-light text-center py-4">
@@ -128,7 +129,7 @@
                         <input type="file" name="Fotograflar" class="form-control border-0 shadow-sm" required accept="image/*" multiple>
                     </div>
                     <div class="modal-footer border-0 bg-light">
-                        <button type="submit" class="btn btn-gold rounded-pill px-4">Toplu Yükle</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-4">Yükle</button>
                     </div>
                 </form>
             </div>

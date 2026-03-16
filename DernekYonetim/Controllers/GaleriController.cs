@@ -39,6 +39,13 @@ public class GaleriController : Controller
         ViewBag.MevcutSayfa = sayfa; ViewBag.ToplamSayfa = toplamSayfa;
         ViewBag.AramaKelimesi = arama; ViewBag.ToplamKayit = toplamKayit;
 
+        // EĞER İSTEK AJAX (Canlı Arama) İLE GELDİYSE SADECE PARTIAL DÖNDÜR
+        if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return PartialView("_AlbumListesiPartial", model);
+        }
+
+        // NORMAL SAYFA YÜKLEMESİYSE TÜM SAYFAYI DÖNDÜR
         return View(model);
     }
 

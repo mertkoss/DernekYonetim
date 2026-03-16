@@ -1,0 +1,135 @@
+﻿@model DernekYonetim.Models.HomeViewModel
+
+@if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi))
+{
+    <div class="text-center mb-4 text-muted small">
+        <strong>"@ViewBag.AramaKelimesi"</strong> için @ViewBag.ToplamKayit albüm bulundu.
+        <a href="#" onclick="document.getElementById('canliAramaKutusu').value=''; document.getElementById('canliAramaKutusu').dispatchEvent(new Event('input')); return false;" class="text-decoration-none ms-2 text-primary-dark fw-bold"><i class="fas fa-times me-1 text-danger"></i>Temizle</a>
+    </div>
+}
+
+<div class="row g-4 mt-2">
+    @if (Model.GaleriAlbumleri != null && Model.GaleriAlbumleri.Any())
+    {
+        foreach (var album in Model.GaleriAlbumleri)
+        {
+            <div class="col-lg-4 col-md-6">
+                <a href="/Galeri/Detay/@album.Id" class="text-decoration-none">
+                    <div class="card h-100 shadow-sm border-0 gallery-folder-card position-relative">
+
+                        @if (Context.Session.GetInt32("AdminID") != null)
+                        {
+                            <div class="admin-controls position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                                <button class="btn btn-light btn-sm shadow rounded-circle me-1" title="Düzenle" data-id="@album.Id" data-baslik="@album.Baslik" data-aciklama="@album.Aciklama" onclick="event.preventDefault(); event.stopPropagation(); editAlbum(this);">
+                                    <i class="fas fa-edit text-warning"></i>
+                                </button>
+
+                                <form action="/Galeri/AlbumSil" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@album.Id" />
+                                    <button type="button" class="btn btn-light btn-sm shadow rounded-circle" title="Albümü Sil" onclick="event.preventDefault(); event.stopPropagation(); if(confirm('Bu albümü ve içindeki TÜM fotoğrafları silmek istediğinize emin misiniz?')) { this.closest('form').submit(); }">
+                                        <i class="fas fa-trash-alt text-danger"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+
+                        <div class="folder-img-container">
+                            @if (!string.IsNullOrEmpty(album.KapakFotografYolu))
+                            {
+                                <img src="@album.KapakFotografYolu" class="card-img-top" alt="@album.Baslik" style="height:100%; width:100%; object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center bg-secondary text-white" style="height:100%;">
+                                    <i class="fas fa-folder-open fa-4x opacity-50"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-body bg-white border-bottom border-warning border-3">
+                            <h5 class="card-title fw-bold text-primary-dark mb-2">
+                                <i class="far fa-folder-open text-warning me-2"></i>@album.Baslik
+                            </h5>
+                            <p class="card-text text-muted small gallery-desc mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">@album.Aciklama</p>
+                        </div>
+                        <div class="card-footer bg-light border-0 py-2 d-flex justify-content-between align-items-center">
+                            <small class="text-muted fw-bold"><i class="far fa-calendar-alt text-warning me-2"></i> @album.OlusturulmaTarihi.ToString("dd.MM.yyyy")</small>
+                            <small class="text-primary-dark fw-bold"><i class="fas fa-images me-1"></i> @album.Fotograflar.Count</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-folder-open fa-4x text-muted opacity-50 mb-3"></i>
+            <h5 class="text-primary-dark mt-3">Aradığınız kriterlere uygun albüm bulunamadı.</h5>
+        </div>
+    }
+</div>
+
+@if (ViewBag.ToplamSayfa > 1)
+{
+    <div class="row mt-5">
+        <div class="col-12">
+            <nav aria-label="Sayfa Gezinmesi">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(ViewBag.MevcutSayfa == 1 ? "disabled" : "")">
+                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white" href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa - 1)&arama=@ViewBag.AramaKelimesi">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @for (int i = 1; i <= ViewBag.ToplamSayfa; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.MevcutSayfa ? "active" : "")">
+                            <a class="page-link shadow-sm rounded-circle mx-1 border-0 @(i == ViewBag.MevcutSayfa ? "bg-warning text-dark fw-bold" : "bg-white text-dark")" href="/Galeri/Index?sayfa=@i&arama=@ViewBag.AramaKelimesi">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    <li class="page-item @(ViewBag.MevcutSayfa == ViewBag.ToplamSayfa ? "disabled" : "")">
+                        <a class="page-link shadow-sm rounded-circle mx-1 text-dark border-0 bg-white" href="/Galeri/Index?sayfa=@(ViewBag.MevcutSayfa + 1)&arama=@ViewBag.AramaKelimesi">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+}
+
+<style>
+    .gallery-folder-card {
+        transition: all 0.4s ease;
+        border-radius: 12px;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+        .gallery-folder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(13, 43, 77, 0.15) !important;
+        }
+
+    .folder-img-container {
+        position: relative;
+        border-radius: 0 12px 0 0;
+        overflow: hidden;
+        height: 220px;
+        background-color: #e9ecef;
+    }
+
+    .admin-controls {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gallery-folder-card:hover .admin-controls {
+        opacity: 1;
+    }
+</style>
