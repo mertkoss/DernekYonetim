@@ -1,4 +1,6 @@
-﻿<nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+﻿@using DernekYonetim.Models
+@inject DernekYonetimContext DbContext
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom">
     <div class="container">
         <a class="navbar-brand" href="/">
             <img src="~/lib/img/logos/logo.jpeg" alt="logo" style="height:60px; margin-right:10px;" />
@@ -56,7 +58,20 @@
 
                 <li class="nav-item"><a class="nav-link" href="/Galeri">Galeri</a></li>
                 <li class="nav-item"><a class="nav-link" href="/Kayiplar/Index">Kaybettiklerimiz</a></li>
-                <li class="nav-item"><a class="nav-link" href="/Haberler/Index">Haberler</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="haberlerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Haberler
+                    </a>
+                    <ul class="dropdown-menu shadow border-0" aria-labelledby="haberlerDropdown">
+                        <li><a class="dropdown-item fw-bold" href="/Haberler">Tüm Haberler</a></li>
+                        <li><hr class="dropdown-divider"></li>
+
+                        @foreach (var kat in DbContext.HaberKategorileris.ToList())
+                        {
+                            <li><a class="dropdown-item" href="/Haberler/Kategori/@kat.Id">@kat.KategoriAdi</a></li>
+                        }
+                    </ul>
+                </li>
                 <li class="nav-item"><a class="nav-link" href="/Iletisim/Index">İletişim</a></li>
 
                 @if (Context.Session.GetInt32("AdminID") != null)
@@ -110,7 +125,6 @@
                 }
                 else
                 {
-                    // --- GİRİŞ YAPILMAMIŞ HALİ ---
                     <li class="nav-item ms-lg-2">
                         <a class="nav-link btn btn-outline-warning rounded-pill px-4 text-dark fw-bold" href="/Auth/Login">
                             <i class="fa fa-user me-1"></i>

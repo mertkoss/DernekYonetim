@@ -3,203 +3,207 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DernekYonetim.Models;
 using System.IO;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-public class HaberlerController : Controller
+namespace DernekYonetim.Controllers
 {
-    private readonly DernekYonetimContext _context;
-    private readonly IWebHostEnvironment _hostEnvironment;
-
-    public HaberlerController(DernekYonetimContext context, IWebHostEnvironment hostEnvironment)
+    public class HaberlerController : Controller
     {
-        _context = context;
-        _hostEnvironment = hostEnvironment;
-    }
+        private readonly DernekYonetimContext _context;
+        private readonly IWebHostEnvironment _env;
 
-    public async Task<IActionResult> Index(string arama, int? kategoriId, int sayfa = 1)
-    {
-        int sayfaBoyutu = 5;
-        var query = _context.Haberlers.Include(h => h.Kategori).AsQueryable();
-
-        if (!string.IsNullOrEmpty(arama)) { query = query.Where(x => x.Baslik.Contains(arama)); }
-        if (kategoriId.HasValue && kategoriId > 0) { query = query.Where(x => x.KategoriId == kategoriId); }
-
-        var toplamKayit = await query.CountAsync();
-        var toplamSayfa = (int)Math.Ceiling(toplamKayit / (double)sayfaBoyutu);
-
-        var liste = await query.OrderByDescending(x => x.YayimTarihi)
-                               .Skip((sayfa - 1) * sayfaBoyutu)
-                               .Take(sayfaBoyutu)
-                               .ToListAsync();
-
-        bool aramaYok = string.IsNullOrEmpty(arama) && !kategoriId.HasValue && sayfa == 1;
-        if (aramaYok)
+        public HaberlerController(DernekYonetimContext context, IWebHostEnvironment env)
         {
-            var sliderHaberler = await _context.Haberlers.Include(h => h.Kategori)
-                                            .Where(x => x.SlayttaGoster == true)
-                                            .OrderByDescending(x => x.YayimTarihi)
-                                            .Take(3).ToListAsync();
-
-            if (!sliderHaberler.Any())
-            {
-                sliderHaberler = await _context.Haberlers.Include(h => h.Kategori)
-                                            .OrderByDescending(x => x.YayimTarihi)
-                                            .Take(3).ToListAsync();
-            }
-            ViewBag.SliderHaberler = sliderHaberler;
-        }
-        else { ViewBag.SliderHaberler = new List<Haberler>(); }
-
-        var kategoriler = await _context.HaberKategorileris.ToListAsync();
-        ViewBag.Kategoriler = kategoriler;
-        ViewBag.KategoriListesi = new SelectList(kategoriler, "Id", "KategoriAdi");
-
-        ViewBag.MevcutSayfa = sayfa;
-        ViewBag.ToplamSayfa = toplamSayfa;
-        ViewBag.AramaKelimesi = arama;
-        ViewBag.SeciliKategori = kategoriId;
-        ViewBag.ToplamKayit = toplamKayit;
-        ViewBag.AramaYok = aramaYok;
-
-        // AJAX ILE GELDİYSE PARTIAL VIEW DÖNDÜR
-        if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-        {
-            return PartialView("_HaberListesiPartial", liste);
+            _context = context;
+            _env = env;
         }
 
-        return View(liste);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> HaberKaydet(Haberler haber, IFormFile? Fotograf)
-    {
-        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
-
-        try
+        // İsim yerine ID kullanıyoruz, böylece Türkçe karakter sorunu tamamen ortadan kalkıyor
+        [Route("Haberler")]
+        [Route("Haberler/Kategori/{kategoriId:int}")]
+        public async Task<IActionResult> Index(int? kategoriId, string arama, int sayfa = 1)
         {
-            if (string.IsNullOrWhiteSpace(haber.Baslik) || string.IsNullOrWhiteSpace(haber.Ozet))
-            {
-                TempData["Hata"] = "Başlık ve Özet alanları boş bırakılamaz."; return RedirectToAction("Index");
-            }
-            if (haber.KategoriId == null || haber.KategoriId <= 0)
-            {
-                TempData["Hata"] = "Lütfen geçerli bir kategori seçiniz."; return RedirectToAction("Index");
-            }
-            if (haber.Baslik.Length > 150) { TempData["Hata"] = "Haber başlığı 150 karakterden uzun olamaz."; return RedirectToAction("Index"); }
-            if (haber.Ozet.Length > 255) { TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz."; return RedirectToAction("Index"); }
+            int pageSize = 6;
+            var sorgu = _context.Haberlers.Include(h => h.Kategori).AsQueryable();
 
-            if (Fotograf != null && Fotograf.Length > 0)
+            // 1. Arama Durumu
+            bool isAramaYapildi = !string.IsNullOrEmpty(arama);
+            if (isAramaYapildi)
             {
-                if (Fotograf.Length > 3 * 1024 * 1024) { TempData["Hata"] = "Yüklediğiniz fotoğrafın boyutu 3 MB'ı geçemez."; return RedirectToAction("Index"); }
-                var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-                var uzanti = Path.GetExtension(Fotograf.FileName).ToLowerInvariant();
-                if (!izinVerilenUzantilar.Contains(uzanti)) { TempData["Hata"] = "Sadece .jpg, .jpeg, .png veya .webp formatında görsel yükleyebilirsiniz."; return RedirectToAction("Index"); }
-
-                string dosyaAdi = Guid.NewGuid().ToString() + uzanti;
-                string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler");
-                if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
-                string tamYol = Path.Combine(yol, dosyaAdi);
-                using (var stream = new FileStream(tamYol, FileMode.Create)) { await Fotograf.CopyToAsync(stream); }
-                haber.FotografYolu = "/img/haberler/" + dosyaAdi;
+                sorgu = sorgu.Where(h => h.Baslik.Contains(arama) || h.Ozet.Contains(arama));
+                ViewBag.AramaYok = false;
+            }
+            else
+            {
+                ViewBag.AramaYok = true;
             }
 
-            haber.YayimTarihi = DateTime.Now;
-            if (haber.BitisTarihi == null) haber.BitisTarihi = DateTime.Now.AddMonths(1);
-
-            _context.Haberlers.Add(haber);
-            await _context.SaveChangesAsync();
-            TempData["Basari"] = "Haber başarıyla yayınlandı.";
-            return RedirectToAction("Index");
-        }
-        catch (Exception ex)
-        {
-            TempData["Hata"] = "Haber kaydedilirken sistemsel bir sorun oluştu: " + ex.Message;
-            return RedirectToAction("Index");
-        }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> HaberGuncelle(Haberler gelenHaber, IFormFile? Fotograf)
-    {
-        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
-
-        try
-        {
-            if (string.IsNullOrWhiteSpace(gelenHaber.Baslik) || string.IsNullOrWhiteSpace(gelenHaber.Ozet)) { TempData["Hata"] = "Başlık ve Özet alanları boş bırakılamaz."; return RedirectToAction("Index"); }
-            if (gelenHaber.Baslik.Length > 150) { TempData["Hata"] = "Haber başlığı 150 karakterden uzun olamaz."; return RedirectToAction("Index"); }
-            if (gelenHaber.Ozet.Length > 255) { TempData["Hata"] = "Haber özeti 255 karakterden uzun olamaz."; return RedirectToAction("Index"); }
-
-            var mevcutHaber = await _context.Haberlers.FindAsync(gelenHaber.Id);
-            if (mevcutHaber == null) { TempData["Hata"] = "Güncellenmek istenen haber bulunamadı."; return RedirectToAction("Index"); }
-
-            mevcutHaber.Baslik = gelenHaber.Baslik;
-            mevcutHaber.Ozet = gelenHaber.Ozet;
-            mevcutHaber.Icerik = gelenHaber.Icerik;
-            mevcutHaber.KategoriId = gelenHaber.KategoriId;
-            mevcutHaber.SlayttaGoster = gelenHaber.SlayttaGoster;
-
-            if (Fotograf != null && Fotograf.Length > 0)
+            // 2. Kategori Durumu ve Başlık
+            string sayfaBasligi = "Haberler ve Duyurular";
+            if (kategoriId.HasValue)
             {
-                if (Fotograf.Length > 3 * 1024 * 1024) { TempData["Hata"] = "Yüklediğiniz fotoğrafın boyutu 3 MB'ı geçemez."; return RedirectToAction("Index"); }
-                var izinVerilenUzantilar = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-                var uzanti = Path.GetExtension(Fotograf.FileName).ToLowerInvariant();
-                if (!izinVerilenUzantilar.Contains(uzanti)) { TempData["Hata"] = "Sadece .jpg, .jpeg, .png veya .webp formatında görsel yükleyebilirsiniz."; return RedirectToAction("Index"); }
-
-                if (!string.IsNullOrEmpty(mevcutHaber.FotografYolu))
+                sorgu = sorgu.Where(h => h.KategoriId == kategoriId.Value);
+                var seciliKategori = await _context.HaberKategorileris.FindAsync(kategoriId.Value);
+                if (seciliKategori != null)
                 {
-                    var eskiYol = Path.Combine(_hostEnvironment.WebRootPath, mevcutHaber.FotografYolu.TrimStart('/'));
-                    if (System.IO.File.Exists(eskiYol)) System.IO.File.Delete(eskiYol);
+                    sayfaBasligi = seciliKategori.KategoriAdi; // Sayfa başlığı "Basın" vs. olacak
+                }
+            }
+
+            // Eğer sorgu URL içindeki Query String (?arama=... veya ?kategoriId=...) ile yapıldıysa filtre yazısını göster.
+            // Ama navbar'dan Route (/Haberler/Kategori/1) ile tıklandıysa GÖSTERME!
+            ViewBag.FiltreUygulandi = isAramaYapildi || HttpContext.Request.Query.ContainsKey("kategoriId");
+            ViewBag.SayfaBasligi = sayfaBasligi;
+
+            // --- 3. SLIDER İÇERİĞİ ---
+            var sliderSorgusu = _context.Haberlers.Include(h => h.Kategori).Where(h => h.SlayttaGoster == true);
+            if (kategoriId.HasValue)
+            {
+                sliderSorgusu = sliderSorgusu.Where(h => h.KategoriId == kategoriId.Value);
+            }
+
+            ViewBag.SliderHaberler = await sliderSorgusu
+                .OrderByDescending(h => h.YayimTarihi)
+                .Take(3)
+                .ToListAsync();
+
+            // --- 4. LİSTE İÇERİĞİ (Sayfalama) ---
+            int toplamKayit = await sorgu.CountAsync();
+            var haberListesi = await sorgu
+                .OrderByDescending(h => h.YayimTarihi)
+                .Skip((sayfa - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.AramaKelimesi = arama;
+            ViewBag.SeciliKategori = kategoriId;
+            ViewBag.ToplamKayit = toplamKayit;
+            ViewBag.MevcutSayfa = sayfa;
+            ViewBag.ToplamSayfa = (int)Math.Ceiling((double)toplamKayit / pageSize);
+
+            // Dropdown listeleri
+            var kategoriler = await _context.HaberKategorileris.ToListAsync();
+            ViewBag.Kategoriler = kategoriler;
+            ViewBag.KategoriListesi = new SelectList(kategoriler, "Id", "KategoriAdi");
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_HaberListesiPartial", haberListesi);
+            }
+
+            return View(haberListesi);
+        }
+
+        [Route("Haberler/Detay/{id}")]
+        public async Task<IActionResult> Detay(int id)
+        {
+            var haber = await _context.Haberlers
+                .Include(h => h.Kategori)
+                .FirstOrDefaultAsync(h => h.Id == id);
+
+            if (haber == null) return NotFound();
+
+            var kategoriler = await _context.HaberKategorileris.ToListAsync();
+            ViewBag.KategoriListesi = new SelectList(kategoriler, "Id", "KategoriAdi", haber.KategoriId);
+
+            return View(haber);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> HaberKaydet(Haberler model, IFormFile Fotograf)
+        {
+            if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
+
+            try
+            {
+                if (Fotograf != null && Fotograf.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
+                    string path = Path.Combine(_env.WebRootPath, "uploads/haberler", fileName);
+
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/haberler"));
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await Fotograf.CopyToAsync(stream);
+                    }
+                    model.FotografYolu = "/uploads/haberler/" + fileName;
                 }
 
-                string dosyaAdi = Guid.NewGuid().ToString() + uzanti;
-                string yol = Path.Combine(_hostEnvironment.WebRootPath, "img", "haberler");
-                // EKSİKTİ: Klasör kontrolünü buraya ekledik
-                if (!Directory.Exists(yol)) Directory.CreateDirectory(yol);
-                string tamYol = Path.Combine(yol, dosyaAdi);
+                model.YayimTarihi = DateTime.Now;
+                _context.Add(model);
+                await _context.SaveChangesAsync();
 
-                using (var stream = new FileStream(tamYol, FileMode.Create)) { await Fotograf.CopyToAsync(stream); }
-                mevcutHaber.FotografYolu = "/img/haberler/" + dosyaAdi;
+                TempData["Basari"] = "Haber başarıyla eklendi.";
             }
-
-            _context.Haberlers.Update(mevcutHaber);
-            await _context.SaveChangesAsync();
-            TempData["Basari"] = "Haber başarıyla güncellendi.";
-            return RedirectToAction("Index");
-        }
-        catch (Exception)
-        {
-            TempData["Hata"] = "Haber güncellenirken beklenmedik bir hata oluştu.";
-            return RedirectToAction("Index");
-        }
-    }
-
-    public async Task<IActionResult> Detay(int id)
-    {
-        var haber = await _context.Haberlers.Include(h => h.Kategori).FirstOrDefaultAsync(h => h.Id == id);
-        if (haber == null) return NotFound();
-        ViewBag.KategoriListesi = new SelectList(_context.HaberKategorileris.ToList(), "Id", "KategoriAdi");
-        return View(haber);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Sil(int id)
-    {
-        if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Login", "Auth");
-        var silinecekHaber = await _context.Haberlers.FindAsync(id);
-
-        if (silinecekHaber != null)
-        {
-            if (!string.IsNullOrEmpty(silinecekHaber.FotografYolu))
+            catch (Exception)
             {
-                var dosyaYolu = Path.Combine(_hostEnvironment.WebRootPath, silinecekHaber.FotografYolu.TrimStart('/'));
-                if (System.IO.File.Exists(dosyaYolu)) System.IO.File.Delete(dosyaYolu);
+                TempData["Hata"] = "Haber eklenirken bir sorun oluştu.";
             }
-            _context.Haberlers.Remove(silinecekHaber);
-            await _context.SaveChangesAsync();
-            TempData["Basari"] = "Haber başarıyla silindi.";
+
+            return RedirectToAction(nameof(Index));
         }
-        return RedirectToAction("Index");
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> HaberGuncelle(Haberler model, IFormFile Fotograf)
+        {
+            if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
+
+            var mevcutHaber = await _context.Haberlers.FindAsync(model.Id);
+            if (mevcutHaber == null) return NotFound();
+
+            try
+            {
+                mevcutHaber.Baslik = model.Baslik;
+                mevcutHaber.KategoriId = model.KategoriId;
+                mevcutHaber.Ozet = model.Ozet;
+                mevcutHaber.Icerik = model.Icerik;
+                mevcutHaber.SlayttaGoster = model.SlayttaGoster;
+
+                if (Fotograf != null && Fotograf.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(Fotograf.FileName);
+                    string path = Path.Combine(_env.WebRootPath, "uploads/haberler", fileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await Fotograf.CopyToAsync(stream);
+                    }
+                    mevcutHaber.FotografYolu = "/uploads/haberler/" + fileName;
+                }
+
+                _context.Update(mevcutHaber);
+                await _context.SaveChangesAsync();
+
+                TempData["Basari"] = "Haber başarıyla güncellendi.";
+            }
+            catch (Exception)
+            {
+                TempData["Hata"] = "Güncelleme sırasında bir hata oluştu.";
+            }
+
+            return RedirectToAction("Detay", new { id = model.Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Sil(int id)
+        {
+            if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
+
+            var haber = await _context.Haberlers.FindAsync(id);
+            if (haber != null)
+            {
+                _context.Haberlers.Remove(haber);
+                await _context.SaveChangesAsync();
+                TempData["Basari"] = "Haber başarıyla silindi.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

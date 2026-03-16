@@ -8,7 +8,7 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="section-heading text-primary-dark text-uppercase mb-0">Haberler ve Duyurular</h2>
+                <h2 class="section-heading text-primary-dark text-uppercase mb-0">@ViewBag.SayfaBasligi</h2>
                 <p class="text-muted mt-2 fs-5">Derneğimizden en güncel gelişmeler</p>
             </div>
             @if (Context.Session.GetInt32("AdminID") != null)
@@ -21,7 +21,7 @@
 
         <div class="row justify-content-center mb-5">
             <div class="col-md-12 col-lg-10">
-                <form id="filtreFormu" action="/Haberler/Index" method="get" class="d-flex flex-column flex-md-row shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border" onsubmit="return false;">
+                <form id="filtreFormu" action="/Haberler" method="get" class="d-flex flex-column flex-md-row shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border" onsubmit="return false;">
                     <div class="d-flex align-items-center ps-4 text-muted flex-grow-1">
                         <i class="fas fa-search fs-5 opacity-75 me-2"></i>
                         <input type="text" id="canliAramaKutusu" name="arama" value="@ViewBag.AramaKelimesi" class="form-control border-0 px-2 py-3 shadow-none fs-5 bg-transparent" placeholder="Haber başlığı ile ara..." style="outline: none;">
@@ -32,7 +32,7 @@
                         <option value="">Tüm Kategoriler</option>
                         @if (ViewBag.Kategoriler != null)
                         {
-                            foreach (var cat in (List<DernekYonetim.Models.HaberKategorileri>)ViewBag.Kategoriler)
+                            foreach (var cat in ViewBag.Kategoriler)
                             {
                                 if (ViewBag.SeciliKategori != null && ViewBag.SeciliKategori == cat.Id)
                                 {
@@ -395,8 +395,7 @@
         const kategori = kategoriFiltresi.value;
         sonuclarAlani.style.opacity = '0.5';
 
-        const url = `/Haberler/Index?arama=${encodeURIComponent(kelime)}&kategoriId=${encodeURIComponent(kategori)}&sayfa=${sayfaNo}`;
-
+    const url = `/Haberler?arama=${encodeURIComponent(kelime)}&kategoriId=${encodeURIComponent(kategori)}&sayfa=${sayfaNo}`;
         fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
             .then(response => response.text())
             .then(html => {
