@@ -1,12 +1,15 @@
 ﻿using DernekYonetim.Models;
+using Microsoft.AspNetCore.Authorization; // GÜVENLİK İÇİN EKLENDİ
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DernekYonetim.Controllers
 {
+    [Authorize] // BÜTÜN CONTROLLER'I GÜVENCEYE ALIR: Giriş yapmayan kimse erişemez!
     public class AidatlarController : Controller
     {
         private readonly DernekYonetimContext _context;
@@ -19,9 +22,6 @@ namespace DernekYonetim.Controllers
         // 1. LİSTELEME SAYFASI 
         public async Task<IActionResult> Index()
         {
-            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            ViewBag.GirisYapti = girisVarMi;
-
             // Veritabanından veriyi DÜMDÜZ ve TERTEMİZ bir şekilde çekiyoruz. 
             // Select ve Ternary işlemlerini burada yapmıyoruz ki Visual Studio hata ayıklayıcısı çökmesin.
             var uyelerListesi = await _context.Uyelers
@@ -68,9 +68,6 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult YeniUyeEkle(YeniUyeGirisModel model)
         {
-            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
-
             // GÜVENLİK: Boş TC veya İsim gelirse DB'yi yormadan direkt reddet
             if (string.IsNullOrWhiteSpace(model.Ad) || string.IsNullOrWhiteSpace(model.Soyad) || string.IsNullOrWhiteSpace(model.TckimlikNo))
             {
@@ -156,7 +153,7 @@ namespace DernekYonetim.Controllers
                 string hataMesaji = ex.InnerException != null ? ex.InnerException.Message.Split('\n').FirstOrDefault() : ex.Message;
 
                 // Eğer veritabanı kısıtlamasına takıldıysa (Örn: Aynı TC Kimlik numarası)
-                if (hataMesaji != null && hataMesaji.Contains("UNIQUE") || hataMesaji.Contains("Duplicate"))
+                if (hataMesaji != null && (hataMesaji.Contains("UNIQUE") || hataMesaji.Contains("Duplicate")))
                 {
                     TempData["Hata"] = "Bu TC Kimlik Numarası veya Üye No sistemde zaten kayıtlı!";
                 }
@@ -173,9 +170,6 @@ namespace DernekYonetim.Controllers
         [HttpGet]
         public IActionResult UyeGetir(int id)
         {
-            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
-
             var uye = _context.Uyelers
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
@@ -228,9 +222,6 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UyeGuncelle(YeniUyeGirisModel model, int UyeId)
         {
-            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
-
             if (UyeId <= 0 || string.IsNullOrWhiteSpace(model.Ad) || string.IsNullOrWhiteSpace(model.TckimlikNo))
             {
                 TempData["Hata"] = "Geçersiz üye bilgisi veya eksik zorunlu alanlar.";
@@ -346,9 +337,6 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UyeSil(int id)
         {
-            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            if (!girisVarMi) return Unauthorized("Bu işlemi yapmaya yetkiniz yok.");
-
             var uye = _context.Uyelers
                 .Include(u => u.EgitimMesleks)
                 .Include(u => u.DerbisKaydis)
@@ -373,9 +361,6 @@ namespace DernekYonetim.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AidatSil(int id)
         {
-            bool girisVarMi = User.Identity.IsAuthenticated || HttpContext.Session.GetInt32("AdminID") != null;
-            if (!girisVarMi) return Unauthorized();
-
             var aidat = _context.Aidatlars.Find(id);
             if (aidat != null)
             {
