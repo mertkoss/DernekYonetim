@@ -1,9 +1,10 @@
 ﻿@model IEnumerable<DernekYonetim.Models.Haberler>
 @{
     var sliderHaberler = ViewBag.SliderHaberler as List<DernekYonetim.Models.Haberler>;
+    bool aramaYapildiMi = !string.IsNullOrEmpty(ViewBag.AramaKelimesi);
 }
 
-@if (ViewBag.AramaYok == true && sliderHaberler != null && sliderHaberler.Any())
+@if (!aramaYapildiMi && sliderHaberler != null && sliderHaberler.Any())
 {
     <section class="news-hero-slider mb-5">
         <div class="container h-100">
@@ -46,11 +47,12 @@
 
 <section class="page-section bg-white" style="padding-bottom: 100px;">
     <div class="container">
-        @if (!string.IsNullOrEmpty(ViewBag.AramaKelimesi) || ViewBag.SeciliKategori != null)
+
+        @if (aramaYapildiMi)
         {
             <div class="text-center mb-5 text-muted">
-                Seçili kriterlere göre <strong>@ViewBag.ToplamKayit</strong> haber bulundu.
-                <a href="#" onclick="temizleFiltreleri()" class="text-decoration-none ms-2 text-primary-dark fw-bold"><i class="fas fa-times text-danger me-1"></i>Filtreyi Temizle</a>
+                <strong>"@ViewBag.AramaKelimesi"</strong> başlığı için <strong>@ViewBag.ToplamKayit</strong> sonuç bulundu.
+                <a href="#" onclick="temizleArama(); return false;" class="text-decoration-none ms-2 text-primary-dark fw-bold"><i class="fas fa-times text-danger me-1"></i>Aramayı Temizle</a>
             </div>
         }
 
@@ -154,7 +156,7 @@
             {
                 <div class="text-center py-5">
                     <i class="far fa-newspaper fa-4x text-muted mb-3 opacity-50"></i>
-                    <h4 class="text-muted">Bu kriterlere uygun haber bulunamadı.</h4>
+                    <h4 class="text-muted">Bu kritere uygun haber bulunamadı.</h4>
                 </div>
             }
         </div>

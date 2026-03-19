@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<DernekYonetim.Models.Haberler>
 @{
-    ViewData["Title"] = "Haber Yönetimi";
+    ViewData["Title"] = ViewBag.SayfaBasligi ?? "Haber Yönetimi";
     Layout = "_Layout";
 }
 
-<section class="bg-white" style="padding-top:120px;">
+<section class="bg-white" style="padding-top:120px; padding-bottom: 30px;">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -20,31 +20,12 @@
         </div>
 
         <div class="row justify-content-center mb-5">
-            <div class="col-md-12 col-lg-10">
-                <form id="filtreFormu" action="/Haberler" method="get" class="d-flex flex-column flex-md-row shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border" onsubmit="return false;">
+            <div class="col-md-12 col-lg-8">
+                <form action="" method="get" class="d-flex shadow-sm search-bar-wrapper rounded-pill overflow-hidden bg-white border" onsubmit="return false;">
                     <div class="d-flex align-items-center ps-4 text-muted flex-grow-1">
                         <i class="fas fa-search fs-5 opacity-75 me-2"></i>
-                        <input type="text" id="canliAramaKutusu" name="arama" value="@ViewBag.AramaKelimesi" class="form-control border-0 px-2 py-3 shadow-none fs-5 bg-transparent" placeholder="Haber başlığı ile ara..." style="outline: none;">
+                        <input type="text" id="canliAramaKutusu" name="arama" value="@ViewBag.AramaKelimesi" class="form-control border-0 px-2 py-3 shadow-none fs-5 bg-transparent" placeholder="Sadece haber başlığı ile ara..." style="outline: none;" autocomplete="off">
                     </div>
-                    <div class="border-start border-2 my-2 d-none d-md-block"></div>
-                    <div class="border-top border-2 mx-4 d-block d-md-none"></div>
-                    <select id="kategoriFiltresi" name="kategoriId" class="form-select border-0 shadow-none fs-5 bg-transparent text-primary-dark fw-bold px-4 py-3 py-md-0" style="max-width: 300px; cursor:pointer; outline:none;">
-                        <option value="">Tüm Kategoriler</option>
-                        @if (ViewBag.Kategoriler != null)
-                        {
-                            foreach (var cat in ViewBag.Kategoriler)
-                            {
-                                if (ViewBag.SeciliKategori != null && ViewBag.SeciliKategori == cat.Id)
-                                {
-                                    <option value="@cat.Id" selected>@cat.KategoriAdi</option>
-                                }
-                                else
-                                {
-                                    <option value="@cat.Id">@cat.KategoriAdi</option>
-                                }
-                            }
-                        }
-                    </select>
                 </form>
             </div>
         </div>
@@ -214,6 +195,7 @@
 
     .search-bar-wrapper {
         transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        border: 2px solid transparent !important;
     }
 
         .search-bar-wrapper:focus-within, .search-bar-wrapper:hover {
@@ -386,50 +368,44 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const aramaKutusu = document.getElementById('canliAramaKutusu');
-    const kategoriFiltresi = document.getElementById('kategoriFiltresi');
     const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
     let zamanlayici;
 
+    // AJAX ile canlı arama ve sayfalama fonksiyonu
     function sonuclariGetir(sayfaNo = 1) {
         const kelime = aramaKutusu.value;
-        const kategori = kategoriFiltresi.value;
         sonuclarAlani.style.opacity = '0.5';
 
-    const url = `/Haberler?arama=${encodeURIComponent(kelime)}&kategoriId=${encodeURIComponent(kategori)}&sayfa=${sayfaNo}`;
+        // Mevcut URL'i bozmadan (kategorideyse orada kalarak) parametreleri ekle
+        const pathname = window.location.pathname;
+        let url = `${pathname}?arama=${encodeURIComponent(kelime)}&sayfa=${sayfaNo}`;
+
         fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
             .then(response => response.text())
             .then(html => {
                 sonuclarAlani.innerHTML = html;
                 sonuclarAlani.style.opacity = '1';
                 window.history.pushState({}, '', url);
-            })
-            .catch(error => {
-                console.error("Filtreleme hatası:", error);
-                sonuclarAlani.style.opacity = '1';
             });
     }
 
+    // Yazarken tetiklenecek olay
     if(aramaKutusu) {
         aramaKutusu.addEventListener('input', function() {
             clearTimeout(zamanlayici);
-            zamanlayici = setTimeout(() => { sonuclariGetir(1); }, 400);
+            zamanlayici = setTimeout(() => { sonuclariGetir(1); }, 350); // 350ms gecikmeli canlı arama
         });
     }
 
-    if(kategoriFiltresi) {
-        kategoriFiltresi.addEventListener('change', function() {
-            sonuclariGetir(1);
-        });
-    }
-
+    // Sayfalama tıklamalarını yakalamak için
     function sayfaDegistir(sayfaNo) {
         sonuclariGetir(sayfaNo);
-        window.scrollTo({ top: 150, behavior: 'smooth' });
+        window.scrollTo({ top: 250, behavior: 'smooth' });
     }
 
-    function temizleFiltreleri() {
+    // Arama temizleme butonu
+    function temizleArama() {
         aramaKutusu.value = '';
-        kategoriFiltresi.value = '';
         sonuclariGetir(1);
     }
 
@@ -465,7 +441,7 @@
     }
 
     @if (TempData["Basari"] != null)
-     {
+    {
              <text>
              document.addEventListener('DOMContentLoaded', function() {
                  Swal.fire({
@@ -476,9 +452,9 @@
                  });
              });
              </text>
-     }
-     @if (TempData["Hata"] != null)
-     {
+    }
+    @if (TempData["Hata"] != null)
+    {
              <text>
              document.addEventListener('DOMContentLoaded', function() {
                  Swal.fire({
@@ -489,5 +465,5 @@
                  });
              });
              </text>
-     }
+    }
 </script>
