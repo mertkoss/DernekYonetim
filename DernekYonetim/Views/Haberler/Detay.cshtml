@@ -120,14 +120,14 @@
                                 <div class="d-flex justify-content-end mt-1"><small id="detayOzetSayac" class="text-muted fw-bold">0 / 255</small></div>
                             </div>
                             <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
+                                <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="6">@Model.Icerik</textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
                                 <div class="form-check form-switch mt-2">
                                     <input class="form-check-input fs-5" type="checkbox" name="SlayttaGoster" value="true" id="detaySlayttaGoster" @(Model.SlayttaGoster ? "checked" : "")>
                                     <label class="form-check-label fw-bold text-primary-dark ms-2 mt-1" for="detaySlayttaGoster">Ana Sayfa Slider'ında Göster</label>
                                 </div>
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
-                                <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="6">@Model.Icerik</textarea>
                             </div>
                         </div>
                     </div>
