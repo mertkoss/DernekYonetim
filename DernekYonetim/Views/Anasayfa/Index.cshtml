@@ -49,7 +49,6 @@
         z-index: 1;
     }
 
-    /* Yazı içeriği artık sola yapışmayacak */
     .hero-content {
         position: relative;
         z-index: 2;
@@ -83,7 +82,7 @@
 
     .hero-content h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 4.5rem; /* Biraz daha büyüttük */
+        font-size: 4.5rem;
         font-weight: 800;
         line-height: 1.1;
         margin-bottom: 20px;
@@ -96,7 +95,7 @@
         opacity: 0.9;
         margin-bottom: 35px;
         border-left: 4px solid var(--renk-altin);
-        padding-left: 20px; /* Çizgi ile yazı arasına nefes payı */
+        padding-left: 20px;
     }
 
     .btn-hero {
@@ -119,55 +118,17 @@
         box-shadow: 0 10px 20px rgba(184, 134, 11, 0.3);
     }
 
-    /* ---- YENİ PROFESYONEL İNDİKATÖR (KAPSÜL NOKTALAR) ---- */
-    .carousel-indicators {
-        margin-bottom: 2.5rem;
-        gap: 8px; /* Noktalar arası mesafe */
-    }
+    /* İNDİKATÖR (KAPSÜL NOKTALAR) */
+    .carousel-indicators { margin-bottom: 2.5rem; gap: 8px; }
+    .carousel-indicators button { width: 10px !important; height: 10px !important; border-radius: 50% !important; background-color: rgba(255, 255, 255, 0.4) !important; border: none !important; margin: 0 !important; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+    .carousel-indicators button.active { width: 35px !important; border-radius: 10px !important; background-color: var(--renk-altin) !important; }
 
-    .carousel-indicators button {
-        width: 10px !important;
-        height: 10px !important;
-        border-radius: 50% !important; /* Yuvarlak nokta */
-        background-color: rgba(255, 255, 255, 0.4) !important;
-        border: none !important;
-        margin: 0 !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .carousel-indicators button.active {
-        width: 35px !important; /* Aktif olunca uzar (kapsül) */
-        border-radius: 10px !important;
-        background-color: var(--renk-altin) !important;
-    }
-
-    /* ---- OKLARIN KONUMU DÜZELTİLDİ ---- */
-    .carousel-control-prev, .carousel-control-next {
-        width: 50px;
-        height: 50px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        top: 50%;
-        transform: translateY(-50%);
-        transition: all 0.3s ease;
-        opacity: 0;
-    }
-
-    /* Ekranın en sağına ve soluna sabitlendi */
+    /* OKLAR */
+    .carousel-control-prev, .carousel-control-next { width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; top: 50%; transform: translateY(-50%); transition: all 0.3s ease; opacity: 0; }
     .carousel-control-prev { left: 2%; }
     .carousel-control-next { right: 2%; }
-
-    .hero-section:hover .carousel-control-prev, 
-    .hero-section:hover .carousel-control-next {
-        opacity: 1;
-    }
-
-    .carousel-control-prev:hover, .carousel-control-next:hover {
-        background-color: var(--renk-altin);
-        border-color: var(--renk-altin);
-        color: var(--renk-lacivert);
-    }
+    .hero-section:hover .carousel-control-prev, .hero-section:hover .carousel-control-next { opacity: 1; }
+    .carousel-control-prev:hover, .carousel-control-next:hover { background-color: var(--renk-altin); border-color: var(--renk-altin); color: var(--renk-lacivert); }
 
     @@media (max-width: 991px) {
         .hero-content h1 { font-size: 3rem; }
@@ -176,169 +137,70 @@
     }
 
     /* İSTATİSTİK BÖLÜMÜ */
-    .stats-section {
-        background-color: var(--renk-lacivert);
-        color: white;
-        padding: 60px 0;
-    }
+    .stats-section { background-color: var(--renk-lacivert); color: white; padding: 60px 0; }
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 2.5rem; font-weight: 800; color: white; }
+    .stat-label { color: var(--renk-altin); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+    .stat-icon i { font-size: 2.5rem; color: var(--renk-altin); margin-bottom: 15px; }
 
-    .stat-item {
-        text-align: center;
-    }
+    /* EĞİTİM KURUMLARI */
+    .school-card .card-img-top { height: 250px; object-fit: cover; border-radius: 8px 8px 0 0; }
+    .school-card { border-radius: 8px; transition: all 0.3s ease-in-out; }
+    .school-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(10, 26, 92, 0.15) !important; }
+    .text-decoration-none { text-decoration: none !important; }
 
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: white;
-    }
+    /* YEPYENİ MODERN HABERLER BÖLÜMÜ */
+    .modern-news-section { background-color: #f8fafc; padding: 90px 0; }
+    .news-header-title { font-family: 'Playfair Display', serif; color: var(--renk-lacivert); font-weight: 800; font-size: 2.8rem; }
+    .btn-view-all { border: 2px solid var(--renk-altin); color: var(--renk-lacivert); font-weight: 600; border-radius: 50px; padding: 12px 30px; transition: all 0.3s; background: transparent; }
+    .btn-view-all:hover { background-color: var(--renk-altin); color: var(--renk-lacivert); box-shadow: 0 8px 15px rgba(184, 134, 11, 0.2); transform: translateY(-2px); }
 
-    .stat-label {
-        color: var(--renk-altin);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 5px;
-    }
+    /* Manşet Kartı (Sol Büyük) */
+    .featured-card { border-radius: 24px; overflow: hidden; position: relative; height: 100%; min-height: 500px; box-shadow: 0 15px 35px rgba(10, 26, 92, 0.1); display: block; }
+    .featured-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .featured-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,26,92,0.95) 0%, rgba(10,26,92,0.3) 50%, transparent 100%); transition: background 0.4s ease; }
+    .featured-card:hover .featured-img { transform: scale(1.05); }
+    .featured-card:hover .featured-overlay { background: linear-gradient(to top, rgba(10,26,92,0.95) 0%, rgba(10,26,92,0.5) 60%, transparent 100%); }
+    .featured-content { position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px; color: white; z-index: 2; }
+    .featured-badge { background: rgba(184, 134, 11, 0.85); backdrop-filter: blur(8px); color: white; padding: 8px 18px; border-radius: 50px; font-weight: 600; letter-spacing: 1px; font-size: 0.85rem; display: inline-block; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .featured-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: color 0.3s ease; }
+    .featured-card:hover .featured-title { color: var(--renk-altin); }
+    .featured-desc { opacity: 0.9; font-size: 1.05rem; line-height: 1.6; margin-bottom: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-    .stat-icon i {
-        font-size: 2.5rem;
-        color: var(--renk-altin);
-        margin-bottom: 15px;
-    }
+    /* Yan Haberler Listesi (Sağ Liste) */
+    .side-news-list { display: flex; flex-direction: column; gap: 24px; height: 100%; justify-content: space-between; }
+    .side-card { display: flex; align-items: center; background: white; border-radius: 20px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid rgba(0,0,0,0.03); text-decoration: none; }
+    .side-card:hover { transform: translateX(-10px); box-shadow: 0 15px 30px rgba(10, 26, 92, 0.08); border-color: rgba(184, 134, 11, 0.2); }
+    .side-img-box { width: 140px; height: 140px; border-radius: 16px; overflow: hidden; flex-shrink: 0; position: relative; }
+    .side-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+    .side-card:hover .side-img { transform: scale(1.1); }
+    .side-content { padding-left: 24px; flex-grow: 1; }
+    .date-badge { display: inline-flex; align-items: center; color: var(--renk-altin); font-weight: 700; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .date-badge i { margin-right: 8px; font-size: 1rem; }
+    .side-title { font-weight: 700; color: var(--renk-lacivert); font-size: 1.15rem; line-height: 1.5; transition: color 0.3s; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .side-card:hover .side-title { color: var(--renk-altin); }
+    .read-more-link { color: var(--renk-lacivert); font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; transition: all 0.3s; opacity: 0.8; }
+    .read-more-link i { transition: transform 0.3s; margin-left: 6px; font-size: 0.8rem; }
+    .side-card:hover .read-more-link { color: var(--renk-altin); opacity: 1; }
+    .side-card:hover .read-more-link i { transform: translateX(5px); }
 
-    /* Görsellerin kart içinde düzgün ve aynı boyutta durmasını sağlar */
-.school-card .card-img-top {
-    height: 250px;
-    object-fit: cover;
-    border-radius: 8px 8px 0 0;
-}
-
-/* Kartların üzerine gelindiğinde oluşan animasyon */
-.school-card {
-    border-radius: 8px;
-    transition: all 0.3s ease-in-out;
-}
-
-.school-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(10, 26, 92, 0.15) !important;
-}
-
-/* Link yazılarının mavi veya altı çizili olmasını engeller */
-.text-decoration-none {
-    text-decoration: none !important;
-}
-   
-
-   .heritage-image-wrapper {
-        width: 100%;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        /* İçerik kutusunun bunun üzerine çıkmasına yer açmak için alt marjin */
-        margin-bottom: 0; 
-    }
-
-    .heritage-img {
-        width: 100%;
-        height: auto;
-        display: block;
-        /* Tarihi havayı artırmak için CSS ile hafif siyah-beyaz ve sepya tonu (İsteğe bağlı) */
-        filter: grayscale(80%) contrast(110%);
-    }
-
-    .heritage-content-card {
-        background: white;
-        padding: 50px;
-        border-radius: 20px;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.08);
-        position: relative;
-        z-index: 10;
-        /* SİHİRLİ DOKUNUŞ: Kutuyu yukarı, fotoğrafın üzerine çeker */
-        margin-top: -100px; 
-    }
-
-    /* Özel Tarihçe Butonu Hover Efekti */
-    .btn-heritage {
-        border: 2px solid var(--renk-lacivert);
-        color: var(--renk-lacivert);
-        background-color: transparent;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .btn-heritage:hover {
-        background-color: var(--renk-altin);
-        border-color: var(--renk-altin);
-        color: #ffffff !important;
-    }
+    /* TARİHÇE */
+    .heritage-image-wrapper { width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-bottom: 0; }
+    .heritage-img { width: 100%; height: auto; display: block; filter: grayscale(80%) contrast(110%); }
+    .heritage-content-card { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.08); position: relative; z-index: 10; margin-top: -100px; }
+    .btn-heritage { border: 2px solid var(--renk-lacivert); color: var(--renk-lacivert); background-color: transparent; transition: all 0.3s ease-in-out; }
+    .btn-heritage:hover { background-color: var(--renk-altin); border-color: var(--renk-altin); color: #ffffff !important; }
     
+    @@media (max-width: 991px) {
+        .featured-card { min-height: 400px; margin-bottom: 30px; }
+        .side-card:hover { transform: translateY(-5px); } /* Mobilde sağa değil yukarı kaysın */
+    }
     @@media (max-width: 768px) {
-        .heritage-content-card {
-            margin-top: -50px;
-            padding: 30px 20px;
-        }
-    }
-
-    /* ANA SAYFA HABERLER BÖLÜMÜ ÖZEL STİLLERİ */
-    .object-fit-cover {
-        object-fit: cover;
-    }
-
-    /* Manşet Haberi Efektleri */
-    .main-featured-news {
-        min-height: 450px;
-    }
-
-    .main-news-img {
-        transition: transform 0.6s ease;
-    }
-
-    .news-gradient-overlay {
-        background: linear-gradient(to top, rgba(10, 26, 92, 0.95) 0%, rgba(10, 26, 92, 0.4) 50%, rgba(0, 0, 0, 0) 100%);
-        transition: background 0.4s ease;
-    }
-
-    .main-featured-news:hover .main-news-img {
-        transform: scale(1.05); /* Üzerine gelince resim hafifçe büyür */
-    }
-
-    .main-featured-news:hover .news-gradient-overlay {
-        background: linear-gradient(to top, rgba(10, 26, 92, 0.95) 0%, rgba(10, 26, 92, 0.6) 60%, rgba(0, 0, 0, 0) 100%);
-    }
-
-    .main-news-content h3 {
-        transition: color 0.3s;
-    }
-
-    .main-featured-news:hover .main-news-content h3 {
-        color: var(--renk-altin) !important; /* Üzerine gelince başlık sarı olur */
-    }
-
-    /* Yan Akış Haberi Efektleri */
-    .transition-all {
-        transition: all 0.3s ease;
-        border: 1px solid transparent;
-    }
-
-    .side-news-card:hover {
-        transform: translateY(-5px); /* Kart hafifçe yukarı kalkar */
-        border-color: rgba(184, 134, 11, 0.3); /* Kenarlık hafif sarımsı olur */
-        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
-    }
-
-    .side-news-img-wrapper img {
-        transition: transform 0.5s ease;
-    }
-
-    .side-news-card:hover .side-news-img-wrapper img {
-        transform: scale(1.1);
-    }
-    
-    .side-news-card h6 {
-        transition: color 0.3s;
-    }
-
-    .side-news-card:hover h6 {
-        color: var(--renk-altin) !important;
+        .heritage-content-card { margin-top: -50px; padding: 30px 20px; }
+        .news-header-title { font-size: 2.2rem; }
+        .side-card { flex-direction: column; text-align: center; }
+        .side-img-box { width: 100%; height: 200px; margin-bottom: 15px; }
+        .side-content { padding-left: 0; }
     }
 </style>
 
@@ -447,16 +309,13 @@
 </header>
 
 
-
 <section class="stats-section">
     <div class="container">
         <div class="row g-4">
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-graduation-cap"></i></div>
-
                     <div class="stat-number counter" data-count="1965">0</div>
-
                     <div class="stat-label">Kuruluş Yılı</div>
                 </div>
             </div>
@@ -464,9 +323,7 @@
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-users"></i></div>
-
                     <div class="stat-number counter" data-count="5000" data-suffix="+">0</div>
-
                     <div class="stat-label">Mezun</div>
                 </div>
             </div>
@@ -474,9 +331,7 @@
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-hand-holding-heart"></i></div>
-
                     <div class="stat-number counter" data-count="1200">0</div>
-
                     <div class="stat-label">Bursiyer</div>
                 </div>
             </div>
@@ -484,9 +339,7 @@
             <div class="col-6 col-md-3">
                 <div class="stat-item">
                     <div class="stat-icon"><i class="fa fa-eye"></i></div>
-
                     <div class="stat-number counter" data-count="@ViewBag.ZiyaretciSayisi">0</div>
-
                     <div class="stat-label">Ziyaret</div>
                 </div>
             </div>
@@ -541,79 +394,78 @@
     </div>
 </section>
 
-@* @if (Model.SonHaberler != null && Model.SonHaberler.Any())
+@if (Model.SonHaberler != null && Model.SonHaberler.Any())
 {
-    // İlk haberi "Manşet", geri kalanları (varsa) "Yan Akış" olarak ayırıyoruz
+    // İlk haberi "Manşet", geri kalanları (maksimum 3 tane) "Yan Liste" olarak ayırıyoruz.
     var mansetHaber = Model.SonHaberler.First();
-    var yanHaberler = Model.SonHaberler.Skip(1).ToList();
+    var yanHaberler = Model.SonHaberler.Skip(1).Take(3).ToList();
 
-    <section class="home-news-section bg-light" style="padding: 100px 0;">
+    <section class="modern-news-section">
         <div class="container">
             
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5 border-bottom pb-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5">
                 <div>
-                    <h6 class="text-gold-header text-uppercase fw-bold mb-2" style="color: var(--renk-altin); letter-spacing: 2px; font-size: 0.9rem;">Güncel Gelişmeler</h6>
-                    <h2 class="fw-bold mb-0 text-navy-header" style="color: var(--renk-lacivert); font-family: 'Playfair Display', serif; font-size: 2.5rem;">Haberler & Duyurular</h2>
+                    <h6 class="text-uppercase fw-bold mb-2" style="color: var(--renk-altin); letter-spacing: 2px; font-size: 0.95rem;">
+                        Derneğimizden Haberler
+                    </h6>
+                    <h2 class="news-header-title mb-0">Güncel Gelişmeler</h2>
                 </div>
-                <div class="mt-3 mt-md-0">
-                    <a href="/Haberler/Index" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold" style="border-color: var(--renk-lacivert); color: var(--renk-lacivert);">
+                <div class="mt-4 mt-md-0">
+                    <a href="/Haberler" class="btn btn-view-all text-decoration-none d-inline-flex align-items-center">
                         Tüm Arşivi Gör <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>
 
             <div class="row g-4">
+                
                 <div class="col-lg-7">
-                    <a href="/Haberler/Detay/@mansetHaber.Id" class="text-decoration-none">
-                        <div class="main-featured-news h-100 position-relative rounded-4 overflow-hidden shadow-sm">
-                            <img src="@(string.IsNullOrEmpty(mansetHaber.FotografYolu) ? "/img/default-news.jpg" : mansetHaber.FotografYolu)" alt="@mansetHaber.Baslik" class="img-fluid w-100 h-100 object-fit-cover main-news-img">
-                            
-                            <div class="news-gradient-overlay position-absolute bottom-0 start-0 w-100 h-100"></div>
-
-                            <div class="main-news-content position-absolute bottom-0 start-0 w-100 p-4 p-md-5 z-2 text-white">
-                                @if(mansetHaber.Kategori != null)
-                                {
-                                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 fs-6 shadow">@mansetHaber.Kategori.KategoriAdi</span>
-                                }
-                                <h3 class="fw-bold mb-3" style="font-family: 'Playfair Display', serif; font-size: 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
-                                    @mansetHaber.Baslik
-                                </h3>
-                                <p class="d-none d-md-block text-light mb-0" style="opacity: 0.9;">
-                                    @(mansetHaber.Ozet.Length > 120 ? mansetHaber.Ozet.Substring(0, 120) + "..." : mansetHaber.Ozet)
-                                </p>
-                            </div>
+                    <a href="/Haberler/Detay/@mansetHaber.Id" class="featured-card text-decoration-none">
+                        <img src="@(string.IsNullOrEmpty(mansetHaber.FotografYolu) ? "/img/default-news.jpg" : mansetHaber.FotografYolu)" alt="@mansetHaber.Baslik" class="featured-img">
+                        <div class="featured-overlay"></div>
+                        <div class="featured-content">
+                            @if(mansetHaber.Kategori != null)
+                            {
+                                <div class="featured-badge">
+                                    <i class="fas fa-tag me-1"></i> @mansetHaber.Kategori.KategoriAdi
+                                </div>
+                            }
+                            <h3 class="featured-title">@mansetHaber.Baslik</h3>
+                            <p class="featured-desc d-none d-md-block">@mansetHaber.Ozet</p>
                         </div>
                     </a>
                 </div>
 
-                <div class="col-lg-5">
-                    <div class="d-flex flex-column gap-4 h-100 justify-content-between">
-                        
-                        @foreach (var yanHaber in yanHaberler)
-                        {
-                            <a href="/Haberler/Detay/@yanHaber.Id" class="side-news-card text-decoration-none d-flex align-items-center bg-white rounded-4 p-3 shadow-sm transition-all">
-                                <div class="side-news-img-wrapper rounded-3 overflow-hidden flex-shrink-0" style="width: 120px; height: 120px;">
-                                    <img src="@(string.IsNullOrEmpty(yanHaber.FotografYolu) ? "/img/default-news.jpg" : yanHaber.FotografYolu)" class="w-100 h-100 object-fit-cover" alt="@yanHaber.Baslik">
-                                </div>
-                                <div class="ms-4">
-                                    <div class="text-muted small mb-1 fw-bold">
-                                        <i class="far fa-calendar-alt text-warning me-1"></i> @(yanHaber.YayimTarihi?.ToString("dd MMMM yyyy") ?? DateTime.Now.ToString("dd MMMM yyyy"))
+                @if(yanHaberler.Any())
+                {
+                    <div class="col-lg-5">
+                        <div class="side-news-list">
+                            @foreach (var yanHaber in yanHaberler)
+                            {
+                                <a href="/Haberler/Detay/@yanHaber.Id" class="side-card">
+                                    <div class="side-img-box">
+                                        <img src="@(string.IsNullOrEmpty(yanHaber.FotografYolu) ? "/img/default-news.jpg" : yanHaber.FotografYolu)" class="side-img" alt="@yanHaber.Baslik">
                                     </div>
-                                    <h6 class="fw-bold mb-2" style="color: var(--renk-lacivert); line-height: 1.4;">
-                                        @(yanHaber.Baslik.Length > 65 ? yanHaber.Baslik.Substring(0, 65) + "..." : yanHaber.Baslik)
-                                    </h6>
-                                </div>
-                            </a>
-                        }
-
+                                    <div class="side-content">
+                                        <div class="date-badge">
+                                            <i class="far fa-calendar-alt"></i> 
+                                            @(yanHaber.YayimTarihi?.ToString("dd MMM yyyy") ?? DateTime.Now.ToString("dd MMM yyyy"))
+                                        </div>
+                                        <h4 class="side-title">@yanHaber.Baslik</h4>
+                                        <span class="read-more-link">
+                                            İncele <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </div>
+                                </a>
+                            }
+                        </div>
                     </div>
-                </div>
-            </div>
+                }
 
+            </div>
         </div>
     </section>
-} *@
-
+}
 
 <section class="heritage-section pt-5 pb-5" style="background-color: var(--renk-gri);">
     <div class="container">
@@ -625,8 +477,8 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="heritage-content-card">
-                    <h6 class="text-gold-header text-uppercase fw-bold mb-3 text-center">Tarihçemiz & Hakkımızda</h6>
-                    <h2 class="text-navy-header fw-bold mb-4 text-center">
+                    <h6 class="text-gold-header text-uppercase fw-bold mb-3 text-center" style="color: var(--renk-altin)">Tarihçemiz & Hakkımızda</h6>
+                    <h2 class="text-navy-header fw-bold mb-4 text-center" style="color: var(--renk-lacivert); font-family: 'Playfair Display'">
                         @(Model?.About?.Baslik ?? "1965'ten Gelen Köklü Miras")
                     </h2>
                     
@@ -653,7 +505,6 @@
     </div>
 </section>
 
-
 @section Scripts {
     <script>
         // 1. TARAYICININ KAYDIRMA HAFIZASINI KAPAT VE EN ÜSTE ÇIK
@@ -664,10 +515,8 @@
 
         // 2. MODERN SAYAÇ ANİMASYONU
         document.addEventListener("DOMContentLoaded", function() {
-            console.log("Başarılı: Modern sayaç animasyonu başlatılıyor...");
-
             const counters = document.querySelectorAll('.counter');
-            const duration = 2000; // Animasyon süresi (2 saniye)
+            const duration = 2000; 
 
             counters.forEach(counter => {
                 const target = parseInt(counter.getAttribute('data-count')) || 0;
