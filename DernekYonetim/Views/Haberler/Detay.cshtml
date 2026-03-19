@@ -33,9 +33,9 @@
                         <div>
                             <button class="btn btn-sm btn-outline-primary-dark me-2 rounded-pill px-3"
                                     data-bs-toggle="modal" data-bs-target="#detayHaberDuzenleModal" onclick="modalAcildi()">
-                                <i class="fas fa-edit me-1"></i> Haberi Düzenle
+                                <i class="fas fa-edit me-1"></i> Haberi / Paneli Düzenle
                             </button>
-                            <form action="/Haberler/Sil" method="post" class="d-inline" onsubmit="return confirm('Bu haberi silmek istediğinize emin misiniz?');">
+                            <form action="/Haberler/Sil" method="post" class="d-inline" onsubmit="return confirm('Bunu silmek istediğinize emin misiniz?');">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@Model.Id" />
                                 <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3">
@@ -64,6 +64,33 @@
                     @Model.Icerik
                 </div>
 
+                @if (!string.IsNullOrEmpty(Model.PanelistOzgecmis) || !string.IsNullOrEmpty(Model.CvDosyaYolu))
+                {
+                    <div class="panelist-profile-card bg-light p-4 rounded-4 mt-5 mb-4 border-start border-5 border-warning shadow-sm">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white p-3 rounded-circle shadow-sm me-3 d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-user-tie fa-2x text-primary-dark"></i>
+                            </div>
+                            <h4 class="text-primary-dark fw-bold mb-0">Panelist Bilgileri</h4>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.PanelistOzgecmis))
+                        {
+                            <p class="text-muted fs-6" style="line-height: 1.7;">
+                                @Model.PanelistOzgecmis
+                            </p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.CvDosyaYolu))
+                        {
+                            <div class="mt-3 pt-3 border-top border-secondary-subtle">
+                                <a href="@Model.CvDosyaYolu" class="btn btn-outline-primary-dark rounded-pill px-4" target="_blank" download>
+                                    <i class="fas fa-file-pdf me-2 text-danger"></i> Özgeçmiş Dosyasını İndir / İncele
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
                 <div class="mt-5 pt-4 border-top border-light d-flex justify-content-between align-items-center">
                     <div class="text-muted small"><strong>Ankara Öğretim Derneği</strong> - Tüm Hakları Saklıdır</div>
                 </div>
@@ -81,7 +108,7 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="Id" value="@Model.Id" />
                     <div class="modal-header bg-warning text-dark border-0">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
+                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi / Paneli Düzenle</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4 bg-light">
@@ -122,6 +149,20 @@
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
                                 <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="6">@Model.Icerik</textarea>
+                            </div>
+
+                            <div class="col-md-12 mb-3 border-top pt-3 mt-2">
+                                <h6 class="fw-bold mb-3"><i class="fas fa-user-tie me-2"></i>Panelist Bilgileri</h6>
+                                <label class="form-label fw-bold text-primary-dark">Panelist Özgeçmişi</label>
+                                <textarea name="PanelistOzgecmis" id="detayPanelistOzgecmis" class="form-control border-0 shadow-sm mb-2" rows="3">@Model.PanelistOzgecmis</textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Yeni CV Dosyası Yükle</label>
+                                <input type="file" name="CvDosyasi" class="form-control border-0 shadow-sm" accept=".pdf,.doc,.docx" />
+                                @if (!string.IsNullOrEmpty(Model.CvDosyaYolu))
+                                {
+                                    <small class="text-success mt-2 d-block fw-bold"><i class="fas fa-check-circle me-1"></i>Sistemde yüklü bir CV bulunuyor.</small>
+                                }
                             </div>
                             <div class="col-md-12 mb-3">
                                 <div class="form-check form-switch mt-2">
@@ -223,10 +264,7 @@
              <text>
              document.addEventListener('DOMContentLoaded', function() {
                  Swal.fire({
-                     icon: 'success',
-                     title: 'Başarılı!',
-                     text: @Html.Raw(Json.Serialize(TempData["Basari"])),
-                     confirmButtonColor: '#0d2b4d'
+                     icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#0d2b4d'
                  });
              });
              </text>
@@ -236,10 +274,7 @@
              <text>
              document.addEventListener('DOMContentLoaded', function() {
                  Swal.fire({
-                     icon: 'error',
-                     title: 'Hata!',
-                     text: @Html.Raw(Json.Serialize(TempData["Hata"])),
-                     confirmButtonColor: '#0d2b4d'
+                     icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#0d2b4d'
                  });
              });
              </text>

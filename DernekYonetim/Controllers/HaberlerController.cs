@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DernekYonetim.Models;
+using Microsoft.AspNetCore.Http;
 using System.IO;
 using System;
 using System.Linq;
@@ -102,7 +103,8 @@ namespace DernekYonetim.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> HaberKaydet(Haberler model, IFormFile Fotograf)
+        // EKSİK BURADAYDI: IFormFile CvDosyasi parametresi eklendi
+        public async Task<IActionResult> HaberKaydet(Haberler model, IFormFile Fotograf, IFormFile CvDosyasi)
         {
             if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
 
@@ -117,6 +119,15 @@ namespace DernekYonetim.Controllers
                     model.FotografYolu = "/uploads/haberler/" + fileName;
                 }
 
+                if (CvDosyasi != null && CvDosyasi.Length > 0)
+                {
+                    string cvFileName = Guid.NewGuid().ToString() + Path.GetExtension(CvDosyasi.FileName);
+                    string cvPath = Path.Combine(_env.WebRootPath, "uploads/cv", cvFileName);
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/cv")); // Klasör yoksa oluştur
+                    using (var stream = new FileStream(cvPath, FileMode.Create)) { await CvDosyasi.CopyToAsync(stream); }
+                    model.CvDosyaYolu = "/uploads/cv/" + cvFileName;
+                }
+
                 model.YayimTarihi = DateTime.Now;
                 _context.Add(model);
                 await _context.SaveChangesAsync();
@@ -129,7 +140,8 @@ namespace DernekYonetim.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> HaberGuncelle(Haberler model, IFormFile Fotograf)
+        // EKSİK BURADAYDI: IFormFile CvDosyasi parametresi eklendi
+        public async Task<IActionResult> HaberGuncelle(Haberler model, IFormFile Fotograf, IFormFile CvDosyasi)
         {
             if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
 
@@ -143,6 +155,7 @@ namespace DernekYonetim.Controllers
                 mevcutHaber.Ozet = model.Ozet;
                 mevcutHaber.Icerik = model.Icerik;
                 mevcutHaber.SlayttaGoster = model.SlayttaGoster;
+                mevcutHaber.PanelistOzgecmis = model.PanelistOzgecmis; // EKSİK BURADAYDI: Panelist özgeçmişi güncellenmiyordu
 
                 if (Fotograf != null && Fotograf.Length > 0)
                 {
@@ -150,6 +163,15 @@ namespace DernekYonetim.Controllers
                     string path = Path.Combine(_env.WebRootPath, "uploads/haberler", fileName);
                     using (var stream = new FileStream(path, FileMode.Create)) { await Fotograf.CopyToAsync(stream); }
                     mevcutHaber.FotografYolu = "/uploads/haberler/" + fileName;
+                }
+
+                if (CvDosyasi != null && CvDosyasi.Length > 0)
+                {
+                    string cvFileName = Guid.NewGuid().ToString() + Path.GetExtension(CvDosyasi.FileName);
+                    string cvPath = Path.Combine(_env.WebRootPath, "uploads/cv", cvFileName);
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/cv"));
+                    using (var stream = new FileStream(cvPath, FileMode.Create)) { await CvDosyasi.CopyToAsync(stream); }
+                    mevcutHaber.CvDosyaYolu = "/uploads/cv/" + cvFileName;
                 }
 
                 _context.Update(mevcutHaber);

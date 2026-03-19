@@ -45,7 +45,7 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="Id" id="editHaberId" />
                     <div class="modal-header bg-warning text-dark border-0">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi Düzenle</h5>
+                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Haberi / Paneli Düzenle</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4 bg-light">
@@ -79,6 +79,16 @@
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
                                 <textarea name="Icerik" id="editIcerik" class="form-control border-0 shadow-sm" rows="4"></textarea>
+                            </div>
+
+                            <div class="col-md-12 mb-3 border-top pt-3 mt-2">
+                                <h6 class="fw-bold mb-3"><i class="fas fa-user-tie me-2"></i>Panelist Bilgileri</h6>
+                                <label class="form-label fw-bold text-primary-dark">Panelist Özgeçmişi</label>
+                                <textarea name="PanelistOzgecmis" id="editPanelistOzgecmis" class="form-control border-0 shadow-sm mb-2" rows="3" placeholder="Panelist hakkında kısa bilgi..."></textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">CV Dosyası Yükle</label>
+                                <input type="file" name="CvDosyasi" class="form-control border-0 shadow-sm" accept=".pdf,.doc,.docx" />
                             </div>
                             <div class="col-md-12 mb-3">
                                 <div class="form-check form-switch mt-2">
@@ -137,6 +147,16 @@
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Haber İçeriği</label>
                                 <textarea name="Icerik" class="form-control border-0 shadow-sm" rows="4"></textarea>
+                            </div>
+
+                            <div class="col-md-12 mb-3 border-top pt-3 mt-2">
+                                <h6 class="fw-bold mb-3"><i class="fas fa-user-tie me-2"></i>Panelist Bilgileri</h6>
+                                <label class="form-label fw-bold text-primary-dark">Panelist Özgeçmişi</label>
+                                <textarea name="PanelistOzgecmis" class="form-control border-0 shadow-sm mb-2" rows="3" placeholder="Panelist hakkında kısa bilgi..."></textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Panelist Detaylı CV Dosyası (PDF/Word - Opsiyonel)</label>
+                                <input type="file" name="CvDosyasi" class="form-control border-0 shadow-sm" accept=".pdf,.doc,.docx" />
                             </div>
                             <div class="col-md-12 mb-3">
                                 <div class="form-check form-switch mt-2">
@@ -202,12 +222,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
             border-color: #ffc800 !important;
         }
-
-    @@media (max-width: 768px) {
-        .search-bar-wrapper {
-            border-radius: 1.5rem !important;
-        }
-    }
 
     .cat-color-0 {
         background-color: #0d2b4d;
@@ -353,6 +367,12 @@
         }
     }
 
+    @@media (max-width: 768px) {
+        .search-bar-wrapper {
+            border-radius: 1.5rem !important;
+        }
+    }
+
     @@media (max-width: 576px) {
         #haberlerCarousel {
             height: 320px;
@@ -371,12 +391,9 @@
     const sonuclarAlani = document.getElementById('aramaSonuclariAlani');
     let zamanlayici;
 
-    // AJAX ile canlı arama ve sayfalama fonksiyonu
     function sonuclariGetir(sayfaNo = 1) {
         const kelime = aramaKutusu.value;
         sonuclarAlani.style.opacity = '0.5';
-
-        // Mevcut URL'i bozmadan (kategorideyse orada kalarak) parametreleri ekle
         const pathname = window.location.pathname;
         let url = `${pathname}?arama=${encodeURIComponent(kelime)}&sayfa=${sayfaNo}`;
 
@@ -389,21 +406,18 @@
             });
     }
 
-    // Yazarken tetiklenecek olay
     if(aramaKutusu) {
         aramaKutusu.addEventListener('input', function() {
             clearTimeout(zamanlayici);
-            zamanlayici = setTimeout(() => { sonuclariGetir(1); }, 350); // 350ms gecikmeli canlı arama
+            zamanlayici = setTimeout(() => { sonuclariGetir(1); }, 350);
         });
     }
 
-    // Sayfalama tıklamalarını yakalamak için
     function sayfaDegistir(sayfaNo) {
         sonuclariGetir(sayfaNo);
         window.scrollTo({ top: 250, behavior: 'smooth' });
     }
 
-    // Arama temizleme butonu
     function temizleArama() {
         aramaKutusu.value = '';
         sonuclariGetir(1);
@@ -416,6 +430,7 @@
         document.getElementById('editIcerik').value = btn.getAttribute('data-icerik');
         document.getElementById('editKategoriId').value = btn.getAttribute('data-kategori');
         document.getElementById('editSlayttaGoster').checked = (btn.getAttribute('data-slaytta') === 'true');
+        document.getElementById('editPanelistOzgecmis').value = btn.getAttribute('data-ozgecmis') || '';
 
         karakterSayici(document.getElementById('editOzet'), 'duzenleOzetSayac');
         var myModal = new bootstrap.Modal(document.getElementById('haberDuzenleModal'));
@@ -442,28 +457,18 @@
 
     @if (TempData["Basari"] != null)
     {
-             <text>
-             document.addEventListener('DOMContentLoaded', function() {
-                 Swal.fire({
-                     icon: 'success',
-                     title: 'Başarılı!',
-                     text: @Html.Raw(Json.Serialize(TempData["Basari"])),
-                     confirmButtonColor: '#0d2b4d'
-                 });
-             });
-             </text>
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#0d2b4d' });
+            });
+            </text>
     }
     @if (TempData["Hata"] != null)
     {
-             <text>
-             document.addEventListener('DOMContentLoaded', function() {
-                 Swal.fire({
-                     icon: 'error',
-                     title: 'Hata!',
-                     text: @Html.Raw(Json.Serialize(TempData["Hata"])),
-                     confirmButtonColor: '#0d2b4d'
-                 });
-             });
-             </text>
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#0d2b4d' });
+            });
+            </text>
     }
 </script>
