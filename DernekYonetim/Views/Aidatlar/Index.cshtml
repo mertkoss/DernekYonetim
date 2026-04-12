@@ -352,6 +352,8 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="UyeId" id="hiddenUyeId" value="0" />
 
+                <input type="hidden" name="DogumYeri" id="hiddenDogumYeri" />
+
                 <div class="modal-body bg-light p-4">
                     <ul class="nav nav-pills nav-fill mb-4" id="uyeTabs" role="tablist">
                         <li class="nav-item" role="presentation"><button class="nav-link active fw-bold" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik</button></li>
@@ -363,16 +365,123 @@
                     <div class="tab-content bg-white p-4 rounded-3 shadow-sm" id="uyeTabsContent">
                         <div class="tab-pane fade show active" id="kimlik" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label fw-bold">Üye No</label><input type="text" name="UyeNo" class="form-control required-input" required></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Üyelik Tarihi</label><input type="date" name="UyelikTarihi" class="form-control required-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" required></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">TC Kimlik No</label><input type="text" name="TckimlikNo" class="form-control required-input" required maxlength="11"></div>
-                                <div class="col-md-6"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Üye No</label><input type="text" name="UyeNo" class="form-control required-input" required></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Üyelik Tarihi</label><input type="date" name="UyelikTarihi" class="form-control required-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" required></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Onay Tarihi</label><input type="date" name="OnayTarihi" class="form-control" title="Yönetim Kurulu Onay Tarihi"></div>
+
+                                <div class="col-md-12"><label class="form-label fw-bold">TC Kimlik No</label><input type="text" name="TckimlikNo" class="form-control required-input" required maxlength="11"></div>
+
                                 <div class="col-md-4"><label class="form-label fw-bold">Ad</label><input type="text" name="Ad" class="form-control required-input" required></div>
                                 <div class="col-md-4"><label class="form-label fw-bold">Soyad</label><input type="text" name="Soyad" class="form-control required-input" required></div>
                                 <div class="col-md-4"><label class="form-label fw-bold">Evlilik Soyadı</label><input type="text" name="EvlilikSoyadi" class="form-control" placeholder="(Varsa)"></div>
+
                                 <div class="col-md-6"><label class="form-label fw-bold">Doğum Tarihi</label><input type="date" name="DogumTarihi" class="form-control"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Doğum Yeri</label><input type="text" name="DogumYeri" class="form-control"></div>
-                                <div class="col-12"><div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="Vefat" value="true" id="vefatCheck"><label class="form-check-label text-danger fw-bold ms-2" for="vefatCheck">Vefat Etti</label></div></div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Doğum Yeri</label>
+                                    <select id="uiDogumYeriSelect" class="form-select">
+                                        <option value="">Seçiniz...</option>
+                                        <option value="Adana">Adana</option>
+                                        <option value="Adıyaman">Adıyaman</option>
+                                        <option value="Afyonkarahisar">Afyonkarahisar</option>
+                                        <option value="Ağrı">Ağrı</option>
+                                        <option value="Amasya">Amasya</option>
+                                        <option value="Ankara">Ankara</option>
+                                        <option value="Antalya">Antalya</option>
+                                        <option value="Artvin">Artvin</option>
+                                        <option value="Aydın">Aydın</option>
+                                        <option value="Balıkesir">Balıkesir</option>
+                                        <option value="Bilecik">Bilecik</option>
+                                        <option value="Bingöl">Bingöl</option>
+                                        <option value="Bitlis">Bitlis</option>
+                                        <option value="Bolu">Bolu</option>
+                                        <option value="Burdur">Burdur</option>
+                                        <option value="Bursa">Bursa</option>
+                                        <option value="Çanakkale">Çanakkale</option>
+                                        <option value="Çankırı">Çankırı</option>
+                                        <option value="Çorum">Çorum</option>
+                                        <option value="Denizli">Denizli</option>
+                                        <option value="Diyarbakır">Diyarbakır</option>
+                                        <option value="Edirne">Edirne</option>
+                                        <option value="Elazığ">Elazığ</option>
+                                        <option value="Erzincan">Erzincan</option>
+                                        <option value="Erzurum">Erzurum</option>
+                                        <option value="Eskişehir">Eskişehir</option>
+                                        <option value="Gaziantep">Gaziantep</option>
+                                        <option value="Giresun">Giresun</option>
+                                        <option value="Gümüşhane">Gümüşhane</option>
+                                        <option value="Hakkari">Hakkari</option>
+                                        <option value="Hatay">Hatay</option>
+                                        <option value="Isparta">Isparta</option>
+                                        <option value="Mersin">Mersin</option>
+                                        <option value="İstanbul">İstanbul</option>
+                                        <option value="İzmir">İzmir</option>
+                                        <option value="Kars">Kars</option>
+                                        <option value="Kastamonu">Kastamonu</option>
+                                        <option value="Kayseri">Kayseri</option>
+                                        <option value="Kırklareli">Kırklareli</option>
+                                        <option value="Kırşehir">Kırşehir</option>
+                                        <option value="Kocaeli">Kocaeli</option>
+                                        <option value="Konya">Konya</option>
+                                        <option value="Kütahya">Kütahya</option>
+                                        <option value="Malatya">Malatya</option>
+                                        <option value="Manisa">Manisa</option>
+                                        <option value="Kahramanmaraş">Kahramanmaraş</option>
+                                        <option value="Mardin">Mardin</option>
+                                        <option value="Muğla">Muğla</option>
+                                        <option value="Muş">Muş</option>
+                                        <option value="Nevşehir">Nevşehir</option>
+                                        <option value="Niğde">Niğde</option>
+                                        <option value="Ordu">Ordu</option>
+                                        <option value="Rize">Rize</option>
+                                        <option value="Sakarya">Sakarya</option>
+                                        <option value="Samsun">Samsun</option>
+                                        <option value="Siirt">Siirt</option>
+                                        <option value="Sinop">Sinop</option>
+                                        <option value="Sivas">Sivas</option>
+                                        <option value="Tekirdağ">Tekirdağ</option>
+                                        <option value="Tokat">Tokat</option>
+                                        <option value="Trabzon">Trabzon</option>
+                                        <option value="Tunceli">Tunceli</option>
+                                        <option value="Şanlıurfa">Şanlıurfa</option>
+                                        <option value="Uşak">Uşak</option>
+                                        <option value="Van">Van</option>
+                                        <option value="Yozgat">Yozgat</option>
+                                        <option value="Zonguldak">Zonguldak</option>
+                                        <option value="Aksaray">Aksaray</option>
+                                        <option value="Bayburt">Bayburt</option>
+                                        <option value="Karaman">Karaman</option>
+                                        <option value="Kırıkkale">Kırıkkale</option>
+                                        <option value="Batman">Batman</option>
+                                        <option value="Şırnak">Şırnak</option>
+                                        <option value="Bartın">Bartın</option>
+                                        <option value="Ardahan">Ardahan</option>
+                                        <option value="Iğdır">Iğdır</option>
+                                        <option value="Yalova">Yalova</option>
+                                        <option value="Karabük">Karabük</option>
+                                        <option value="Kilis">Kilis</option>
+                                        <option value="Osmaniye">Osmaniye</option>
+                                        <option value="Düzce">Düzce</option>
+                                        <option value="Diğer" class="fw-bold text-primary">Diğer (Yurtdışı vb.)</option>
+                                    </select>
+                                    <input type="text" id="uiDogumYeriDiger" class="form-control mt-2" placeholder="Lütfen belirtiniz..." style="display:none;">
+                                </div>
+
+                                <div class="col-md-6 border-top pt-3 mt-4">
+                                    <label class="form-label fw-bold text-danger">İstifa Durumu</label>
+                                    <input type="date" name="IstifaTarihi" id="istifaTarihi" class="form-control mb-2" title="İstifa Tarihi">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="IstifaEtti" value="true" id="istifaCheck">
+                                        <label class="form-check-label text-danger fw-bold ms-2" for="istifaCheck">Üye İstifa Etti</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 border-top pt-3 mt-4">
+                                    <label class="form-label fw-bold text-secondary">Vefat Durumu</label>
+                                    <div class="form-check mt-1">
+                                        <input class="form-check-input" type="checkbox" name="Vefat" value="true" id="vefatCheck">
+                                        <label class="form-check-label text-secondary fw-bold ms-2" for="vefatCheck">Vefat Etti</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -388,9 +497,23 @@
 
                         <div class="tab-pane fade" id="egitim" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label fw-bold">Üniversite</label><input type="text" name="Universite" class="form-control"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Fakülte</label><input type="text" name="Fakulte" class="form-control"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Mezuniyet Yılı</label><input type="number" name="MezuniyetYili" class="form-control" placeholder="YYYY"></div>
+                                <div class="col-12"><h6 class="text-primary fw-bold border-bottom pb-2">Lise Bilgileri</h6></div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Lise</label>
+                                    <select name="Lise" class="form-select">
+                                        <option value="" selected>Seçiniz...</option>
+                                        <option value="İzmir Tevfik Fikret Lisesi">İzmir Tevfik Fikret Lisesi</option>
+                                        <option value="Ankara Tevfik Fikret Lisesi">Ankara Tevfik Fikret Lisesi</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Lise Mezuniyet Yılı</label><input type="number" name="LiseMezuniyetYili" class="form-control" placeholder="YYYY"></div>
+
+                                <div class="col-12 mt-3"><h6 class="text-primary fw-bold border-bottom pb-2">Üniversite Bilgileri</h6></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Üniversite</label><input type="text" name="Universite" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Fakülte</label><input type="text" name="Fakulte" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Bölüm</label><input type="text" name="Bolum" class="form-control"></div>
+
+                                <div class="col-md-6"><label class="form-label fw-bold">Lisans Mezuniyet Yılı</label><input type="number" name="MezuniyetYili" class="form-control" placeholder="YYYY"></div>
                                 <div class="col-md-6"><label class="form-label fw-bold">Meslek</label><input type="text" name="Meslek" class="form-control"></div>
                             </div>
                         </div>
@@ -437,6 +560,38 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // ----- DOĞUM YERİ LOGIC -----
+    const uiSelect = document.getElementById("uiDogumYeriSelect");
+    const uiDiger = document.getElementById("uiDogumYeriDiger");
+    const hiddenDogumYeri = document.getElementById("hiddenDogumYeri");
+
+    uiSelect.addEventListener("change", function() {
+        if (this.value === "Diğer") {
+            uiDiger.style.display = "block";
+            hiddenDogumYeri.value = uiDiger.value;
+        } else {
+            uiDiger.style.display = "none";
+            uiDiger.value = "";
+            hiddenDogumYeri.value = this.value;
+        }
+    });
+
+    uiDiger.addEventListener("input", function() {
+        hiddenDogumYeri.value = this.value;
+    });
+
+    // ----- İSTİFA LOGIC -----
+    const istifaTarihiInput = document.getElementById("istifaTarihi");
+    const istifaCheck = document.getElementById("istifaCheck");
+
+    istifaTarihiInput.addEventListener("change", function() {
+        if (this.value) {
+            istifaCheck.checked = true;
+        } else {
+            istifaCheck.checked = false;
+        }
+    });
+
     // Tablo Satır Genişletme
     function toggleRow(id) {
         var detailRow = document.getElementById('detail-' + id);
@@ -464,6 +619,9 @@
         document.getElementById("yeniUyeModalLabel").innerHTML = '<i class="fa fa-user-plus me-2"></i> Yeni Üye Kaydı';
         document.getElementById("btnKaydet").innerHTML = '<i class="fa fa-save me-2"></i> Üyeyi Kaydet';
         document.getElementById("aidatListesiBadge").innerHTML = "<span class='text-muted small'>Henüz kaydedilmiş aidat yok.</span>";
+
+        uiDiger.style.display = "none";
+        hiddenDogumYeri.value = "";
 
         // İlk sekmeye dön
         const triggerEl = document.querySelector('#uyeTabs button[data-bs-target="#kimlik"]');
@@ -494,7 +652,6 @@
         }
     }
 
-    // Kullanıcı sekmelere manuel tıklarsa butonları güncelle
     document.querySelectorAll('#uyeTabs button[data-bs-toggle="tab"]').forEach((tab, index) => {
         tab.addEventListener('shown.bs.tab', (event) => {
             currentTabIndex = index;
@@ -502,9 +659,7 @@
         });
     });
 
-    // İleri Butonu
     document.getElementById('btnIleri').addEventListener('click', function () {
-        // Mevcut sekmedeki zorunlu alanları kontrol et
         const currentPaneId = document.getElementById(tabList[currentTabIndex]).getAttribute('data-bs-target');
         const currentPane = document.querySelector(currentPaneId);
         const inputs = currentPane.querySelectorAll('input[required], select[required], textarea[required]');
@@ -512,9 +667,9 @@
         let isValid = true;
         for (let input of inputs) {
             if (!input.checkValidity()) {
-                input.reportValidity(); // Tarayıcının varsayılan hata mesajını göster
+                input.reportValidity();
                 isValid = false;
-                break; // İlk hatada dur
+                break;
             }
         }
 
@@ -525,7 +680,6 @@
         }
     });
 
-    // Geri Butonu
     document.getElementById('btnGeri').addEventListener('click', function () {
         if (currentTabIndex > 0) {
             currentTabIndex--;
@@ -542,14 +696,13 @@
 
         rows.forEach(function(row) {
             var textContent = row.textContent.toLowerCase();
-            var detailRow = row.nextElementSibling; // Detay satırı
+            var detailRow = row.nextElementSibling;
 
             if (textContent.includes(searchValue)) {
                 row.style.display = '';
                 visibleCount++;
             } else {
                 row.style.display = 'none';
-                // Eğer detay satırı açıksa onu da gizle
                 if(detailRow && detailRow.classList.contains('detail-row')) {
                     detailRow.style.display = 'none';
                     row.classList.remove('open');
@@ -558,7 +711,6 @@
             }
         });
 
-        // Sonuç yoksa mesaj göster
         document.getElementById('noResultMessage').style.display = visibleCount === 0 ? 'block' : 'none';
     });
 
@@ -575,20 +727,50 @@
 
                  document.querySelector('input[name="UyeNo"]').value = data.uyeNo;
                  document.querySelector('input[name="UyelikTarihi"]').value = data.uyelikTarihi;
+
+                 // Yeni Alanlar
+                 if(data.onayTarihi) document.querySelector('input[name="OnayTarihi"]').value = data.onayTarihi;
+                 if(data.istifaTarihi) document.querySelector('input[name="IstifaTarihi"]').value = data.istifaTarihi;
+                 document.querySelector('input[name="IstifaEtti"]').checked = data.istifaEtti;
+
                  document.querySelector('input[name="TckimlikNo"]').value = data.tcKimlikNo;
                  document.querySelector('input[name="Ad"]').value = data.ad;
                  document.querySelector('input[name="Soyad"]').value = data.soyad;
                  document.querySelector('input[name="EvlilikSoyadi"]').value = data.evlilikSoyadi;
                  document.querySelector('input[name="DogumTarihi"]').value = data.dogumTarihi;
-                 document.querySelector('input[name="DogumYeri"]').value = data.dogumYeri;
+
+                 // Doğum Yeri Logic Apply
+                 let dYeri = data.dogumYeri;
+                 let selectOptions = Array.from(uiSelect.options).map(opt => opt.value);
+                 if(dYeri) {
+                     if(selectOptions.includes(dYeri) && dYeri !== "Diğer") {
+                         uiSelect.value = dYeri;
+                         uiDiger.style.display = "none";
+                         hiddenDogumYeri.value = dYeri;
+                     } else {
+                         uiSelect.value = "Diğer";
+                         uiDiger.style.display = "block";
+                         uiDiger.value = dYeri;
+                         hiddenDogumYeri.value = dYeri;
+                     }
+                 } else {
+                     uiSelect.value = "";
+                     uiDiger.style.display = "none";
+                     hiddenDogumYeri.value = "";
+                 }
+
                  document.querySelector('input[name="Vefat"]').checked = data.vefat;
                  document.querySelector('input[name="Telefon"]').value = data.telefon;
                  document.querySelector('input[name="Email"]').value = data.email;
                  document.querySelector('input[name="Il"]').value = data.il;
                  document.querySelector('input[name="Ilce"]').value = data.ilce;
                  document.querySelector('textarea[name="Adres"]').value = data.adres;
+
                  document.querySelector('input[name="Universite"]').value = data.universite;
                  document.querySelector('input[name="Fakulte"]').value = data.fakulte;
+                 document.querySelector('input[name="Bolum"]').value = data.bolum; // Yeni
+                 document.querySelector('select[name="Lise"]').value = data.lise || ""; // Yeni
+                 document.querySelector('input[name="LiseMezuniyetYili"]').value = data.liseMezuniyetYili || ""; // Yeni
                  document.querySelector('input[name="MezuniyetYili"]').value = data.mezuniyetYili;
                  document.querySelector('input[name="Meslek"]').value = data.meslek;
                  document.querySelector('select[name="KayitDurumu"]').value = data.kayitDurumu;
@@ -614,7 +796,6 @@
                  document.querySelector('input[name="AidatYili"]').value = new Date().getFullYear();
                  document.querySelector('input[name="AidatTutari"]').value = "";
 
-                 // Form açılırken her zaman ilk sekmeyi göster
                  const triggerEl = document.querySelector('#uyeTabs button[data-bs-target="#kimlik"]');
                  bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
 
@@ -688,18 +869,18 @@
     // Başarı/Hata Mesajları
     @if (TempData["Basari"] != null)
     {
-            <text>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#4e73df' });
-            });
-            </text>
+                <text>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#4e73df' });
+                });
+                </text>
     }
     @if (TempData["Hata"] != null)
     {
-            <text>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#4e73df' });
-            });
-            </text>
+                <text>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#4e73df' });
+                });
+                </text>
     }
 </script>
