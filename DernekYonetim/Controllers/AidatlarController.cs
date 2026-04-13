@@ -1,5 +1,5 @@
 ﻿using DernekYonetim.Models;
-using Microsoft.AspNetCore.Authorization; // GÜVENLİK İÇİN EKLENDİ
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -52,6 +52,7 @@ namespace DernekYonetim.Controllers
                     Email = uye.Email,
                     AdresTam = uye.Adres + " / " + uye.Ilce + " / " + uye.Il,
                     Vefat = uye.Vefat ?? false,
+                    // İstifa bilgisini doğrudan View modeline yansıtabilirsin istersen (isteğe bağlı)
                     Universite = egitim != null ? egitim.Universite + " - " + egitim.Fakulte : "-",
                     Meslek = egitim != null ? egitim.Meslek : "-",
                     MezuniyetYili = egitim?.MezuniyetYili,
@@ -69,9 +70,9 @@ namespace DernekYonetim.Controllers
         public IActionResult YeniUyeEkle(YeniUyeGirisModel model)
         {
             // GÜVENLİK: Boş TC veya İsim gelirse DB'yi yormadan direkt reddet
-            if (string.IsNullOrWhiteSpace(model.Ad) || string.IsNullOrWhiteSpace(model.Soyad) || string.IsNullOrWhiteSpace(model.TckimlikNo))
+            if (string.IsNullOrWhiteSpace(model.Ad) || string.IsNullOrWhiteSpace(model.Soyad) || string.IsNullOrWhiteSpace(model.TckimlikNo) || string.IsNullOrWhiteSpace(model.Email))
             {
-                TempData["Hata"] = "Ad, Soyad ve TC Kimlik No alanları zorunludur!";
+                TempData["Hata"] = "Ad, Soyad, TC Kimlik No ve E-Mail alanları zorunludur!";
                 return RedirectToAction("Index");
             }
 
@@ -83,6 +84,7 @@ namespace DernekYonetim.Controllers
                 {
                     UyeNo = model.UyeNo,
                     UyelikTarihi = DateOnly.FromDateTime(model.UyelikTarihi),
+                    OnayTarihi = model.OnayTarihi.HasValue ? DateOnly.FromDateTime(model.OnayTarihi.Value) : null, // YENİ EKLENDİ
                     Ad = model.Ad,
                     Soyad = model.Soyad,
                     EvlilikSoyadi = model.EvlilikSoyadi,
@@ -94,21 +96,27 @@ namespace DernekYonetim.Controllers
                     Il = model.Il,
                     Ilce = model.Ilce,
                     Adres = model.Adres,
-                    Vefat = model.Vefat
+                    Vefat = model.Vefat,
+                    IstifaEtti = model.IstifaEtti, // YENİ EKLENDİ
+                    IstifaTarihi = model.IstifaTarihi.HasValue ? DateOnly.FromDateTime(model.IstifaTarihi.Value) : null // YENİ EKLENDİ
                 };
 
                 _context.Uyelers.Add(yeniUye);
                 _context.SaveChanges(); // UyeId'yi almak için önce kaydetmeliyiz.
 
                 // 2. Eğitim Kaydı
-                if (!string.IsNullOrWhiteSpace(model.Universite) || !string.IsNullOrWhiteSpace(model.Meslek))
+                // Lise veya Üniversite alanlarından herhangi biri doluysa Eğitim nesnesi oluşturulur
+                if (!string.IsNullOrWhiteSpace(model.Universite) || !string.IsNullOrWhiteSpace(model.Meslek) || !string.IsNullOrWhiteSpace(model.Lise))
                 {
                     var egitim = new EgitimMeslek
                     {
                         UyeId = yeniUye.UyeId,
                         Universite = model.Universite,
                         Fakulte = model.Fakulte,
+                        Bolum = model.Bolum, // YENİ EKLENDİ
                         MezuniyetYili = model.MezuniyetYili,
+                        Lise = model.Lise, // YENİ EKLENDİ
+                        LiseMezuniyetYili = model.LiseMezuniyetYili, // YENİ EKLENDİ
                         Meslek = model.Meslek
                     };
                     _context.EgitimMesleks.Add(egitim);
@@ -190,6 +198,9 @@ namespace DernekYonetim.Controllers
                 uyeId = uye.UyeId,
                 uyeNo = uye.UyeNo,
                 uyelikTarihi = uye.UyelikTarihi.ToString("yyyy-MM-dd"),
+                onayTarihi = uye.OnayTarihi.HasValue ? uye.OnayTarihi.Value.ToString("yyyy-MM-dd") : "", // YENİ
+                istifaEtti = uye.IstifaEtti, // YENİ
+                istifaTarihi = uye.IstifaTarihi.HasValue ? uye.IstifaTarihi.Value.ToString("yyyy-MM-dd") : "", // YENİ
                 tcKimlikNo = uye.TckimlikNo,
                 ad = uye.Ad,
                 soyad = uye.Soyad,
@@ -204,6 +215,9 @@ namespace DernekYonetim.Controllers
                 adres = uye.Adres,
                 universite = egitim?.Universite,
                 fakulte = egitim?.Fakulte,
+                bolum = egitim?.Bolum, // YENİ
+                lise = egitim?.Lise, // YENİ
+                liseMezuniyetYili = egitim?.LiseMezuniyetYili, // YENİ
                 mezuniyetYili = egitim?.MezuniyetYili,
                 meslek = egitim?.Meslek,
                 kayitDurumu = uiKayitDurumu,
@@ -238,9 +252,10 @@ namespace DernekYonetim.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Temel Bilgiler
+                // Temel Bilgiler ve Yeni Alanlar
                 uye.UyeNo = model.UyeNo;
                 uye.UyelikTarihi = DateOnly.FromDateTime(model.UyelikTarihi);
+                uye.OnayTarihi = model.OnayTarihi.HasValue ? DateOnly.FromDateTime(model.OnayTarihi.Value) : null;
                 uye.TckimlikNo = model.TckimlikNo;
                 uye.Ad = model.Ad;
                 uye.Soyad = model.Soyad;
@@ -248,6 +263,8 @@ namespace DernekYonetim.Controllers
                 uye.DogumTarihi = model.DogumTarihi.HasValue ? DateOnly.FromDateTime(model.DogumTarihi.Value) : null;
                 uye.DogumYeri = model.DogumYeri;
                 uye.Vefat = model.Vefat;
+                uye.IstifaEtti = model.IstifaEtti;
+                uye.IstifaTarihi = model.IstifaTarihi.HasValue ? DateOnly.FromDateTime(model.IstifaTarihi.Value) : null;
                 uye.Telefon = model.Telefon;
                 uye.Email = model.Email;
                 uye.Il = model.Il;
@@ -262,18 +279,24 @@ namespace DernekYonetim.Controllers
                 {
                     egitim.Universite = model.Universite;
                     egitim.Fakulte = model.Fakulte;
+                    egitim.Bolum = model.Bolum;
                     egitim.MezuniyetYili = model.MezuniyetYili;
+                    egitim.Lise = model.Lise;
+                    egitim.LiseMezuniyetYili = model.LiseMezuniyetYili;
                     egitim.Meslek = model.Meslek;
                     _context.EgitimMesleks.Update(egitim);
                 }
-                else if (!string.IsNullOrWhiteSpace(model.Universite) || !string.IsNullOrWhiteSpace(model.Meslek))
+                else if (!string.IsNullOrWhiteSpace(model.Universite) || !string.IsNullOrWhiteSpace(model.Meslek) || !string.IsNullOrWhiteSpace(model.Lise))
                 {
                     var yeniEgitim = new EgitimMeslek
                     {
                         UyeId = UyeId,
                         Universite = model.Universite,
                         Fakulte = model.Fakulte,
+                        Bolum = model.Bolum,
                         MezuniyetYili = model.MezuniyetYili,
+                        Lise = model.Lise,
+                        LiseMezuniyetYili = model.LiseMezuniyetYili,
                         Meslek = model.Meslek
                     };
                     _context.EgitimMesleks.Add(yeniEgitim);
