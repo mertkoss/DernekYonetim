@@ -218,6 +218,16 @@
                                         <span class="text-primary small ms-1">(@item.EvlilikSoyadi)</span>
                                     }
                                     <span class="d-none tc-kimlik">@item.TcKimlikNo</span>
+
+                                    @* İstifa veya Vefat durumunu küçük badge olarak ismin yanına da ekleyebiliriz *@
+                                    @if (item.IstifaEtti)
+                                    {
+                                        <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">İstifa Etti</span>
+                                    }
+                                    @if (item.Vefat)
+                                    {
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">Vefat</span>
+                                    }
                                 </div>
                             </td>
                             <td>@item.Telefon</td>
@@ -270,7 +280,16 @@
                                                 {
                                                     <li class="mb-1"><strong>Evlilik Soyadı:</strong> @item.EvlilikSoyadi</li>
                                                 }
-                                                <li><strong>Doğum:</strong> @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-") / @item.DogumYeri</li>
+                                                <li class="mb-1"><strong>Doğum:</strong> @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-") / @item.DogumYeri</li>
+
+                                                @if (item.OnayTarihi != null)
+                                                {
+                                                    <li class="mb-1"><strong>Onay Tarihi:</strong> @item.OnayTarihi.Value.ToString("dd.MM.yyyy")</li>
+                                                }
+                                                @if (item.IstifaEtti)
+                                                {
+                                                    <li class="mb-1 text-danger"><strong>İstifa Tarihi:</strong> @(item.IstifaTarihi != null ? item.IstifaTarihi.Value.ToString("dd.MM.yyyy") : "Belirtilmedi")</li>
+                                                }
                                             </ul>
                                         </div>
 
@@ -285,8 +304,17 @@
                                         <div class="col-md-3 border-end">
                                             <h6 class="text-primary fw-bold mb-3"><i class="fa fa-graduation-cap me-2"></i>Eğitim ve Derbis</h6>
                                             <ul class="list-unstyled text-muted small">
-                                                <li class="mb-1"><strong>Okul:</strong> @item.Universite</li>
+                                                @if (!string.IsNullOrEmpty(item.Lise))
+                                                {
+                                                    <li class="mb-1"><strong>Lise:</strong> @item.Lise @(item.LiseMezuniyetYili.HasValue ? $"({item.LiseMezuniyetYili})" : "")</li>
+                                                }
+                                                <li class="mb-1"><strong>Üniversite:</strong> @item.Universite</li>
+                                                @if (!string.IsNullOrEmpty(item.Bolum))
+                                                {
+                                                    <li class="mb-1"><strong>Bölüm:</strong> @item.Bolum</li>
+                                                }
                                                 <li class="mb-2"><strong>Mezuniyet:</strong> @item.MezuniyetYili</li>
+
                                                 <li class="mb-1"><strong>Üyelik Tarihi:</strong> @item.UyelikTarihi.ToShortDateString()</li>
                                                 <li>
                                                     <strong>Derbis:</strong>
@@ -518,7 +546,7 @@
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
 
         // CSV Sütun Başlıkları (Noktalı virgül ile ayırıyoruz, Türkiye Excel'i için idealdir)
-        csvContent += "Üye No;Ad Soyad;TC Kimlik No;Telefon;Ödenen Aidatlar\n";
+        csvContent += "Üye No;Ad Soyad;TC Kimlik No;Telefon;Meslek;Ödenen Aidatlar\n";
 
         // Model içindeki verileri arka planda JavaScript dizisine dönüştürüyoruz
         const exportData = [
@@ -541,6 +569,7 @@
                         adSoyad: "@Html.Raw(item.AdSoyad)",
                         tc: "@Html.Raw(item.TcKimlikNo)",
                         telefon: "@Html.Raw(item.Telefon ?? "-")",
+                        meslek: "@Html.Raw(item.Meslek ?? "-")",
                         aidatlar: "@Html.Raw(aidatlarStr)"
                     },
                     </text>
@@ -549,7 +578,7 @@
 
         // Verileri CSV formatında satırlara dönüştür
         exportData.forEach(row => {
-            csvContent += `${row.uyeNo};${row.adSoyad};${row.tc};${row.telefon};${row.aidatlar}\n`;
+            csvContent += `${row.uyeNo};${row.adSoyad};${row.tc};${row.telefon};${row.meslek};${row.aidatlar}\n`;
         });
 
         // Dosyayı İndir
