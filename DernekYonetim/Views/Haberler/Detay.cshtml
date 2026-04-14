@@ -67,11 +67,15 @@
                 @if (!string.IsNullOrEmpty(Model.PanelistOzgecmis) || !string.IsNullOrEmpty(Model.CvDosyaYolu))
                 {
                     <div class="panelist-profile-card bg-light p-4 rounded-4 mt-5 mb-4 border-start border-5 border-warning shadow-sm">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-white p-3 rounded-circle shadow-sm me-3 d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                        <div class="bg-white p-2 rounded-circle shadow-sm me-3 d-flex justify-content-center align-items-center" style="width: 70px; height: 70px; overflow: hidden;">
+                            @if (!string.IsNullOrEmpty(Model.PanelistFotografYolu))
+                            {
+                                <img src="@Model.PanelistFotografYolu" alt="Panelist Fotoğrafı" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                            }
+                            else
+                            {
                                 <i class="fas fa-user-tie fa-2x text-primary-dark"></i>
-                            </div>
-                            <h4 class="text-primary-dark fw-bold mb-0">Panelist Bilgileri</h4>
+                            }
                         </div>
 
                         @if (!string.IsNullOrEmpty(Model.PanelistOzgecmis))
@@ -156,7 +160,15 @@
                                 <label class="form-label fw-bold text-primary-dark">Panelist Özgeçmişi</label>
                                 <textarea name="PanelistOzgecmis" id="detayPanelistOzgecmis" class="form-control border-0 shadow-sm mb-2" rows="3">@Model.PanelistOzgecmis</textarea>
                             </div>
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-primary-dark">Panelist Fotoğrafı</label>
+                                <input type="file" name="PanelistFotograf" class="form-control border-0 shadow-sm" accept="image/*" />
+                                @if (!string.IsNullOrEmpty(Model.PanelistFotografYolu))
+                                {
+                                    <small class="text-success mt-2 d-block fw-bold"><i class="fas fa-image me-1"></i>Sistemde yüklü bir fotoğraf var.</small>
+                                }
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-primary-dark">Yeni CV Dosyası Yükle</label>
                                 <input type="file" name="CvDosyasi" class="form-control border-0 shadow-sm" accept=".pdf,.doc,.docx" />
                                 @if (!string.IsNullOrEmpty(Model.CvDosyaYolu))

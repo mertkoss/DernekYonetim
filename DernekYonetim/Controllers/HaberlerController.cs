@@ -103,8 +103,8 @@ namespace DernekYonetim.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // EKSİK BURADAYDI: IFormFile CvDosyasi parametresi eklendi
-        public async Task<IActionResult> HaberKaydet(Haberler model, IFormFile Fotograf, IFormFile CvDosyasi)
+        // EKLENEN: IFormFile PanelistFotograf parametresi
+        public async Task<IActionResult> HaberKaydet(Haberler model, IFormFile Fotograf, IFormFile CvDosyasi, IFormFile PanelistFotograf)
         {
             if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
 
@@ -123,9 +123,19 @@ namespace DernekYonetim.Controllers
                 {
                     string cvFileName = Guid.NewGuid().ToString() + Path.GetExtension(CvDosyasi.FileName);
                     string cvPath = Path.Combine(_env.WebRootPath, "uploads/cv", cvFileName);
-                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/cv")); // Klasör yoksa oluştur
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/cv"));
                     using (var stream = new FileStream(cvPath, FileMode.Create)) { await CvDosyasi.CopyToAsync(stream); }
                     model.CvDosyaYolu = "/uploads/cv/" + cvFileName;
+                }
+
+                // YENİ EKLENEN: Panelist Fotoğrafı Yükleme İşlemi
+                if (PanelistFotograf != null && PanelistFotograf.Length > 0)
+                {
+                    string pFileName = Guid.NewGuid().ToString() + Path.GetExtension(PanelistFotograf.FileName);
+                    string pPath = Path.Combine(_env.WebRootPath, "uploads/panelist", pFileName);
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/panelist"));
+                    using (var stream = new FileStream(pPath, FileMode.Create)) { await PanelistFotograf.CopyToAsync(stream); }
+                    model.PanelistFotografYolu = "/uploads/panelist/" + pFileName;
                 }
 
                 model.YayimTarihi = DateTime.Now;
@@ -140,8 +150,8 @@ namespace DernekYonetim.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // EKSİK BURADAYDI: IFormFile CvDosyasi parametresi eklendi
-        public async Task<IActionResult> HaberGuncelle(Haberler model, IFormFile Fotograf, IFormFile CvDosyasi)
+        // EKLENEN: IFormFile PanelistFotograf parametresi
+        public async Task<IActionResult> HaberGuncelle(Haberler model, IFormFile Fotograf, IFormFile CvDosyasi, IFormFile PanelistFotograf)
         {
             if (HttpContext.Session.GetInt32("AdminID") == null) return RedirectToAction("Index");
 
@@ -155,7 +165,7 @@ namespace DernekYonetim.Controllers
                 mevcutHaber.Ozet = model.Ozet;
                 mevcutHaber.Icerik = model.Icerik;
                 mevcutHaber.SlayttaGoster = model.SlayttaGoster;
-                mevcutHaber.PanelistOzgecmis = model.PanelistOzgecmis; // EKSİK BURADAYDI: Panelist özgeçmişi güncellenmiyordu
+                mevcutHaber.PanelistOzgecmis = model.PanelistOzgecmis;
 
                 if (Fotograf != null && Fotograf.Length > 0)
                 {
@@ -172,6 +182,15 @@ namespace DernekYonetim.Controllers
                     Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/cv"));
                     using (var stream = new FileStream(cvPath, FileMode.Create)) { await CvDosyasi.CopyToAsync(stream); }
                     mevcutHaber.CvDosyaYolu = "/uploads/cv/" + cvFileName;
+                }
+
+                if (PanelistFotograf != null && PanelistFotograf.Length > 0)
+                {
+                    string pFileName = Guid.NewGuid().ToString() + Path.GetExtension(PanelistFotograf.FileName);
+                    string pPath = Path.Combine(_env.WebRootPath, "uploads/panelist", pFileName);
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, "uploads/panelist"));
+                    using (var stream = new FileStream(pPath, FileMode.Create)) { await PanelistFotograf.CopyToAsync(stream); }
+                    mevcutHaber.PanelistFotografYolu = "/uploads/panelist/" + pFileName;
                 }
 
                 _context.Update(mevcutHaber);

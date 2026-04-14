@@ -18,5 +18,7 @@ public partial class Haberler
     public string? PanelistOzgecmis { get; set; }
     public string? CvDosyaYolu { get; set; }
 
+    public string? PanelistFotografYolu { get; set; }
+
     public virtual HaberKategorileri? Kategori { get; set; }
 }
