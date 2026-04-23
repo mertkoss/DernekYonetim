@@ -170,27 +170,29 @@
 
 <section class="page-section" style="padding-top:100px; padding-bottom: 50px; background-color: #f8f9fc;">
     <div class="page-wrapper">
-        <div class="row align-items-center mb-4">
-            <div class="col-md-4">
-                <h2 class="section-heading text-uppercase mb-1">Üye Yönetimi</h2>
-                <p class="text-muted mb-0">Üye listesi, detay bilgileri ve aidat geçmişi.</p>
+        <div class="row align-items-center mb-4 g-3">
+            <div class="col-lg-4 col-md-12">
+                <h2 class="section-heading text-uppercase mb-1" style="font-size: 1.5rem;">Üye Yönetimi</h2>
+                <p class="text-muted mb-0 small">Üye listesi, detay bilgileri ve aidat geçmişi.</p>
             </div>
-            <div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
-                <div class="search-box me-2">
-                    <i class="fa fa-search"></i>
-                    <input type="text" id="tableSearch" class="form-control shadow-sm" placeholder="İsim, TC veya No ile ara...">
+
+            <div class="col-lg-8 col-md-12 d-flex justify-content-lg-end justify-content-start align-items-center flex-wrap gap-2">
+
+                <div class="search-box me-1" style="width: 220px;">
+                    <i class="fa fa-search text-muted" style="font-size: 0.9rem;"></i>
+                    <input type="text" id="tableSearch" class="form-control form-control-sm shadow-sm rounded-pill px-4" placeholder="İsim, TC veya No ile ara...">
                 </div>
 
-                <button type="button" class="btn btn-success shadow-sm rounded-pill px-3" onclick="exportToCSV()">
-                    <i class="fa fa-file-excel me-1"></i> Excel'e Aktar
+                <button type="button" class="btn btn-sm btn-success shadow-sm rounded-pill px-3" onclick="exportToCSV()">
+                    <i class="fa fa-file-excel me-1"></i> Excel
                 </button>
 
-                <button type="button" class="btn btn-warning shadow-sm rounded-pill px-3 text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#topluMailModal">
+                <button type="button" class="btn btn-sm btn-warning shadow-sm rounded-pill px-3 text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#topluMailModal">
                     <i class="fa fa-envelope me-1"></i> Toplu Mail
                 </button>
 
-                <button type="button" class="btn btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
-                    <i class="fa fa-plus me-1"></i> Yeni Üye Ekle
+                <button type="button" class="btn btn-sm btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
+                    <i class="fa fa-plus me-1"></i> Yeni Üye
                 </button>
             </div>
         </div>
@@ -378,9 +380,10 @@
 <div class="modal fade" id="topluMailModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+
             <div class="modal-header bg-primary text-white border-0">
                 <h5 class="modal-title fw-bold" id="topluMailModalLabel">
-                    <i class="fa fa-envelope-open-text me-2"></i> Tüm Üyelere Toplu Mail Gönder
+                    <i class="fa fa-envelope-open-text me-2"></i> Tüm Üyelere Toplu Mail
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
@@ -389,39 +392,33 @@
                 @Html.AntiForgeryToken()
 
                 <div class="modal-body bg-light p-4">
-                    <div class="alert alert-primary border-0 shadow-sm rounded-3 d-flex align-items-center mb-4">
-                        <i class="fa fa-info-circle fa-2x me-3"></i>
-                        <div>
-                            Bu mesaj; e-posta adresi sistemde kayıtlı olan, <strong>istifa etmemiş ve vefat etmemiş</strong> tüm aktif üyelere BCC (Gizli Kopya) yöntemi ile gönderilecektir. Üyeler birbirlerinin mail adreslerini göremezler.
-                        </div>
-                    </div>
+                  
 
-                    <div class="bg-white p-4 rounded-3 shadow-sm">
+                    <div class="bg-white p-4 rounded-4 shadow-sm border border-light">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label for="konu" class="form-label fw-bold text-dark">E-Posta Konusu <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control rounded-pill px-3 required-input" id="konu" name="konu" placeholder="Örn: Aidat Ödemeleri Hakkında Bilgilendirme" required>
+                                <label for="konu" class="form-label fw-bold text-dark small mb-1">E-Posta Konusu <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm rounded-pill px-3 py-2 required-input" id="konu" name="konu" placeholder="Örn: Aidat Ödemeleri Hakkında Bilgilendirme" required>
                             </div>
 
-                            <div class="col-12 mt-4">
-                                <label for="mesaj" class="form-label fw-bold text-dark">Mesaj İçeriği <span class="text-danger">*</span></label>
-                                <textarea class="form-control rounded-3 p-3 custom-scroll required-input" id="mesaj" name="mesaj" rows="8" placeholder="Mesajınızı buraya yazınız... (HTML etiketleri kullanabilirsiniz)" required></textarea>
+                            <div class="col-12 mt-3">
+                                <label for="mesaj" class="form-label fw-bold text-dark small mb-1">Mesaj İçeriği <span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm rounded-3 p-3 custom-scroll required-input" id="mesaj" name="mesaj" rows="6" placeholder="Mesajınızı buraya yazınız..." required></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 bg-light d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
-                        <i class="fa fa-paper-plane me-2"></i> Maili Gönder
+                <div class="modal-footer border-0 bg-light d-flex justify-content-end gap-2 pt-0 pb-4 px-4">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fa fa-paper-plane me-1"></i> Gönder
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 <div class="modal fade" id="yeniUyeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg">

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration; 
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,16 @@ namespace DernekYonetim.Controllers
     [Authorize] // BÜTÜN CONTROLLER'I GÜVENCEYE ALIR
     public class AidatlarController : Controller
     {
+        // Tanımlamalar class'ın hemen içinde başlar
         private readonly DernekYonetimContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AidatlarController(DernekYonetimContext context)
+        // Constructor her iki yapıyı da (Context ve Configuration) içeri alır
+        public AidatlarController(DernekYonetimContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
-
         // 1. LİSTELEME SAYFASI 
         public async Task<IActionResult> Index()
         {
@@ -387,63 +391,99 @@ namespace DernekYonetim.Controllers
             return NotFound();
         }
 
-        // 7. TÜM ÜYELERE TOPLU MAİL GÖNDERME (TEST VERSİYONU)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TopluMailGonder(string konu, string mesaj)
         {
             if (string.IsNullOrWhiteSpace(konu) || string.IsNullOrWhiteSpace(mesaj))
             {
-                return Content("TEST SONUCU: Başarısız. Konu veya mesaj boş.");
+                TempData["Hata"] = "Konu ve mesaj alanları boş bırakılamaz.";
+                return RedirectToAction("Index");
             }
 
             try
             {
-                // SADECE TEST İÇİN KENDİ MAİLLERİNİ YAZ
-                var mailListesi = new List<string>
-            {
-                "mertkosar552@gmail.com",
-                "irem.eng123@gmail.com"
-            };
+                // 1. Veritabanından aktif ve mail adresi olan üyeleri çek
+                var mailListesi = await _context.Uyelers
+                    .AsNoTracking()
+                    .Where(u => u.IstifaEtti == false
+                             && (u.Vefat == null || u.Vefat == false)
+                             && !string.IsNullOrEmpty(u.Email))
+                    .Select(u => u.Email.Trim())
+                    .ToListAsync();
 
-                string gonderenMail = "mertkosar153@gmail.com";
-                string mailSifresi = "cnvx rfyd bdnq nmqb"; // AppSettings'tekiyle aynı, doğru.
-                string smtpSunucu = "smtp.gmail.com";
-                int smtpPort = 587;
-
-                using (System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient(smtpSunucu, smtpPort))
+                if (!mailListesi.Any())
                 {
-                    // BU SATIR ÇOK ÖNEMLİ: Kendi verdiğimiz şifreyi kullanması için zorluyoruz
-                    smtp.UseDefaultCredentials = false;
+                    TempData["Hata"] = "E-posta gönderilecek aktif üye bulunamadı.";
+                    return RedirectToAction("Index");
+                }
 
+                // 2. Appsettings.json üzerinden ayarları oku
+                var emailSettings = _configuration.GetSection("EmailSettings");
+                string gonderenMail = emailSettings["SenderMail"];
+                string mailSifresi = emailSettings["SenderPassword"];
+                string smtpSunucu = emailSettings["SmtpServer"];
+                int smtpPort = int.Parse(emailSettings["SmtpPort"] ?? "587");
+
+                // 3. SMTP Yapılandırması
+                using (var smtp = new System.Net.Mail.SmtpClient(smtpSunucu, smtpPort))
+                {
+                    smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new System.Net.NetworkCredential(gonderenMail, mailSifresi);
                     smtp.EnableSsl = true;
 
-                    using (System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage())
+                    using (var mail = new System.Net.Mail.MailMessage())
                     {
-                        mail.From = new System.Net.Mail.MailAddress(gonderenMail, "Dernek Yönetimi");
+                        mail.From = new System.Net.Mail.MailAddress(gonderenMail, "Ankara Öğretim Derneği");
                         mail.Subject = konu;
-                        mail.Body = mesaj;
                         mail.IsBodyHtml = true;
 
+                        // Profesyonel HTML Tasarımı
+                        mail.Body = $@"
+                <div style='background-color: #f8f9fc; padding: 20px; font-family: ""Segoe UI"", Tahoma, Geneva, Verdana, sans-serif;'>
+                    <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eaeaea;'>
+                        <div style='background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); padding: 30px; text-align: center;'>
+                            <h2 style='color: #ffffff; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-size: 20px;'>Ankara Öğretim Derneği</h2>
+                        </div>
+                        <div style='padding: 40px; line-height: 1.6; color: #444; font-size: 16px;'>
+                            <h3 style='color: #224abe; margin-top: 0; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;'>
+                                {konu}
+                            </h3>
+                            <div style='margin-bottom: 25px;'>
+                                {mesaj.Replace("\n", "<br>")}
+                            </div>
+                            <p style='margin-top: 30px; font-size: 14px; color: #888; border-top: 1px solid #eee; padding-top: 20px;'>
+                                Saygılarımızla,<br>
+                                <strong>Dernek Yönetim Kurulu</strong>
+                            </p>
+                        </div>
+                        <div style='background-color: #224abe; padding: 20px; text-align: center; font-size: 12px; color: #cbd5e0;'>
+                            <p style='margin: 0;'>Bu e-posta Dernek Yönetim Sistemi aracılığıyla gönderilmiştir.</p>
+                            <p style='margin: 5px 0 0 0;'>© {DateTime.Now.Year} Tüm Hakları Saklıdır.</p>
+                        </div>
+                    </div>
+                </div>";
+
+                        // Kişisel verilerin korunması ve gizlilik için BCC kullanıyoruz
                         foreach (var email in mailListesi)
                         {
                             mail.Bcc.Add(email);
                         }
 
-                        // Maili gönder
                         await smtp.SendMailAsync(mail);
                     }
                 }
 
-                // DİKKAT: Veritabanına (Index'e) dönmüyoruz. Ekrana düz yazı basıyoruz.
-                return Content("TEST SONUCU: HARİKA! MAİLLER BAŞARIYLA GÖNDERİLDİ! Lütfen Gelen Kutusunu kontrol et.");
+                TempData["Basari"] = $"{mailListesi.Count} üyeye bilgilendirme mesajı başarıyla gönderildi.";
             }
             catch (Exception ex)
             {
-                // DİKKAT: Hata olursa veritabanına dönmüyoruz. Hatayı ekrana basıyoruz.
-                return Content("TEST SONUCU: MAİL GÖNDERİLEMEDİ! Hata detayı: " + ex.Message);
+                // Hata mesajını daha temiz hale getirip kullanıcıya gösteriyoruz
+                string error = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                TempData["Hata"] = "Mail gönderimi sırasında bir sorun oluştu: " + error;
             }
+
+            return RedirectToAction("Index");
         }
     }
 }
