@@ -185,6 +185,10 @@
                     <i class="fa fa-file-excel me-1"></i> Excel'e Aktar
                 </button>
 
+                <button type="button" class="btn btn-warning shadow-sm rounded-pill px-3 text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#topluMailModal">
+                    <i class="fa fa-envelope me-1"></i> Toplu Mail
+                </button>
+
                 <button type="button" class="btn btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
                     <i class="fa fa-plus me-1"></i> Yeni Üye Ekle
                 </button>
@@ -219,14 +223,13 @@
                                     }
                                     <span class="d-none tc-kimlik">@item.TcKimlikNo</span>
 
-                                    @* İstifa veya Vefat durumunu küçük badge olarak ismin yanına da ekleyebiliriz *@
                                     @if (item.IstifaEtti)
                                     {
-                                        <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">İstifa Etti</span>
+                                        <span class="badge bg-danger ms-1 rounded-pill" style="font-size: 0.65rem;">İstifa Etti</span>
                                     }
                                     @if (item.Vefat)
                                     {
-                                        <span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">Vefat</span>
+                                        <span class="badge bg-secondary ms-1 rounded-pill" style="font-size: 0.65rem;">Vefat</span>
                                     }
                                 </div>
                             </td>
@@ -248,7 +251,7 @@
 
                                     if (kalanAidatSayisi > 0)
                                     {
-                                        <span class="badge bg-secondary ms-1 shadow-sm" style="font-size: 0.75rem; vertical-align: top;" title="Tüm geçmişi görmek için satıra tıklayın">
+                                        <span class="badge bg-secondary ms-1 shadow-sm rounded-pill" style="font-size: 0.75rem; vertical-align: top;" title="Tüm geçmişi görmek için satıra tıklayın">
                                             +@kalanAidatSayisi Daha
                                         </span>
                                     }
@@ -372,6 +375,53 @@
     </div>
 </section>
 
+<div class="modal fade" id="topluMailModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title fw-bold" id="topluMailModalLabel">
+                    <i class="fa fa-envelope-open-text me-2"></i> Tüm Üyelere Toplu Mail Gönder
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+
+            <form action="/Aidatlar/TopluMailGonder" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-body bg-light p-4">
+                    <div class="alert alert-primary border-0 shadow-sm rounded-3 d-flex align-items-center mb-4">
+                        <i class="fa fa-info-circle fa-2x me-3"></i>
+                        <div>
+                            Bu mesaj; e-posta adresi sistemde kayıtlı olan, <strong>istifa etmemiş ve vefat etmemiş</strong> tüm aktif üyelere BCC (Gizli Kopya) yöntemi ile gönderilecektir. Üyeler birbirlerinin mail adreslerini göremezler.
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-3 shadow-sm">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="konu" class="form-label fw-bold text-dark">E-Posta Konusu <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control rounded-pill px-3 required-input" id="konu" name="konu" placeholder="Örn: Aidat Ödemeleri Hakkında Bilgilendirme" required>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <label for="mesaj" class="form-label fw-bold text-dark">Mesaj İçeriği <span class="text-danger">*</span></label>
+                                <textarea class="form-control rounded-3 p-3 custom-scroll required-input" id="mesaj" name="mesaj" rows="8" placeholder="Mesajınızı buraya yazınız... (HTML etiketleri kullanabilirsiniz)" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
+                        <i class="fa fa-paper-plane me-2"></i> Maili Gönder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="yeniUyeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg">
@@ -383,42 +433,41 @@
             <form id="uyeForm" action="/Aidatlar/YeniUyeEkle" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="UyeId" id="hiddenUyeId" value="0" />
-
                 <input type="hidden" name="DogumYeri" id="hiddenDogumYeri" />
 
                 <div class="modal-body bg-light p-4">
                     <ul class="nav nav-pills nav-fill mb-4" id="uyeTabs" role="tablist">
-                        <li class="nav-item" role="presentation"><button class="nav-link active fw-bold" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik</button></li>
-                        <li class="nav-item" role="presentation"><button class="nav-link fw-bold" id="iletisim-tab" data-bs-toggle="tab" data-bs-target="#iletisim" type="button" role="tab">İletişim</button></li>
-                        <li class="nav-item" role="presentation"><button class="nav-link fw-bold" id="egitim-tab" data-bs-toggle="tab" data-bs-target="#egitim" type="button" role="tab">Eğitim</button></li>
-                        <li class="nav-item" role="presentation"><button class="nav-link fw-bold" id="diger-tab" data-bs-toggle="tab" data-bs-target="#diger" type="button" role="tab">Derbis & Aidat</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link active fw-bold rounded-pill" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link fw-bold rounded-pill" id="iletisim-tab" data-bs-toggle="tab" data-bs-target="#iletisim" type="button" role="tab">İletişim</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link fw-bold rounded-pill" id="egitim-tab" data-bs-toggle="tab" data-bs-target="#egitim" type="button" role="tab">Eğitim</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link fw-bold rounded-pill" id="diger-tab" data-bs-toggle="tab" data-bs-target="#diger" type="button" role="tab">Derbis & Aidat</button></li>
                     </ul>
 
                     <div class="tab-content bg-white p-4 rounded-3 shadow-sm" id="uyeTabsContent">
                         <div class="tab-pane fade show active" id="kimlik" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-4"><label class="form-label fw-bold">Üye No</label><input type="text" name="UyeNo" class="form-control required-input" required></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Üyelik Tarihi</label><input type="date" name="UyelikTarihi" class="form-control required-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" required></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Onay Tarihi</label><input type="date" name="OnayTarihi" class="form-control" title="Yönetim Kurulu Onay Tarihi"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Üye No</label><input type="text" name="UyeNo" class="form-control rounded-pill required-input" required></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Üyelik Tarihi</label><input type="date" name="UyelikTarihi" class="form-control rounded-pill required-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" required></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Onay Tarihi</label><input type="date" name="OnayTarihi" class="form-control rounded-pill" title="Yönetim Kurulu Onay Tarihi"></div>
 
-                                <div class="col-md-12"><label class="form-label fw-bold">TC Kimlik No</label><input type="text" name="TckimlikNo" class="form-control required-input" required maxlength="11"></div>
+                                <div class="col-md-12"><label class="form-label fw-bold">TC Kimlik No</label><input type="text" name="TckimlikNo" class="form-control rounded-pill required-input" required maxlength="11"></div>
 
-                                <div class="col-md-4"><label class="form-label fw-bold">Ad</label><input type="text" name="Ad" class="form-control required-input" required></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Soyad</label><input type="text" name="Soyad" class="form-control required-input" required></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Evlilik Soyadı</label><input type="text" name="EvlilikSoyadi" class="form-control" placeholder="(Varsa)"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Ad</label><input type="text" name="Ad" class="form-control rounded-pill required-input" required></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Soyad</label><input type="text" name="Soyad" class="form-control rounded-pill required-input" required></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Evlilik Soyadı</label><input type="text" name="EvlilikSoyadi" class="form-control rounded-pill" placeholder="(Varsa)"></div>
 
-                                <div class="col-md-6"><label class="form-label fw-bold">Doğum Tarihi</label><input type="date" name="DogumTarihi" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Doğum Tarihi</label><input type="date" name="DogumTarihi" class="form-control rounded-pill"></div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Doğum Yeri</label>
-                                    <select id="uiDogumYeriSelect" class="form-select">
+                                    <select id="uiDogumYeriSelect" class="form-select rounded-pill">
                                         <option value="">İller Yükleniyor...</option>
                                     </select>
-                                    <input type="text" id="uiDogumYeriDiger" class="form-control mt-2" placeholder="Lütfen belirtiniz..." style="display:none;">
+                                    <input type="text" id="uiDogumYeriDiger" class="form-control rounded-pill mt-2" placeholder="Lütfen belirtiniz..." style="display:none;">
                                 </div>
 
                                 <div class="col-md-6 border-top pt-3 mt-4">
                                     <label class="form-label fw-bold text-danger">İstifa Durumu</label>
-                                    <input type="date" name="IstifaTarihi" id="istifaTarihi" class="form-control mb-2" title="İstifa Tarihi">
+                                    <input type="date" name="IstifaTarihi" id="istifaTarihi" class="form-control rounded-pill mb-2" title="İstifa Tarihi">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="IstifaEtti" value="true" id="istifaCheck">
                                         <label class="form-check-label text-danger fw-bold ms-2" for="istifaCheck">Üye İstifa Etti</label>
@@ -437,10 +486,11 @@
 
                         <div class="tab-pane fade" id="iletisim" role="tabpanel">
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label fw-bold">Telefon</label><input type="text" name="Telefon" class="form-control"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">E-Mail <span class="text-danger">*</span></label><input type="email" name="Email" class="form-control required-input" required></div>                                <div class="col-md-6"><label class="form-label fw-bold">İl</label><input type="text" name="Il" class="form-control"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">İlçe</label><input type="text" name="Ilce" class="form-control"></div>
-                                <div class="col-12"><label class="form-label fw-bold">Tam Adres</label><textarea name="Adres" class="form-control" rows="3"></textarea></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Telefon</label><input type="text" name="Telefon" class="form-control rounded-pill"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">E-Mail <span class="text-danger">*</span></label><input type="email" name="Email" class="form-control rounded-pill required-input" required></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">İl</label><input type="text" name="Il" class="form-control rounded-pill"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">İlçe</label><input type="text" name="Ilce" class="form-control rounded-pill"></div>
+                                <div class="col-12"><label class="form-label fw-bold">Tam Adres</label><textarea name="Adres" class="form-control rounded-3 custom-scroll" rows="3"></textarea></div>
                             </div>
                         </div>
 
@@ -449,21 +499,21 @@
                                 <div class="col-12"><h6 class="text-primary fw-bold border-bottom pb-2">Lise Bilgileri</h6></div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Lise</label>
-                                    <select name="Lise" class="form-select">
+                                    <select name="Lise" class="form-select rounded-pill">
                                         <option value="" selected>Seçiniz...</option>
                                         <option value="İzmir Tevfik Fikret Lisesi">İzmir Tevfik Fikret Lisesi</option>
                                         <option value="Ankara Tevfik Fikret Lisesi">Ankara Tevfik Fikret Lisesi</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Lise Mezuniyet Yılı</label><input type="number" name="LiseMezuniyetYili" class="form-control" placeholder="YYYY"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Lise Mezuniyet Yılı</label><input type="number" name="LiseMezuniyetYili" class="form-control rounded-pill" placeholder="YYYY"></div>
 
                                 <div class="col-12 mt-3"><h6 class="text-primary fw-bold border-bottom pb-2">Üniversite Bilgileri</h6></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Üniversite</label><input type="text" name="Universite" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Fakülte</label><input type="text" name="Fakulte" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label fw-bold">Bölüm</label><input type="text" name="Bolum" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Üniversite</label><input type="text" name="Universite" class="form-control rounded-pill"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Fakülte</label><input type="text" name="Fakulte" class="form-control rounded-pill"></div>
+                                <div class="col-md-4"><label class="form-label fw-bold">Bölüm</label><input type="text" name="Bolum" class="form-control rounded-pill"></div>
 
-                                <div class="col-md-6"><label class="form-label fw-bold">Lisans Mezuniyet Yılı</label><input type="number" name="MezuniyetYili" class="form-control" placeholder="YYYY"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Meslek</label><input type="text" name="Meslek" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Lisans Mezuniyet Yılı</label><input type="number" name="MezuniyetYili" class="form-control rounded-pill" placeholder="YYYY"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Meslek</label><input type="text" name="Meslek" class="form-control rounded-pill"></div>
                             </div>
                         </div>
 
@@ -472,7 +522,7 @@
                                 <div class="col-12"><h6 class="text-primary fw-bold border-bottom pb-2">Derbis Kaydı</h6></div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Derbis Durumu</label>
-                                    <select name="KayitDurumu" class="form-select">
+                                    <select name="KayitDurumu" class="form-select rounded-pill">
                                         <option value="Belirtilmedi" selected>Belirtilmedi</option>
                                         <option value="Var">Derbis Kaydı Var</option>
                                         <option value="Yok">Derbis Kaydı Yok</option>
@@ -482,12 +532,12 @@
 
                                 <div class="col-12 mb-2">
                                     <label class="form-label text-muted small fw-bold">Ödenmiş Aidatlar (Geçmiş):</label>
-                                    <div id="aidatListesiBadge" class="custom-scroll p-2 border rounded bg-light d-flex flex-wrap gap-2" style="max-height: 120px; overflow-y: auto;">
+                                    <div id="aidatListesiBadge" class="custom-scroll p-2 border rounded-3 bg-light d-flex flex-wrap gap-2" style="max-height: 120px; overflow-y: auto;">
                                     </div>
                                 </div>
 
-                                <div class="col-md-6"><label class="form-label fw-bold">Yeni Aidat Yılı</label><input type="number" name="AidatYili" class="form-control" value="@DateTime.Now.Year"></div>
-                                <div class="col-md-6"><label class="form-label fw-bold">Yeni Aidat Tutarı (TL)</label><input type="number" step="0.01" name="AidatTutari" class="form-control" placeholder="Tutar Giriniz"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Yeni Aidat Yılı</label><input type="number" name="AidatYili" class="form-control rounded-pill" value="@DateTime.Now.Year"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold">Yeni Aidat Tutarı (TL)</label><input type="number" step="0.01" name="AidatTutari" class="form-control rounded-pill" placeholder="Tutar Giriniz"></div>
                                 <div class="col-12"><small class="text-muted fst-italic">* Tutar girip kaydederseniz bu üyeye yeni bir ödeme eklenir.</small></div>
                             </div>
                         </div>
@@ -552,27 +602,27 @@
         const exportData = [
             @foreach (var item in Model)
             {
-                    // Aidatları tek satırda birleştirelim
-                    var aidatlarStr = "";
-                    if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
-                    {
-                            aidatlarStr = string.Join(" | ", item.OdenenAidatlar.Select(a => $"{a.Yil}: {a.Tutar} TL"));
-                    }
-                    else
-                    {
-                            aidatlarStr = "Ödeme Yok";
-                    }
+                        // Aidatları tek satırda birleştirelim
+                        var aidatlarStr = "";
+                        if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
+                        {
+                                    aidatlarStr = string.Join(" | ", item.OdenenAidatlar.Select(a => $"{a.Yil}: {a.Tutar} TL"));
+                        }
+                        else
+                        {
+                                    aidatlarStr = "Ödeme Yok";
+                        }
 
-                    <text>
-                    {
-                        uyeNo: "@Html.Raw(item.UyeNo)",
-                        adSoyad: "@Html.Raw(item.AdSoyad)",
-                        tc: "@Html.Raw(item.TcKimlikNo)",
-                        telefon: "@Html.Raw(item.Telefon ?? "-")",
-                        meslek: "@Html.Raw(item.Meslek ?? "-")",
-                        aidatlar: "@Html.Raw(aidatlarStr)"
-                    },
-                    </text>
+                        <text>
+                        {
+                            uyeNo: "@Html.Raw(item.UyeNo)",
+                            adSoyad: "@Html.Raw(item.AdSoyad)",
+                            tc: "@Html.Raw(item.TcKimlikNo)",
+                            telefon: "@Html.Raw(item.Telefon ?? "-")",
+                            meslek: "@Html.Raw(item.Meslek ?? "-")",
+                            aidatlar: "@Html.Raw(aidatlarStr)"
+                        },
+                        </text>
             }
         ];
 
@@ -813,7 +863,7 @@
                      var siraliAidatlar = data.gecmisAidatlar.sort((a,b) => b.id - a.id);
                      siraliAidatlar.forEach(aidat => {
                          var span = document.createElement("span");
-                         span.className = "badge bg-white text-dark border border-secondary shadow-sm d-flex align-items-center py-2 px-3";
+                         span.className = "badge bg-white text-dark border border-secondary shadow-sm d-flex align-items-center py-2 px-3 rounded-pill";
                          span.style.gap = "8px";
                          span.id = "aidat-badge-" + aidat.id;
                          span.innerHTML = `<span class="fw-bold">${aidat.yil}:</span> <span class="text-success">${aidat.tutar} TL</span>
@@ -846,7 +896,10 @@
             confirmButtonColor: '#d33',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Evet, Sil',
-            cancelButtonText: 'Vazgeç'
+            cancelButtonText: 'Vazgeç',
+            customClass: {
+                popup: 'rounded-4'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 var form = document.createElement('form');
@@ -874,7 +927,10 @@
             confirmButtonColor: '#d33',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Evet, Sil',
-            cancelButtonText: 'İptal'
+            cancelButtonText: 'İptal',
+            customClass: {
+                popup: 'rounded-4'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 var formData = new FormData();
@@ -890,7 +946,7 @@
                     if (response.ok) {
                         var badge = document.getElementById("aidat-badge-" + id);
                         if(badge) badge.remove();
-                        Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Aidat başarıyla silindi.', timer: 1500, showConfirmButton: false });
+                        Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Aidat başarıyla silindi.', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-4' } });
                     }
                 });
             }
@@ -900,18 +956,18 @@
     // Başarı/Hata Mesajları
     @if (TempData["Basari"] != null)
     {
-                    <text>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#4e73df' });
-                    });
-                    </text>
+                        <text>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#4e73df', customClass: { popup: 'rounded-4' } });
+                        });
+                        </text>
     }
     @if (TempData["Hata"] != null)
     {
-                    <text>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#4e73df' });
-                    });
-                    </text>
+                        <text>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#4e73df', customClass: { popup: 'rounded-4' } });
+                        });
+                        </text>
     }
 </script>

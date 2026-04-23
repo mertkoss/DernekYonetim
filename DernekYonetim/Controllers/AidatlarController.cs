@@ -217,7 +217,8 @@ namespace DernekYonetim.Controllers
                 mezuniyetYili = egitim?.MezuniyetYili,
                 meslek = egitim?.Meslek,
                 kayitDurumu = uiKayitDurumu,
-                gecmisAidatlar = uye.Aidatlars.OrderBy(x => x.Yil).Select(x => new {
+                gecmisAidatlar = uye.Aidatlars.OrderBy(x => x.Yil).Select(x => new
+                {
                     id = x.Id,
                     yil = x.Yil,
                     tutar = x.Tutar
@@ -384,6 +385,65 @@ namespace DernekYonetim.Controllers
                 return Ok("Silindi");
             }
             return NotFound();
+        }
+
+        // 7. TÜM ÜYELERE TOPLU MAİL GÖNDERME (TEST VERSİYONU)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TopluMailGonder(string konu, string mesaj)
+        {
+            if (string.IsNullOrWhiteSpace(konu) || string.IsNullOrWhiteSpace(mesaj))
+            {
+                return Content("TEST SONUCU: Başarısız. Konu veya mesaj boş.");
+            }
+
+            try
+            {
+                // SADECE TEST İÇİN KENDİ MAİLLERİNİ YAZ
+                var mailListesi = new List<string>
+            {
+                "mertkosar552@gmail.com",
+                "irem.eng123@gmail.com"
+            };
+
+                string gonderenMail = "mertkosar153@gmail.com";
+                string mailSifresi = "cnvx rfyd bdnq nmqb"; // AppSettings'tekiyle aynı, doğru.
+                string smtpSunucu = "smtp.gmail.com";
+                int smtpPort = 587;
+
+                using (System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient(smtpSunucu, smtpPort))
+                {
+                    // BU SATIR ÇOK ÖNEMLİ: Kendi verdiğimiz şifreyi kullanması için zorluyoruz
+                    smtp.UseDefaultCredentials = false;
+
+                    smtp.Credentials = new System.Net.NetworkCredential(gonderenMail, mailSifresi);
+                    smtp.EnableSsl = true;
+
+                    using (System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage())
+                    {
+                        mail.From = new System.Net.Mail.MailAddress(gonderenMail, "Dernek Yönetimi");
+                        mail.Subject = konu;
+                        mail.Body = mesaj;
+                        mail.IsBodyHtml = true;
+
+                        foreach (var email in mailListesi)
+                        {
+                            mail.Bcc.Add(email);
+                        }
+
+                        // Maili gönder
+                        await smtp.SendMailAsync(mail);
+                    }
+                }
+
+                // DİKKAT: Veritabanına (Index'e) dönmüyoruz. Ekrana düz yazı basıyoruz.
+                return Content("TEST SONUCU: HARİKA! MAİLLER BAŞARIYLA GÖNDERİLDİ! Lütfen Gelen Kutusunu kontrol et.");
+            }
+            catch (Exception ex)
+            {
+                // DİKKAT: Hata olursa veritabanına dönmüyoruz. Hatayı ekrana basıyoruz.
+                return Content("TEST SONUCU: MAİL GÖNDERİLEMEDİ! Hata detayı: " + ex.Message);
+            }
         }
     }
 }
