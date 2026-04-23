@@ -43,12 +43,43 @@ public partial class DernekYonetimContext : DbContext
     public virtual DbSet<ZiyaretciSayaci> ZiyaretciSayacis { get; set; }
     public DbSet<IletisimMesaj> IletisimMesajlari { get; set; }
 
+    public virtual DbSet<SistemLoglari> SistemLoglaris { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=.;Database=DernekYonetimDB;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<SistemLoglari>(entity =>
+        {
+            entity.HasKey(e => e.LogId).HasName("PK_SistemLoglari");
+
+            entity.ToTable("SistemLoglari");
+
+            entity.Property(e => e.KullaniciAdi)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.Property(e => e.IslemTipi)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.Property(e => e.IslemDetayi)
+                .IsRequired()
+                .IsUnicode(true); // Detaylarda Türkçe karakter veya uzun metinler olabilir
+
+            entity.Property(e => e.Tarih)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.Property(e => e.IpAdresi)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<AdminKullanicilar>(entity =>
         {
             entity.HasKey(e => e.AdminId).HasName("PK__AdminKul__719FE4E808FB369B");
