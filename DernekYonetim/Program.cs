@@ -22,7 +22,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // MVC
 builder.Services.AddDataProtection();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Sistemdeki tüm Controller'lara bu log izleyicisini otomatik takýyoruz!
+    options.Filters.Add<DernekYonetim.Filters.AuditLogFilter>();
+});
 
 // DbContext (DernekYonetimDB baðlantýsý)
 builder.Services.AddDbContext<DernekYonetimContext>(options =>
