@@ -1,20 +1,29 @@
 ﻿using DernekYonetim.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration; // IConfiguration için eklendi
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DernekYonetim.Controllers
 {
     public class AnasayfaController : Controller
     {
         private readonly DernekYonetimContext _context;
+        private readonly IConfiguration _configuration; // JSON okumak için tanımladık
 
-        public AnasayfaController(DernekYonetimContext context)
+        // IConfiguration'ı Constructor'a ekledik
+        public AnasayfaController(DernekYonetimContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
         {
+            // ---- ZİYARETÇİ SAYACI LOGIC ----
             if (HttpContext.Session.GetString("ZiyaretEdildi") == null)
             {
                 var sayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
@@ -35,6 +44,17 @@ namespace DernekYonetim.Controllers
             var guncelSayac = await _context.ZiyaretciSayacis.FirstOrDefaultAsync();
             ViewBag.ZiyaretciSayisi = guncelSayac?.ToplamZiyaretci ?? 0;
 
+
+            // ---- YENİ EKLENEN İSTATİSTİKLER (appsettings.json'dan çekiliyor) ----
+            var istatistik = _configuration.GetSection("DernekIstatistik");
+
+            // Eğer JSON'da değer bulamazsa 0 veya varsayılan değer atasın diye kontrol yapıyoruz
+            ViewBag.KurulusYili = istatistik["KurulusYili"] ?? "1965";
+            ViewBag.AnkaraMezunSayisi = istatistik["AnkaraMezunSayisi"] ?? "0";
+            ViewBag.IzmirMezunSayisi = istatistik["IzmirMezunSayisi"] ?? "0";
+
+
+            // ---- VİEW MODEL DOLDURMA ----
             var model = new HomeViewModel
             {
                 Uyeler = await _context.Uyelers.ToListAsync(),

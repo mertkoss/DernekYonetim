@@ -317,38 +317,40 @@
 
 <section class="stats-section">
     <div class="container">
-        <div class="row g-4">
-            <div class="col-6 col-md-3">
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fa fa-graduation-cap"></i></div>
-                    <div class="stat-number counter" data-count="1965">0</div>
-                    <div class="stat-label">Kuruluş Yılı</div>
+        <div class="row justify-content-center g-4">
+            
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-item text-center">
+                    <div class="stat-icon"><i class="fa fa-university text-warning fa-2x mb-2"></i></div>
+                    <div class="stat-number fw-bold fs-3 text-white">@ViewBag.KurulusYili</div>
+                    <div class="stat-label text-white-50">Kuruluş Yılı</div>
                 </div>
             </div>
 
-            <div class="col-6 col-md-3">
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fa fa-users"></i></div>
-                    <div class="stat-number counter" data-count="5000" data-suffix="+">0</div>
-                    <div class="stat-label">Mezun</div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-item text-center">
+                    <div class="stat-icon"><i class="fa fa-graduation-cap text-warning fa-2x mb-2"></i></div>
+                    <div class="stat-number counter fw-bold fs-3 text-white" data-count="@ViewBag.AnkaraMezunSayisi" data-suffix="+">0</div>
+                    <div class="stat-label text-white-50">Ankara Mezun</div>
                 </div>
             </div>
 
-            <div class="col-6 col-md-3">
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fa fa-hand-holding-heart"></i></div>
-                    <div class="stat-number counter" data-count="1200">0</div>
-                    <div class="stat-label">Bursiyer</div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-item text-center">
+                    <div class="stat-icon"><i class="fa fa-graduation-cap text-warning fa-2x mb-2"></i></div>
+                    <div class="stat-number counter fw-bold fs-3 text-white" data-count="@ViewBag.IzmirMezunSayisi" data-suffix="+">0</div>
+                    <div class="stat-label text-white-50">İzmir Mezun</div>
                 </div>
             </div>
 
-            <div class="col-6 col-md-3">
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fa fa-eye"></i></div>
-                    <div class="stat-number counter" data-count="@ViewBag.ZiyaretciSayisi">0</div>
-                    <div class="stat-label">Ziyaret</div>
+            <div class="col-6 col-md-4 col-lg">
+                <div class="stat-item text-center">
+                    <div class="stat-icon"><i class="fa fa-eye text-warning fa-2x mb-2"></i></div>
+                    <div class="stat-number counter fw-bold fs-3 text-white" data-count="@ViewBag.ZiyaretciSayisi">0</div>
+                    <div class="stat-label text-white-50">Site Ziyareti</div>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
