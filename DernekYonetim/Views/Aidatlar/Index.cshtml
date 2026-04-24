@@ -13,19 +13,25 @@
     }
 
     .table-container {
-        max-width: 1200px;
-        margin: 0 auto;
         background: #ffffff;
         border-radius: 12px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
         border: 1px solid #eaeaea;
+        overflow: hidden; /* Dış çerçevenin köşelerini yuvarlatır */
+    }
+
+    /* Tablo kaydırma alanı */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
     }
 
     .table {
         margin-bottom: 0;
         width: 100%;
         border-collapse: collapse;
+        min-width: 900px; /* Mobilde sütunların ezilmemesi için minimum genişlik */
     }
 
         .table thead th {
@@ -38,6 +44,7 @@
             padding: 16px;
             border: none;
             vertical-align: middle;
+            white-space: nowrap;
         }
 
         .table tbody td {
@@ -58,7 +65,7 @@
 
         .main-row:hover {
             background-color: #f8fbff !important;
-            transform: scale(1.005);
+            transform: scale(1.002);
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             position: relative;
             z-index: 10;
@@ -100,6 +107,7 @@
         display: inline-flex;
         align-items: center;
         box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        white-space: nowrap;
     }
 
     .badge-yok {
@@ -110,6 +118,7 @@
         border-radius: 50px;
         font-size: 0.75rem;
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .toggle-icon {
@@ -151,7 +160,6 @@
     /* Arama Kutusu Stili */
     .search-box {
         position: relative;
-        width: 300px;
     }
 
         .search-box input {
@@ -166,6 +174,42 @@
             transform: translateY(-50%);
             color: #aaa;
         }
+
+    /* --- RESPONSIVE MOBİL AYARLARI --- */
+    @@media (max-width: 768px) {
+        .detail-row .border-end
+
+    {
+        border-right: none !important;
+        border-bottom: 1px solid #eef2f7;
+        padding-bottom: 15px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .detail-row .col-md-3:last-child {
+        border-bottom: none;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .action-buttons-container {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .action-buttons-container .btn {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+        }
+
+    .search-box {
+        width: 100% !important;
+    }
+
+    }
 </style>
 
 <section class="page-section" style="padding-top:100px; padding-bottom: 50px; background-color: #f8f9fc;">
@@ -176,199 +220,205 @@
                 <p class="text-muted mb-0 small">Üye listesi, detay bilgileri ve aidat geçmişi.</p>
             </div>
 
-            <div class="col-lg-8 col-md-12 d-flex justify-content-lg-end justify-content-start align-items-center flex-wrap gap-2">
+            <div class="col-lg-8 col-md-12">
+                <div class="d-flex flex-column flex-lg-row justify-content-lg-end align-items-lg-center gap-3">
 
-                <div class="search-box me-1" style="width: 220px;">
-                    <i class="fa fa-search text-muted" style="font-size: 0.9rem;"></i>
-                    <input type="text" id="tableSearch" class="form-control form-control-sm shadow-sm rounded-pill px-4" placeholder="İsim, TC veya No ile ara...">
+                    <div class="search-box" style="max-width: 100%; width: 250px;">
+                        <i class="fa fa-search text-muted" style="font-size: 0.9rem;"></i>
+                        <input type="text" id="tableSearch" class="form-control form-control-sm shadow-sm rounded-pill px-4" placeholder="İsim, TC veya No ile ara...">
+                    </div>
+
+                    <div class="action-buttons-container d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-success shadow-sm rounded-pill px-3" onclick="exportToCSV()">
+                            <i class="fa fa-file-excel me-1"></i> Excel
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-warning shadow-sm rounded-pill px-3 text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#topluMailModal">
+                            <i class="fa fa-envelope me-1"></i> Toplu Mail
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
+                            <i class="fa fa-plus me-1"></i> Yeni Üye
+                        </button>
+                    </div>
                 </div>
-
-                <button type="button" class="btn btn-sm btn-success shadow-sm rounded-pill px-3" onclick="exportToCSV()">
-                    <i class="fa fa-file-excel me-1"></i> Excel
-                </button>
-
-                <button type="button" class="btn btn-sm btn-warning shadow-sm rounded-pill px-3 text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#topluMailModal">
-                    <i class="fa fa-envelope me-1"></i> Toplu Mail
-                </button>
-
-                <button type="button" class="btn btn-sm btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#yeniUyeModal" onclick="resetForm()">
-                    <i class="fa fa-plus me-1"></i> Yeni Üye
-                </button>
             </div>
         </div>
 
-        <div class="table-container table-responsive">
-            <table class="table table-bordered align-middle mb-0" id="uyeTable">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th style="width: 30px;">#</th>
-                        <th>Üye No</th>
-                        <th>Ad Soyad <span class="fw-light text-white-50">(Evlilik Soyadı)</span></th>
-                        <th>Telefon</th>
-                        <th>Meslek</th>
-                        <th>Ödenen Aidatlar</th>
-                        <th style="width: 100px;">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr class="main-row searchable-row" onclick="toggleRow(@item.UyeId)">
-                            <td class="text-center"><i id="icon-@item.UyeId" class="fa fa-chevron-right toggle-icon text-muted"></i></td>
-                            <td class="fw-bold text-center uye-no">@item.UyeNo</td>
-                            <td>
-                                <div class="fw-bold ad-soyad">
-                                    @item.AdSoyad
-                                    @if (!string.IsNullOrEmpty(item.EvlilikSoyadi))
-                                    {
-                                        <span class="text-primary small ms-1">(@item.EvlilikSoyadi)</span>
-                                    }
-                                    <span class="d-none tc-kimlik">@item.TcKimlikNo</span>
-
-                                    @if (item.IstifaEtti)
-                                    {
-                                        <span class="badge bg-danger ms-1 rounded-pill" style="font-size: 0.65rem;">İstifa Etti</span>
-                                    }
-                                    @if (item.Vefat)
-                                    {
-                                        <span class="badge bg-secondary ms-1 rounded-pill" style="font-size: 0.65rem;">Vefat</span>
-                                    }
-                                </div>
-                            </td>
-                            <td>@item.Telefon</td>
-                            <td>@item.Meslek</td>
-                            <td>
-                                @if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
-                                {
-                                    var siraliAidatlar = item.OdenenAidatlar.OrderByDescending(a => a.Id).ToList();
-                                    var gosterilecekAidatlar = siraliAidatlar.Take(2).ToList();
-                                    var kalanAidatSayisi = siraliAidatlar.Count - 2;
-
-                                    foreach (var aidat in gosterilecekAidatlar)
-                                    {
-                                        <span class="badge-aidat">
-                                            @aidat.Yil: @aidat.Tutar?.ToString("N0") TL
-                                        </span>
-                                    }
-
-                                    if (kalanAidatSayisi > 0)
-                                    {
-                                        <span class="badge bg-secondary ms-1 shadow-sm rounded-pill" style="font-size: 0.75rem; vertical-align: top;" title="Tüm geçmişi görmek için satıra tıklayın">
-                                            +@kalanAidatSayisi Daha
-                                        </span>
-                                    }
-                                }
-                                else
-                                {
-                                    <span class="badge-yok">Ödeme Yok</span>
-                                }
-                            </td>
-                            <td class="text-center" onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-outline-warning" title="Düzenle" onclick="editUye(@item.UyeId)">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteUye(@item.UyeId, '@item.AdSoyad')">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </td>
+        <div class="table-container">
+            <div class="table-wrapper custom-scroll">
+                <table class="table table-bordered align-middle mb-0" id="uyeTable">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th style="width: 30px;">#</th>
+                            <th>Üye No</th>
+                            <th>Ad Soyad <span class="fw-light text-white-50">(Evlilik Soyadı)</span></th>
+                            <th>Telefon</th>
+                            <th>Meslek</th>
+                            <th>Ödenen Aidatlar</th>
+                            <th style="width: 100px;">İşlemler</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="main-row searchable-row" onclick="toggleRow(@item.UyeId)">
+                                <td class="text-center"><i id="icon-@item.UyeId" class="fa fa-chevron-right toggle-icon text-muted"></i></td>
+                                <td class="fw-bold text-center uye-no">@item.UyeNo</td>
+                                <td>
+                                    <div class="fw-bold ad-soyad">
+                                        @item.AdSoyad
+                                        @if (!string.IsNullOrEmpty(item.EvlilikSoyadi))
+                                        {
+                                            <span class="text-primary small ms-1">(@item.EvlilikSoyadi)</span>
+                                        }
+                                        <span class="d-none tc-kimlik">@item.TcKimlikNo</span>
 
-                        <tr id="detail-@item.UyeId" class="detail-row">
-                            <td colspan="7">
-                                <div class="p-3">
-                                    <div class="row">
-                                        <div class="col-md-3 border-end">
-                                            <h6 class="text-primary fw-bold mb-3"><i class="fa fa-id-card me-2"></i>Kimlik Bilgileri</h6>
-                                            <ul class="list-unstyled text-muted small">
-                                                <li class="mb-1"><strong>TC No:</strong> @item.TcKimlikNo</li>
-                                                @if (!string.IsNullOrEmpty(item.EvlilikSoyadi))
-                                                {
-                                                    <li class="mb-1"><strong>Evlilik Soyadı:</strong> @item.EvlilikSoyadi</li>
-                                                }
-                                                <li class="mb-1"><strong>Doğum:</strong> @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-") / @item.DogumYeri</li>
+                                        @if (item.IstifaEtti)
+                                        {
+                                            <span class="badge bg-danger ms-1 rounded-pill" style="font-size: 0.65rem;">İstifa Etti</span>
+                                        }
+                                        @if (item.Vefat)
+                                        {
+                                            <span class="badge bg-secondary ms-1 rounded-pill" style="font-size: 0.65rem;">Vefat</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>@item.Telefon</td>
+                                <td>@item.Meslek</td>
+                                <td>
+                                    @if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
+                                    {
+                                        var siraliAidatlar = item.OdenenAidatlar.OrderByDescending(a => a.Id).ToList();
+                                        var gosterilecekAidatlar = siraliAidatlar.Take(2).ToList();
+                                        var kalanAidatSayisi = siraliAidatlar.Count - 2;
 
-                                                @if (item.OnayTarihi != null)
-                                                {
-                                                    <li class="mb-1"><strong>Onay Tarihi:</strong> @item.OnayTarihi.Value.ToString("dd.MM.yyyy")</li>
-                                                }
-                                                @if (item.IstifaEtti)
-                                                {
-                                                    <li class="mb-1 text-danger"><strong>İstifa Tarihi:</strong> @(item.IstifaTarihi != null ? item.IstifaTarihi.Value.ToString("dd.MM.yyyy") : "Belirtilmedi")</li>
-                                                }
-                                            </ul>
-                                        </div>
+                                        foreach (var aidat in gosterilecekAidatlar)
+                                        {
+                                            <span class="badge-aidat">
+                                                @aidat.Yil: @aidat.Tutar?.ToString("N0") TL
+                                            </span>
+                                        }
 
-                                        <div class="col-md-3 border-end">
-                                            <h6 class="text-primary fw-bold mb-3"><i class="fa fa-phone me-2"></i>İletişim Bilgileri</h6>
-                                            <ul class="list-unstyled text-muted small">
-                                                <li class="mb-1"><i class="fa fa-envelope me-1"></i> @item.Email</li>
-                                                <li><i class="fa fa-map-marker-alt me-1"></i> @item.AdresTam</li>
-                                            </ul>
-                                        </div>
+                                        if (kalanAidatSayisi > 0)
+                                        {
+                                            <span class="badge bg-secondary ms-1 shadow-sm rounded-pill" style="font-size: 0.75rem; vertical-align: top;" title="Tüm geçmişi görmek için satıra tıklayın">
+                                                +@kalanAidatSayisi Daha
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-yok">Ödeme Yok</span>
+                                    }
+                                </td>
+                                <td class="text-center" onclick="event.stopPropagation()">
+                                    <button class="btn btn-sm btn-outline-warning" title="Düzenle" onclick="editUye(@item.UyeId)">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteUye(@item.UyeId, '@item.AdSoyad')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
 
-                                        <div class="col-md-3 border-end">
-                                            <h6 class="text-primary fw-bold mb-3"><i class="fa fa-graduation-cap me-2"></i>Eğitim ve Derbis</h6>
-                                            <ul class="list-unstyled text-muted small">
-                                                @if (!string.IsNullOrEmpty(item.Lise))
-                                                {
-                                                    <li class="mb-1"><strong>Lise:</strong> @item.Lise @(item.LiseMezuniyetYili.HasValue ? $"({item.LiseMezuniyetYili})" : "")</li>
-                                                }
-                                                <li class="mb-1"><strong>Üniversite:</strong> @item.Universite</li>
-                                                @if (!string.IsNullOrEmpty(item.Bolum))
-                                                {
-                                                    <li class="mb-1"><strong>Bölüm:</strong> @item.Bolum</li>
-                                                }
-                                                <li class="mb-2"><strong>Mezuniyet:</strong> @item.MezuniyetYili</li>
-
-                                                <li class="mb-1"><strong>Üyelik Tarihi:</strong> @item.UyelikTarihi.ToShortDateString()</li>
-                                                <li>
-                                                    <strong>Derbis:</strong>
-                                                    @if (item.DerbisDurumu == "Evet")
+                            <tr id="detail-@item.UyeId" class="detail-row">
+                                <td colspan="7">
+                                    <div class="p-3">
+                                        <div class="row">
+                                            <div class="col-md-3 border-end">
+                                                <h6 class="text-primary fw-bold mb-3"><i class="fa fa-id-card me-2"></i>Kimlik Bilgileri</h6>
+                                                <ul class="list-unstyled text-muted small">
+                                                    <li class="mb-1"><strong>TC No:</strong> @item.TcKimlikNo</li>
+                                                    @if (!string.IsNullOrEmpty(item.EvlilikSoyadi))
                                                     {
-                                                        <span class="badge bg-success ms-1"><i class="fa fa-check-circle"></i> Var</span>
+                                                        <li class="mb-1"><strong>Evlilik Soyadı:</strong> @item.EvlilikSoyadi</li>
                                                     }
-                                                    else if (item.DerbisDurumu == "Hayır")
+                                                    <li class="mb-1"><strong>Doğum:</strong> @(item.DogumTarihi != null ? item.DogumTarihi.Value.ToString("dd.MM.yyyy") : "-") / @item.DogumYeri</li>
+
+                                                    @if (item.OnayTarihi != null)
                                                     {
-                                                        <span class="badge bg-danger ms-1"><i class="fa fa-times-circle"></i> Yok</span>
+                                                        <li class="mb-1"><strong>Onay Tarihi:</strong> @item.OnayTarihi.Value.ToString("dd.MM.yyyy")</li>
+                                                    }
+                                                    @if (item.IstifaEtti)
+                                                    {
+                                                        <li class="mb-1 text-danger"><strong>İstifa Tarihi:</strong> @(item.IstifaTarihi != null ? item.IstifaTarihi.Value.ToString("dd.MM.yyyy") : "Belirtilmedi")</li>
+                                                    }
+                                                </ul>
+                                            </div>
+
+                                            <div class="col-md-3 border-end">
+                                                <h6 class="text-primary fw-bold mb-3"><i class="fa fa-phone me-2"></i>İletişim Bilgileri</h6>
+                                                <ul class="list-unstyled text-muted small">
+                                                    <li class="mb-1"><i class="fa fa-envelope me-1"></i> @item.Email</li>
+                                                    <li><i class="fa fa-map-marker-alt me-1"></i> @item.AdresTam</li>
+                                                </ul>
+                                            </div>
+
+                                            <div class="col-md-3 border-end">
+                                                <h6 class="text-primary fw-bold mb-3"><i class="fa fa-graduation-cap me-2"></i>Eğitim ve Derbis</h6>
+                                                <ul class="list-unstyled text-muted small">
+                                                    @if (!string.IsNullOrEmpty(item.Lise))
+                                                    {
+                                                        <li class="mb-1"><strong>Lise:</strong> @item.Lise @(item.LiseMezuniyetYili.HasValue ? $"({item.LiseMezuniyetYili})" : "")</li>
+                                                    }
+                                                    <li class="mb-1"><strong>Üniversite:</strong> @item.Universite</li>
+                                                    @if (!string.IsNullOrEmpty(item.Bolum))
+                                                    {
+                                                        <li class="mb-1"><strong>Bölüm:</strong> @item.Bolum</li>
+                                                    }
+                                                    <li class="mb-2"><strong>Mezuniyet:</strong> @item.MezuniyetYili</li>
+
+                                                    <li class="mb-1"><strong>Üyelik Tarihi:</strong> @item.UyelikTarihi.ToShortDateString()</li>
+                                                    <li>
+                                                        <strong>Derbis:</strong>
+                                                        @if (item.DerbisDurumu == "Evet")
+                                                        {
+                                                            <span class="badge bg-success ms-1"><i class="fa fa-check-circle"></i> Var</span>
+                                                        }
+                                                        else if (item.DerbisDurumu == "Hayır")
+                                                        {
+                                                            <span class="badge bg-danger ms-1"><i class="fa fa-times-circle"></i> Yok</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary ms-1">Belirtilmedi</span>
+                                                        }
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <h6 class="text-primary fw-bold mb-3"><i class="fa fa-history me-2"></i>Tüm Aidat Geçmişi</h6>
+                                                <div class="custom-scroll" style="max-height: 110px; overflow-y: auto; padding-right: 10px;">
+                                                    @if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
+                                                    {
+                                                        <table class="table table-sm table-borderless mb-0 small">
+                                                            <tbody>
+                                                                @foreach (var aidat in item.OdenenAidatlar.OrderByDescending(x => x.Id))
+                                                                {
+                                                                    <tr class="border-bottom">
+                                                                        <td class="fw-bold px-0 py-1">@aidat.Yil Yılı</td>
+                                                                        <td class="text-end text-success fw-bold px-0 py-1">@aidat.Tutar?.ToString("N0") TL</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-secondary ms-1">Belirtilmedi</span>
+                                                        <div class="text-muted small fst-italic mt-2">Bu üyeye ait geçmiş ödeme kaydı bulunamadı.</div>
                                                     }
-                                                </li>
-                                            </ul>
-                                        </div>
-
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary fw-bold mb-3"><i class="fa fa-history me-2"></i>Tüm Aidat Geçmişi</h6>
-                                            <div class="custom-scroll" style="max-height: 110px; overflow-y: auto; padding-right: 10px;">
-                                                @if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
-                                                {
-                                                    <table class="table table-sm table-borderless mb-0 small">
-                                                        <tbody>
-                                                            @foreach (var aidat in item.OdenenAidatlar.OrderByDescending(x => x.Id))
-                                                            {
-                                                                <tr class="border-bottom">
-                                                                    <td class="fw-bold px-0 py-1">@aidat.Yil Yılı</td>
-                                                                    <td class="text-end text-success fw-bold px-0 py-1">@aidat.Tutar?.ToString("N0") TL</td>
-                                                                </tr>
-                                                            }
-                                                        </tbody>
-                                                    </table>
-                                                }
-                                                else
-                                                {
-                                                    <div class="text-muted small fst-italic mt-2">Bu üyeye ait geçmiş ödeme kaydı bulunamadı.</div>
-                                                }
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
             <div id="noResultMessage" class="text-center py-4 text-muted" style="display: none;">
                 <i class="fa fa-search fa-2x mb-2 text-light"></i><br>
                 Aradığınız kriterlere uygun üye bulunamadı.
@@ -392,7 +442,7 @@
                 @Html.AntiForgeryToken()
 
                 <div class="modal-body bg-light p-4">
-                  
+
 
                     <div class="bg-white p-4 rounded-4 shadow-sm border border-light">
                         <div class="row g-3">
@@ -419,6 +469,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="yeniUyeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg">
@@ -433,7 +484,7 @@
                 <input type="hidden" name="DogumYeri" id="hiddenDogumYeri" />
 
                 <div class="modal-body bg-light p-4">
-                    <ul class="nav nav-pills nav-fill mb-4" id="uyeTabs" role="tablist">
+                    <ul class="nav nav-pills nav-fill mb-4 flex-column flex-md-row gap-2 gap-md-0" id="uyeTabs" role="tablist">
                         <li class="nav-item" role="presentation"><button class="nav-link active fw-bold rounded-pill" id="kimlik-tab" data-bs-toggle="tab" data-bs-target="#kimlik" type="button" role="tab">Kimlik</button></li>
                         <li class="nav-item" role="presentation"><button class="nav-link fw-bold rounded-pill" id="iletisim-tab" data-bs-toggle="tab" data-bs-target="#iletisim" type="button" role="tab">İletişim</button></li>
                         <li class="nav-item" role="presentation"><button class="nav-link fw-bold rounded-pill" id="egitim-tab" data-bs-toggle="tab" data-bs-target="#egitim" type="button" role="tab">Eğitim</button></li>
@@ -599,27 +650,27 @@
         const exportData = [
             @foreach (var item in Model)
             {
-                        // Aidatları tek satırda birleştirelim
-                        var aidatlarStr = "";
-                        if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
-                        {
-                                    aidatlarStr = string.Join(" | ", item.OdenenAidatlar.Select(a => $"{a.Yil}: {a.Tutar} TL"));
-                        }
-                        else
-                        {
-                                    aidatlarStr = "Ödeme Yok";
-                        }
+                            // Aidatları tek satırda birleştirelim
+                            var aidatlarStr = "";
+                            if (item.OdenenAidatlar != null && item.OdenenAidatlar.Any())
+                            {
+                                            aidatlarStr = string.Join(" | ", item.OdenenAidatlar.Select(a => $"{a.Yil}: {a.Tutar} TL"));
+                            }
+                            else
+                            {
+                                            aidatlarStr = "Ödeme Yok";
+                            }
 
-                        <text>
-                        {
-                            uyeNo: "@Html.Raw(item.UyeNo)",
-                            adSoyad: "@Html.Raw(item.AdSoyad)",
-                            tc: "@Html.Raw(item.TcKimlikNo)",
-                            telefon: "@Html.Raw(item.Telefon ?? "-")",
-                            meslek: "@Html.Raw(item.Meslek ?? "-")",
-                            aidatlar: "@Html.Raw(aidatlarStr)"
-                        },
-                        </text>
+                            <text>
+                            {
+                                uyeNo: "@Html.Raw(item.UyeNo)",
+                                adSoyad: "@Html.Raw(item.AdSoyad)",
+                                tc: "@Html.Raw(item.TcKimlikNo)",
+                                telefon: "@Html.Raw(item.Telefon ?? "-")",
+                                meslek: "@Html.Raw(item.Meslek ?? "-")",
+                                aidatlar: "@Html.Raw(aidatlarStr)"
+                            },
+                            </text>
             }
         ];
 
@@ -953,18 +1004,18 @@
     // Başarı/Hata Mesajları
     @if (TempData["Basari"] != null)
     {
-                        <text>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#4e73df', customClass: { popup: 'rounded-4' } });
-                        });
-                        </text>
+                            <text>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({ icon: 'success', title: 'Başarılı!', text: @Html.Raw(Json.Serialize(TempData["Basari"])), confirmButtonColor: '#4e73df', customClass: { popup: 'rounded-4' } });
+                            });
+                            </text>
     }
     @if (TempData["Hata"] != null)
     {
-                        <text>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#4e73df', customClass: { popup: 'rounded-4' } });
-                        });
-                        </text>
+                            <text>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({ icon: 'error', title: 'Hata!', text: @Html.Raw(Json.Serialize(TempData["Hata"])), confirmButtonColor: '#4e73df', customClass: { popup: 'rounded-4' } });
+                            });
+                            </text>
     }
 </script>
